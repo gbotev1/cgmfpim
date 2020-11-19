@@ -1,3 +1,9 @@
+# george
 .ipynb_checkpoints/
 .DS_Store
 reddit_memes_dataset.npy
+
+# peter
+.vscode/
+templates/
+*.pdf
