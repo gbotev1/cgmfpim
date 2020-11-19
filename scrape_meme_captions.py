@@ -5,7 +5,6 @@ from bs4 import SoupStrainer as ss
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import requests
-import itertools
 import argparse
 import pandas as pd
 
@@ -30,7 +29,7 @@ def process_meme_template_page(meme_template, j):
   for meme in memes:
     s = get_bs(f"{base_url}/{meme.get('href')}", parse_only=ss(class_='w100p'))
     caption = s.find('img')['alt']
-    dfs.append(pd.DataFrame([[meme_href[1:], caption.split('-')[1].lower()]], columns=['type', 'caption']))
+    dfs.append(pd.DataFrame([[meme_href[1:], caption.split('-')[1][1:].lower()]], columns=['type', 'caption']))
   return pd.concat(dfs, ignore_index=True)
 
 def main(n_pages_meme_types, n_pages_meme_egs, save_dir, outfile_name):
@@ -40,10 +39,10 @@ def main(n_pages_meme_types, n_pages_meme_egs, save_dir, outfile_name):
     meme_templates = get_bs(url, parse_only=ss(class_='char-img'))
     for meme_template in meme_templates:
       save_meme_template(save_dir, meme_template.find('img')['src'])
-    with ThreadPoolExecutor() as executor:
-      futures = [executor.submit(lambda x: process_meme_template_page(x[0], x[1]), x) for x in itertools.product(meme_templates, range(n_pages_meme_egs))]
-      for future in as_completed(futures):
-        dfs.append(future.result())
+      with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(lambda i: process_meme_template_page(meme_template, i), i) for i in range(n_pages_meme_egs)]
+        for future in as_completed(futures):
+          dfs.append(future.result())
   df = pd.concat(dfs, ignore_index=True)
   df.to_csv(f'{outfile_name}.csv')
 
