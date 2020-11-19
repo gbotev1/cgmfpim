@@ -2,6 +2,7 @@
 .ipynb_checkpoints/
 .DS_Store
 reddit_memes_dataset.npy
+meme_scraper.pem
 
 # peter
 .vscode/
