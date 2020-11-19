@@ -37,7 +37,8 @@ def main(n_pages_meme_types, n_pages_meme_egs, save_dir, outfile_name):
   for i in range(n_pages_meme_types):
     url = meme_template_url if i == 0 else f'{meme_template_url}/page/{str(i + 1)}'
     meme_templates = get_bs(url, parse_only=ss(class_='char-img'))
-    for meme_template in meme_templates:
+    for j, meme_template in enumerate(meme_templates):
+      print(f'{i}-{j}')
       save_meme_template(save_dir, meme_template.find('img')['src'])
       with ThreadPoolExecutor() as executor:
         futures = [executor.submit(lambda i: process_meme_template_page(meme_template, i), i) for i in range(n_pages_meme_egs)]
