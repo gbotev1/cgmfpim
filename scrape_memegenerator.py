@@ -25,8 +25,8 @@ def process_meme_template_page(meme_template, j):
   try:
     dfs = []
     meme_href = meme_template.find('a')['href']
-    page_url = f"{base_url}/{meme_href}" if j == 0 else f"{base_url}/{meme_href}/images/popular/alltime/page/{str(j + 1)}"
-    memes = get_bs(page_url, parse_only=ss('a', href=re.compile('instance')))
+    url = f"{base_url}/{meme_href}/images/popular/alltime/page/{str(j + 1)}"
+    memes = get_bs(url, parse_only=ss('a', href=re.compile('instance')))
     for meme in memes:
       s = get_bs(f"{base_url}/{meme.get('href')}", parse_only=ss(class_='w100p'))
       caption = s.find('img')['alt']
@@ -38,7 +38,7 @@ def process_meme_template_page(meme_template, j):
 def main(n_pages_meme_types, n_pages_meme_egs, save_dir, outfile_name):
   dfs = []
   for i in range(n_pages_meme_types):
-    url = meme_template_url if i == 0 else f'{meme_template_url}/page/{str(i + 1)}'
+    url = f'{meme_template_url}/page/{str(i + 1)}'
     meme_templates = get_bs(url, parse_only=ss(class_='char-img'))
     for j, meme_template in enumerate(meme_templates):
       print(f'{i}-{j}')
@@ -47,7 +47,7 @@ def main(n_pages_meme_types, n_pages_meme_egs, save_dir, outfile_name):
         futures = [executor.submit(lambda i: process_meme_template_page(meme_template, i), i) for i in range(n_pages_meme_egs)]
         for future in as_completed(futures):
           future_result = future.result()
-          if future_result:
+          if future_result is not None:
             dfs.append(future_result)
   df = pd.concat(dfs, ignore_index=True)
   df.to_csv(f'{outfile_name}.csv')
