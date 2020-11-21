@@ -3,6 +3,7 @@
 .DS_Store
 reddit_memes_dataset.npy
 meme_scraper.pem
+captions.csv
 
 # peter
 .vscode/
