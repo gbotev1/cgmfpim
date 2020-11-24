@@ -82,11 +82,11 @@ def process_page(page, save_dir):
   dfs = []
   p = mp.Pool() 
 
+  # multiprocessing: within template
   for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
     outputs = p.apply_async(process_template, args=(meme_template, save_dir))
     dfs.append(outputs.get())
 
-  # print(type(dfs))
   return concat(dfs, ignore_index=True)
 
 def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
