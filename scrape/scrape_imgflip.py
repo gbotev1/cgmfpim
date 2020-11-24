@@ -9,6 +9,8 @@ from os import path, makedirs
 from re import compile as re_compile
 from requests import get as requests_get
 from pandas import DataFrame, concat
+import multiprocessing as mp
+from functools import partial
 
 BASE_URL = 'https://imgflip.com'
 MEME_TEMPLATES_URL = f'{BASE_URL}/memetemplates'
@@ -72,12 +74,25 @@ def get_meme_info(meme_template):
   except:
     return None
 
+def process_template(meme_template, save_dir):
+  save_meme_template(meme_template, save_dir)
+  return get_meme_info(meme_template)
+
+def process_page(page, save_dir):
+  dfs = []
+  p = mp.Pool() 
+
+  for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
+    outputs = p.apply_async(process_template, args=(meme_template, save_dir))
+    dfs.append(outputs.get())
+
+  # print(type(dfs))
+  return concat(dfs, ignore_index=True)
+
 def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
   dfs = []
   for page in range(n_pages_meme_types):
-    for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
-      save_meme_template(meme_template, save_dir)
-      dfs.append(get_meme_info(meme_template))
+    dfs.append(process_page(page, save_dir))
   df = concat(dfs, ignore_index=True)
   df.to_csv(f'{outfile}.tsv', sep='\t')
 
