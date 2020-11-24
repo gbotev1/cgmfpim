@@ -16,8 +16,8 @@ MEME_TEMPLATES_URL = f'{BASE_URL}/memetemplates'
 RE_0 = re_compile('Blank Meme Template')
 
 def get_bs(url, payload=None, parse_only=None):
-  r = requests_get(url, params=payload)
-  return bs(r.text, 'html.parser', parse_only=parse_only)
+  r = requests_get(url, params=payload) # full text of HTML file
+  return bs(r.text, 'html.parser', parse_only=parse_only) # parse_only: what elements to get from HTML file
 
 def save_meme_template(meme_template, save_dir):
   # Create save_dir folder if it doesn't already exist
@@ -34,33 +34,45 @@ def save_meme_template(meme_template, save_dir):
   with open(f'{save_dir}/{image_name}', 'wb') as outfile:
     outfile.write(image)
 
-def process_month_page(month, j):
+def get_meme_captions(meme_template):
   try:
     dfs = []
-    meme_href = meme_template.find('a')['href']
-    page_url = f"{base_url}/{meme_href}" if j == 0 else f"{base_url}/{meme_href}/images/popular/alltime/page/{str(j + 1)}"
-    memes = get_bs(page_url, parse_only=ss('a', href=re.compile('instance')))
-    for meme in memes:
-      s = get_bs(f"{base_url}/{meme.get('href')}", parse_only=ss(class_='w100p'))
-      caption = s.find('img')['alt']
-      dfs.append(DataFrame([[meme_href[1:], caption.split('-')[1][1:].lower()]], columns=['type', 'caption']))
+    # get local meme template URL and name
+    meme_href = meme_template.a['href']
+    meme_name = meme_template.a.string
+    s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss(class_='base-unit clearfix'))
+    # for each meme in template:
+    for img in s.find_all('img', class_='base-img'):
+      # get the caption and tags
+      raw_caption = img['alt'].split('|')
+      caption = ""
+      tags = []
+      for i, item in enumerate(raw_caption):
+        if item.startswith(" image tagged in"):
+          tags = item.split(" image tagged in")[-1].strip().split(',')
+          if raw_caption[i-1].startswith('  '):
+            caption = raw_caption[i-1].strip()
+          break
+      # append all of this information (name, caption, tags) into the dataframe
+      dfs.append(DataFrame([[meme_name, caption, tags]], columns=['type', 'caption', 'tags']))
     return concat(dfs, ignore_index=True)
   except:
     return None
 
-def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile_name):
-  # dfs = []
+def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
+  dfs = []
   for page in range(n_pages_meme_types):
     for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
       save_meme_template(meme_template, save_dir)
-  # df = concat(dfs, ignore_index=True)
-  # df.to_csv(f'{outfile_name}.tsv', sep='\t')
+      dfs.append(get_meme_captions(meme_template))
+  df = concat(dfs, ignore_index=True)
+  df.to_csv(f'{outfile}.tsv', sep='\t')
 
 if __name__ == "__main__":
   parser = ArgumentParser(description='Meme caption and metadata curation script for imgflip. Note that the specified folder for saving the meme templates will be created if it does not already exist.', formatter_class=ArgumentDefaultsHelpFormatter)
-  parser.add_argument('n_pages_meme_types', type=int, help='number of meme template pages to scrape')
-  parser.add_argument('n_pages_per_meme', type=int, help='number of memes per template to scrape')
+  parser.add_argument('n_pages_meme_types', type=int, help='number of meme template pages to scrape') # pages of memes
+  parser.add_argument('n_pages_per_meme', type=int, help='number of memes per template to scrape') # pages of memes per template
   parser.add_argument('-d', '--save_dir', type=str, default='meme_templates', help='local directory to save meme templates for which captions were found')
   parser.add_argument('-o', '--outfile', type=str, default='captions', help='TSV filename (without extension) for scraped captions and metadata')
   args = parser.parse_args()
-  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile_name)
+  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile)
