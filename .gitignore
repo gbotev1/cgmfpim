@@ -4,6 +4,7 @@
 reddit_memes_dataset.npy
 meme_scraper.pem
 captions.csv
+scrape/meme_templates/
 
 # peter
 .vscode/
