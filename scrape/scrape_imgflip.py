@@ -34,27 +34,40 @@ def save_meme_template(meme_template, save_dir):
   with open(f'{save_dir}/{image_name}', 'wb') as outfile:
     outfile.write(image)
 
-def get_meme_captions(meme_template):
+def get_meme_info(meme_template):
   try:
     dfs = []
     # get local meme template URL and name
     meme_href = meme_template.a['href']
     meme_name = meme_template.a.string
     s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss(class_='base-unit clearfix'))
+
     # for each meme in template:
-    for img in s.find_all('img', class_='base-img'):
-      # get the caption and tags
-      raw_caption = img['alt'].split('|')
-      caption = ""
-      tags = []
-      for i, item in enumerate(raw_caption):
-        if item.startswith(" image tagged in"):
-          tags = item.split(" image tagged in")[-1].strip().split(',')
-          if raw_caption[i-1].startswith('  '):
-            caption = raw_caption[i-1].strip()
-          break
-      # append all of this information (name, caption, tags) into the dataframe
-      dfs.append(DataFrame([[meme_name, caption, tags]], columns=['type', 'caption', 'tags']))
+    for item in s:
+      img = item.find('img', class_="base-img")
+      view_info = item.find(class_="base-view-count")
+      # if item is an image (rather than video)
+      if img is not None:
+        # get caption and tags
+        raw_caption = img['alt'].split('|')
+        caption = ""
+        tags = []
+        for i, item in enumerate(raw_caption):
+          if item.startswith(" image tagged in"):
+            tags = item.split(" image tagged in")[-1].strip().split(',')
+            if raw_caption[i-1].startswith('  '):
+              caption = raw_caption[i-1].strip()
+
+        # get views and upvotes
+        meme_stat_list = [x.strip(',') for x in view_info.string.strip().split()]
+        # not sure if the following conditional is necessary; it checks that both views and upvotes are included
+        # if all(stat in meme_stat_list for stat in ["views", "upvotes"]):
+        views = int(meme_stat_list[0].replace(',',''))
+        upvotes = int(meme_stat_list[2].replace(',',''))
+        
+        # append all of this information (name, caption, tags, views, upvotes) into the dataframe
+        dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=['type', 'caption', 'tags', 'view_count', 'upvotes']))
+    
     return concat(dfs, ignore_index=True)
   except:
     return None
@@ -64,7 +77,7 @@ def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
   for page in range(n_pages_meme_types):
     for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
       save_meme_template(meme_template, save_dir)
-      dfs.append(get_meme_captions(meme_template))
+      dfs.append(get_meme_info(meme_template))
   df = concat(dfs, ignore_index=True)
   df.to_csv(f'{outfile}.tsv', sep='\t')
 
