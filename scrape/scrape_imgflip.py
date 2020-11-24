@@ -8,17 +8,23 @@ import requests
 import argparse
 import pandas as pd
 
-base_url = 'https://imgflip.com/'
+BASE_URL = 'https://imgflip.com'
+MEME_TEMPLATES_URL = f'{BASE_URL}/memetemplates'
 
-def get_bs(payload, parse_only=None):
-  r = requests.get(base_url, params=payload)
+RE_0 = re.compile('Blank Meme Template')
+
+def get_bs(url, payload=None, parse_only=None):
+  r = requests.get(url, params=payload)
   return bs(r.text, 'html.parser', parse_only=parse_only)
 
-def save_meme_template(save_dir, url):
-  r = requests.get(url, stream=True)
-  name = url.split('/')[-1]
-  with open(f'{save_dir}/{name}', 'wb') as outfile:
-    outfile.write(r.content)
+def save_meme_template(meme_template, save_dir):
+  meme_href = meme_template.find(class_='mt-title').a['href']
+  s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss('img', alt=RE_0))
+  image_url = s.find('img')['src']
+  image = requests.get(f"{BASE_URL}{image_url}", stream=True).content
+  image_name = image_url.split('/')[-1]
+  with open(f'{save_dir}/{image_name}', 'wb') as outfile:
+    outfile.write(image)
 
 def process_month_page(month, j):
   try:
@@ -36,13 +42,13 @@ def process_month_page(month, j):
 
 def main(n_pages_meme_types, n_pages, save_dir, outfile_name):
   dfs = []
-  for j in range(n_pages):
-    s = get_bs({'sort': 'top-2020-10', 'page': str(j + 1)}, parse_only=ss(class_='base-unit clearfix'))
-    for img in s.find_all('img', class_='base-img'):
-      raw_caption = img['alt']
+  for page in range(n_pages):
+    s = get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-box'))
+    for meme_template in s:
+      save_meme_template(meme_template, save_dir)
 
-  df = pd.concat(dfs, ignore_index=True)
-  df.to_csv(f'{outfile_name}.csv')
+  # df = pd.concat(dfs, ignore_index=True)
+  # df.to_csv(f'{outfile_name}.csv')
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Helper script to download meme templates and captions from memegenerator.net')
