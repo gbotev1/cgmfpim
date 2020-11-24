@@ -1,27 +1,35 @@
 # Adapted from: https://github.com/ruhomor/Meme-Generator/blob/master/data_scraper.py
 
+# Keep imports lightweight
 from bs4 import BeautifulSoup as bs
 from bs4 import SoupStrainer as ss
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import re
-import requests
-import argparse
-import pandas as pd
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from os import path, makedirs
+from re import compile as re_compile
+from requests import get as requests_get
+from pandas import DataFrame, concat
 
 BASE_URL = 'https://imgflip.com'
 MEME_TEMPLATES_URL = f'{BASE_URL}/memetemplates'
 
-RE_0 = re.compile('Blank Meme Template')
+RE_0 = re_compile('Blank Meme Template')
 
 def get_bs(url, payload=None, parse_only=None):
-  r = requests.get(url, params=payload)
+  r = requests_get(url, params=payload)
   return bs(r.text, 'html.parser', parse_only=parse_only)
 
 def save_meme_template(meme_template, save_dir):
-  meme_href = meme_template.find(class_='mt-title').a['href']
+  # Create save_dir folder if it doesn't already exist
+  if not path.exists(save_dir):
+    makedirs(save_dir)
+  # Get local meme template URL
+  meme_href = meme_template.a['href']
+  # Follow that URL to get full-resolution meme template image
   s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss('img', alt=RE_0))
   image_url = s.find('img')['src']
-  image = requests.get(f"{BASE_URL}{image_url}", stream=True).content
+  # Download image
+  image = requests_get(f"{BASE_URL}{image_url}", stream=True).content
   image_name = image_url.split('/')[-1]
   with open(f'{save_dir}/{image_name}', 'wb') as outfile:
     outfile.write(image)
@@ -35,26 +43,24 @@ def process_month_page(month, j):
     for meme in memes:
       s = get_bs(f"{base_url}/{meme.get('href')}", parse_only=ss(class_='w100p'))
       caption = s.find('img')['alt']
-      dfs.append(pd.DataFrame([[meme_href[1:], caption.split('-')[1][1:].lower()]], columns=['type', 'caption']))
-    return pd.concat(dfs, ignore_index=True)
+      dfs.append(DataFrame([[meme_href[1:], caption.split('-')[1][1:].lower()]], columns=['type', 'caption']))
+    return concat(dfs, ignore_index=True)
   except:
     return None
 
-def main(n_pages_meme_types, n_pages, save_dir, outfile_name):
-  dfs = []
-  for page in range(n_pages):
-    s = get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-box'))
-    for meme_template in s:
+def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile_name):
+  # dfs = []
+  for page in range(n_pages_meme_types):
+    for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
       save_meme_template(meme_template, save_dir)
-
-  # df = pd.concat(dfs, ignore_index=True)
-  # df.to_csv(f'{outfile_name}.csv')
+  # df = concat(dfs, ignore_index=True)
+  # df.to_csv(f'{outfile_name}.tsv', sep='\t')
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description='Helper script to download meme templates and captions from memegenerator.net')
+  parser = ArgumentParser(description='Meme caption and metadata curation script for imgflip. Note that the specified folder for saving the meme templates will be created if it does not already exist.', formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument('n_pages_meme_types', type=int, help='number of meme template pages to scrape')
-  parser.add_argument('n_pages', type=int, help='number of memes per template to scrape')
-  parser.add_argument('--save_dir', type=str, default='meme_templates', help='local directory to save scraped meme templates')
-  parser.add_argument('--outfile_name', type=str, default='captions', help='CSV filename for scraped captions')
+  parser.add_argument('n_pages_per_meme', type=int, help='number of memes per template to scrape')
+  parser.add_argument('-d', '--save_dir', type=str, default='meme_templates', help='local directory to save meme templates for which captions were found')
+  parser.add_argument('-o', '--outfile', type=str, default='captions', help='TSV filename (without extension) for scraped captions and metadata')
   args = parser.parse_args()
-  main(args.n_pages_meme_types, args.n_pages, args.save_dir, args.outfile_name)
+  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile_name)
