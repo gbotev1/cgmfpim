@@ -9,6 +9,7 @@ from os import path, makedirs
 from requests import get as requests_get
 from pandas import DataFrame, concat
 from re import compile as re_compile
+from re import DOTALL
 from sys import stderr
 
 BASE_URL = 'https://imgflip.com'
@@ -17,7 +18,7 @@ MEME_TEMPLATES_URL = f'{BASE_URL}/memetemplates'
 RE_0 = re_compile(r'Blank Meme Template')
 RE_1 = re_compile(r'\| image tagged in memes,.*\| made w/ Imgflip meme maker')
 RE_1_SPAN_OFFSETS = (24, 29)
-RE_2 = re_compile(r'\|.*?\|')
+RE_2 = re_compile(r'\|.*?\|', flags=DOTALL)  # Make sure a newline character in caption does not mess up regex
 RE_2_SPAN_OFFSETS = (3, 2)
 
 def get_bs(url, payload=None, parse_only=None):
@@ -29,9 +30,6 @@ def get_meme_template_info(meme_template):
   return (link['href'], link.text)
 
 def save_meme_template(meme_href, save_dir):
-  # Create save_dir folder if it doesn't already exist
-  if not path.exists(save_dir):
-    makedirs(save_dir)
   # Follow that URL to get full-resolution meme template image
   s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss('img', alt=RE_0))
   image_url = s.find('img')['src']
@@ -41,49 +39,54 @@ def save_meme_template(meme_href, save_dir):
   with open(f'{save_dir}/{image_name}', 'wb') as outfile:
     outfile.write(image)
 
-def get_meme_info(meme_href, meme_name):
+def get_meme_info(page, meme_href, meme_name, sort):
   dfs = []
-  memes = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss(class_='base-unit clearfix'))
+  memes = get_bs(f'{BASE_URL}{meme_href}', payload={'sort': sort, 'page': page}, parse_only=ss(class_='base-unit clearfix'))
   for meme in memes:
-    try:
-      img = meme.find('img', class_='base-img')
-      # Make sure meme is actually an image (rather than GIF)
-      if img is not None:
-        # Make sure there is a caption
-        alt_text = img['alt']
-        if alt_text.count('|') == 3:
-          # View info
-          view_info = meme.find(class_='base-view-count')
-          views, upvotes, comments = [int(item.replace(',', '')) for i, item in enumerate(view_info.text.split()) if i & 1 == 0]
-          # Tags
-          tags_span = RE_1.search(alt_text).span()
+    img = meme.find('img', class_='base-img')
+    # Make sure meme is actually an image (rather than GIF)
+    if img is not None:
+      alt_text = img['alt']
+      # Make sure meme actually has a caption
+      if alt_text.count('|') == 3:
+        view_info = meme.find(class_='base-view-count').text.replace(',', '').split()
+        tags_search = RE_1.search(alt_text)
+        caption_search = RE_2.search(alt_text)
+        # Make sure meme has metadata containing number of views and upvotes (OK if there are no comments)
+        if len(view_info) >= 4 and tags_search is not None and caption_search is not None:
+          views, upvotes = int(view_info[0]), int(view_info[2])
+          tags_span, caption_span = tags_search.span(), caption_search.span()
           tags = alt_text[tags_span[0] + RE_1_SPAN_OFFSETS[0]:tags_span[1] - RE_1_SPAN_OFFSETS[1]]
-          # Caption
-          caption_span = RE_2.search(alt_text).span()
-          caption = alt_text[caption_span[0] + RE_2_SPAN_OFFSETS[0]: caption_span[1] - RE_2_SPAN_OFFSETS[1]]
-          # Partial write
-          dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes, comments]], columns=['type', 'caption', 'tags', 'views', 'upvotes', 'comments']))
-    except:
-      pass
+          caption = alt_text[caption_span[0] + RE_2_SPAN_OFFSETS[0]: caption_span[1] - RE_2_SPAN_OFFSETS[1]].replace('; ', '\n')
+          dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=['type', 'caption', 'tags', 'views', 'upvotes']))
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def process_template(meme_template, save_dir):
+def process_meme_template(meme_template, save_dir, n_pages_per_meme, sort):
   meme_href, meme_name = get_meme_template_info(meme_template)
   save_meme_template(meme_href, save_dir)
-  return get_meme_info(meme_href, meme_name)
-
-def process_page(page, save_dir):
   dfs = []
-  for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
-    result = process_template(meme_template, save_dir)
+  for i in range(n_pages_per_meme):
+    result = get_meme_info(str(i + 1), meme_href, meme_name, sort)
     if result is not None:
       dfs.append(result)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
+def process_meme_templates(page, save_dir, n_pages_per_meme, sort):
+  dfs = []
+  for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
+    result = process_meme_template(meme_template, save_dir, n_pages_per_meme, sort)
+    if result is not None:
+      dfs.append(result)
+  return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
+
+def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile, sort):
+  # Create save_dir folder if it doesn't already exist
+  if not path.exists(save_dir):
+    makedirs(save_dir)
+  # Scrape driver
   dfs = []
   with ThreadPoolExecutor() as executor:
-    futures = [executor.submit(lambda i: process_page(i, save_dir), i) for i in range(n_pages_meme_types)]
+    futures = [executor.submit(lambda i: process_meme_templates(i, save_dir, n_pages_per_meme, sort), i) for i in range(n_pages_meme_types)]
     for future in as_completed(futures):
       future_result = future.result()
       if future_result is not None:
@@ -95,10 +98,11 @@ def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
     df.to_csv(f'{outfile}.tsv', sep='\t')
 
 if __name__ == "__main__":
-  parser = ArgumentParser(description='Meme caption and metadata curation script for imgflip. Note that the specified folder for saving the meme templates will be created if it does not already exist.', formatter_class=ArgumentDefaultsHelpFormatter)
-  parser.add_argument('n_pages_meme_types', type=int, help='number of meme template pages to scrape')  # pages of memes
+  parser = ArgumentParser(description="Meme caption and metadata curation script for imgflip. Note that the specified folder for saving the meme templates will be created if it does not already exist. In captions, the sequence '; ' is converted to '\n' to normalize the formatting convention of imgflip.", formatter_class=ArgumentDefaultsHelpFormatter)
+  parser.add_argument('n_pages_meme_types', type=int, help='number of meme template pages to scrape')  # pages of meme templates
   parser.add_argument('n_pages_per_meme', type=int, help='number of memes per template to scrape')  # pages of memes per template
   parser.add_argument('-d', '--save_dir', type=str, default='meme_templates', help='local directory to save meme templates for which captions were found')
   parser.add_argument('-o', '--outfile', type=str, default='captions', help='TSV filename (without extension) for scraped captions and metadata')
+  parser.add_argument('-s', '--sort', type=str, default='top-365d', help='payload query argument to specify timeframe and popularity from which to scrape memes per template')
   args = parser.parse_args()
-  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile)
+  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile, args.sort)
