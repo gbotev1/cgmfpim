@@ -34,7 +34,7 @@ def save_meme_template(meme_href, save_dir):
   s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss('img', alt=RE_0))
   image_url = s.find('img')['src']
   # Download image
-  image = requests_get(f"{BASE_URL}{image_url}", stream=True).content
+  image = requests_get(f'{BASE_URL}{image_url}', stream=True).content
   image_name = image_url.split('/')[-1]
   with open(f'{save_dir}/{image_name}', 'wb') as outfile:
     outfile.write(image)
