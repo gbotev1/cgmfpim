@@ -1,8 +1,8 @@
 # George
 .ipynb_checkpoints/
 .DS_Store
-scrape/meme_templates/
-scrape/captions.tsv
+meme_templates/
+captions.tsv
 
 # Peter
 .vscode/
