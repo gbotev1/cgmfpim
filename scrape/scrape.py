@@ -87,8 +87,7 @@ def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile, sort):
   dfs = []
   with ThreadPoolExecutor() as executor:
     futures = [executor.submit(lambda i: process_meme_templates(i, save_dir, n_pages_per_meme, sort), i) for i in range(n_pages_meme_types)]
-    for i, future in enumerate(as_completed(futures)):
-      print(f'Page: {i}')
+    for future in as_completed(futures):
       future_result = future.result()
       if future_result is not None:
         dfs.append(future_result)
