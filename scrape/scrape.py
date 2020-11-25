@@ -65,34 +65,44 @@ def get_meme_info(page, meme_href, meme_name):
             dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=['type', 'caption', 'tags', 'views', 'upvotes']))
     return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def process_meme_template(meme_template, save_dir, n_pages_per_meme):
+def process_meme_template(meme_template, save_dir, n_pages_per_meme, num_attempts):
   meme_href, meme_name = get_meme_template_info(meme_template)
   save_meme_template(meme_href, save_dir)
   dfs = []
   for i in range(n_pages_per_meme):
-    result = get_meme_info(str(i + 1), meme_href, meme_name)
-    if result is not None:
-      dfs.append(result)
+    for attempt in range(num_attempts):
+      try:
+        result = get_meme_info(str(i + 1), meme_href, meme_name)
+        if result is not None:
+          dfs.append(result)
+      except Exception as e:
+        print(f'Exception occurred during attempt {attempt} for page {i} and meme template {meme_template}.', file=stderr)
+        print(e, file=stderr)
+      else:
+        break
+    else:
+      # All attempts failed
+      print(f'Attempted {num_attempts}, but all of them failed.', file=stderr)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def process_meme_templates(page, save_dir, n_pages_per_meme):
+def process_meme_templates(page, save_dir, n_pages_per_meme, num_attempts):
   dfs = []
   with ThreadPoolExecutor() as executor:
-    futures = [executor.submit(lambda x: process_meme_template(x, save_dir, n_pages_per_meme), meme_template) for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title'))]
+    futures = [executor.submit(lambda x: process_meme_template(x, save_dir, n_pages_per_meme, num_attempts), meme_template) for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title'))]
     for future in as_completed(futures):
       result = future.result()
       if result is not None:
         dfs.append(result)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
+def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile, num_attempts):
   # Create save_dir folder if it doesn't already exist
   if not path.exists(save_dir):
     makedirs(save_dir)
   # Scrape driver
   dfs = []
   for i in range(n_pages_meme_types):
-    dfs.append(process_meme_templates(i, save_dir, n_pages_per_meme))
+    dfs.append(process_meme_templates(i, save_dir, n_pages_per_meme, num_attempts))
   if len(dfs) == 0:
     print('No valid captions were found for the given parameters.', file=stderr)
   else:
@@ -106,5 +116,6 @@ if __name__ == "__main__":
   parser.add_argument('n_pages_per_meme', type=int, help='number of memes per template to scrape')  # pages of memes per template
   parser.add_argument('-d', '--save_dir', type=str, default='meme_templates', help='local directory to save meme templates for which captions were found')
   parser.add_argument('-o', '--outfile', type=str, default='captions', help='TSV filename (without extension) for scraped captions and metadata')
+  parser.add_argument('-a', '--num_attempts', type=int, default=10, help='number of times to retry processing a meme template if an exception is thrown')
   args = parser.parse_args()
-  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile)
+  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile, args.num_attempts)
