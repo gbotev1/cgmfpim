@@ -1,12 +1,9 @@
-# george
+# George
 .ipynb_checkpoints/
 .DS_Store
-reddit_memes_dataset.npy
-meme_scraper.pem
-captions.csv
 scrape/meme_templates/
 
-# peter
+# Peter
 .vscode/
 templates/
 *.pdf
