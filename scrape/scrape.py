@@ -3,8 +3,8 @@
 # Keep imports lightweight
 from bs4 import BeautifulSoup as bs
 from bs4 import SoupStrainer as ss
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from os import path, makedirs
 from requests import get as requests_get
 from pandas import DataFrame, concat
@@ -42,24 +42,28 @@ def save_meme_template(meme_href, save_dir):
 def get_meme_info(page, meme_href, meme_name):
   dfs = []
   memes = get_bs(f'{BASE_URL}{meme_href}', payload={'page': page}, parse_only=ss(class_='base-unit clearfix'))
-  for meme in memes:
-    img = meme.find('img', class_='base-img')
-    # Make sure meme is actually an image (rather than GIF)
-    if img is not None:
-      alt_text = img['alt']
-      # Make sure meme actually has a caption
-      if alt_text.count('|') == 3:
-        view_info = meme.find(class_='base-view-count').text.replace(',', '').split()
-        tags_search = RE_1.search(alt_text)
-        caption_search = RE_2.search(alt_text)
-        # Make sure meme has metadata containing number of views and upvotes (OK if there are no comments)
-        if len(view_info) >= 4 and tags_search is not None and caption_search is not None:
-          views, upvotes = int(view_info[0]), int(view_info[2])
-          tags_span, caption_span = tags_search.span(), caption_search.span()
-          tags = alt_text[tags_span[0] + RE_1_SPAN_OFFSETS[0]:tags_span[1] - RE_1_SPAN_OFFSETS[1]]
-          caption = alt_text[caption_span[0] + RE_2_SPAN_OFFSETS[0]: caption_span[1] - RE_2_SPAN_OFFSETS[1]].replace('; ', '\n')
-          dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=['type', 'caption', 'tags', 'views', 'upvotes']))
-  return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
+  # Break early as needed
+  if len(memes) == 0:
+    return None
+  else:
+    for meme in memes:
+      img = meme.find('img', class_='base-img')
+      # Make sure meme is actually an image (rather than GIF)
+      if img is not None:
+        alt_text = img['alt']
+        # Make sure meme actually has a caption
+        if alt_text.count('|') == 3:
+          view_info = meme.find(class_='base-view-count').text.replace(',', '').split()
+          tags_search = RE_1.search(alt_text)
+          caption_search = RE_2.search(alt_text)
+          # Make sure meme has metadata containing number of views and upvotes (OK if there are no comments)
+          if len(view_info) >= 4 and tags_search is not None and caption_search is not None:
+            views, upvotes = int(view_info[0]), int(view_info[2])
+            tags_span, caption_span = tags_search.span(), caption_search.span()
+            tags = alt_text[tags_span[0] + RE_1_SPAN_OFFSETS[0]:tags_span[1] - RE_1_SPAN_OFFSETS[1]]
+            caption = alt_text[caption_span[0] + RE_2_SPAN_OFFSETS[0]: caption_span[1] - RE_2_SPAN_OFFSETS[1]].replace('; ', '\n')
+            dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=['type', 'caption', 'tags', 'views', 'upvotes']))
+    return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
 def process_meme_template(meme_template, save_dir, n_pages_per_meme):
   meme_href, meme_name = get_meme_template_info(meme_template)
@@ -73,10 +77,12 @@ def process_meme_template(meme_template, save_dir, n_pages_per_meme):
 
 def process_meme_templates(page, save_dir, n_pages_per_meme):
   dfs = []
-  for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
-    result = process_meme_template(meme_template, save_dir, n_pages_per_meme)
-    if result is not None:
-      dfs.append(result)
+  with ThreadPoolExecutor() as executor:
+    futures = [executor.submit(lambda x: process_meme_template(x, save_dir, n_pages_per_meme), meme_template) for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title'))]
+    for future in as_completed(futures):
+      result = future.result()
+      if result is not None:
+        dfs.append(result)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
 def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
@@ -85,12 +91,8 @@ def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
     makedirs(save_dir)
   # Scrape driver
   dfs = []
-  with ThreadPoolExecutor() as executor:
-    futures = [executor.submit(lambda i: process_meme_templates(i, save_dir, n_pages_per_meme), i) for i in range(n_pages_meme_types)]
-    for future in as_completed(futures):
-      future_result = future.result()
-      if future_result is not None:
-        dfs.append(future_result)
+  for i in range(n_pages_meme_types):
+    dfs.append(process_meme_templates(i, save_dir, n_pages_per_meme))
   if len(dfs) == 0:
     print('No valid captions were found for the given parameters.', file=stderr)
   else:
