@@ -39,9 +39,9 @@ def save_meme_template(meme_href, save_dir):
   with open(f'{save_dir}/{image_name}', 'wb') as outfile:
     outfile.write(image)
 
-def get_meme_info(page, meme_href, meme_name, sort):
+def get_meme_info(page, meme_href, meme_name):
   dfs = []
-  memes = get_bs(f'{BASE_URL}{meme_href}', payload={'sort': sort, 'page': page}, parse_only=ss(class_='base-unit clearfix'))
+  memes = get_bs(f'{BASE_URL}{meme_href}', payload={'page': page}, parse_only=ss(class_='base-unit clearfix'))
   for meme in memes:
     img = meme.find('img', class_='base-img')
     # Make sure meme is actually an image (rather than GIF)
@@ -61,32 +61,32 @@ def get_meme_info(page, meme_href, meme_name, sort):
           dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=['type', 'caption', 'tags', 'views', 'upvotes']))
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def process_meme_template(meme_template, save_dir, n_pages_per_meme, sort):
+def process_meme_template(meme_template, save_dir, n_pages_per_meme):
   meme_href, meme_name = get_meme_template_info(meme_template)
   save_meme_template(meme_href, save_dir)
   dfs = []
   for i in range(n_pages_per_meme):
-    result = get_meme_info(str(i + 1), meme_href, meme_name, sort)
+    result = get_meme_info(str(i + 1), meme_href, meme_name)
     if result is not None:
       dfs.append(result)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def process_meme_templates(page, save_dir, n_pages_per_meme, sort):
+def process_meme_templates(page, save_dir, n_pages_per_meme):
   dfs = []
   for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title')):
-    result = process_meme_template(meme_template, save_dir, n_pages_per_meme, sort)
+    result = process_meme_template(meme_template, save_dir, n_pages_per_meme)
     if result is not None:
       dfs.append(result)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile, sort):
+def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile):
   # Create save_dir folder if it doesn't already exist
   if not path.exists(save_dir):
     makedirs(save_dir)
   # Scrape driver
   dfs = []
   with ThreadPoolExecutor() as executor:
-    futures = [executor.submit(lambda i: process_meme_templates(i, save_dir, n_pages_per_meme, sort), i) for i in range(n_pages_meme_types)]
+    futures = [executor.submit(lambda i: process_meme_templates(i, save_dir, n_pages_per_meme), i) for i in range(n_pages_meme_types)]
     for future in as_completed(futures):
       future_result = future.result()
       if future_result is not None:
@@ -95,6 +95,7 @@ def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile, sort):
     print('No valid captions were found for the given parameters.', file=stderr)
   else:
     df = concat(dfs, ignore_index=True)
+    print(f'# of memes scraped: {len(df)}')
     df.to_csv(f'{outfile}.tsv', sep='\t')
 
 if __name__ == "__main__":
@@ -103,6 +104,5 @@ if __name__ == "__main__":
   parser.add_argument('n_pages_per_meme', type=int, help='number of memes per template to scrape')  # pages of memes per template
   parser.add_argument('-d', '--save_dir', type=str, default='meme_templates', help='local directory to save meme templates for which captions were found')
   parser.add_argument('-o', '--outfile', type=str, default='captions', help='TSV filename (without extension) for scraped captions and metadata')
-  parser.add_argument('-s', '--sort', type=str, default='top-365d', help='payload query argument to specify timeframe and popularity from which to scrape memes per template')
   args = parser.parse_args()
-  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile, args.sort)
+  main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile)
