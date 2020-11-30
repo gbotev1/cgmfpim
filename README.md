@@ -9,6 +9,7 @@
 
 <!-- SHIELDS -->
 <p align="center">
+    <img alt="Python 3.8" src="https://img.shields.io/badge/python-3.8-blue.svg?style=for-the-badge"/>
     <img alt="repo size" src="https://img.shields.io/github/repo-size/gbotev1/cgmfpim?style=for-the-badge"/>
     <img alt="total lines" src="https://img.shields.io/tokei/lines/github/gbotev1/cgmfpim?style=for-the-badge"/>
 </p>
@@ -49,6 +50,7 @@ git clone https://github.com/gbotev1/cgmfpim.git
 
 ### Install Requirements
 
+Our code is tested using Python 3.8.
 ```sh
 pip3 install -r requirements.txt
 ```
@@ -74,7 +76,7 @@ Contributions are at the very essence of the open source community and are what 
 <!-- LICENSE -->
 ## License
 
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)<br/>
+[![GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](LICENSE)<br/>
 Distributed under the GNU General Public License v3.0. See [`LICENSE`](LICENSE) for more information.
 
 <!-- CONTACT -->
