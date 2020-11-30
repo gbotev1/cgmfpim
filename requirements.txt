@@ -3,5 +3,5 @@ bs4
 requests
 pandas
 # Meme generation
-torch
+pytorch-lightning
 transformers
