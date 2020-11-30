@@ -76,7 +76,7 @@ Contributions are at the very essence of the open source community and are what 
 <!-- LICENSE -->
 ## License
 
-[![GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](LICENSE)<br/>
+<img alt="GPL-3.0" src="https://img.shields.io/github/license/gbotev1/cgmfpim?style=for-the-badge"/>
 Distributed under the GNU General Public License v3.0. See [`LICENSE`](LICENSE) for more information.
 
 <!-- CONTACT -->
