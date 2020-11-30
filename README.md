@@ -85,7 +85,7 @@ Listed in alphabetical order by last name:
 * Georgie Botev - gbotev1@jhu.edu
 	* Pursuing Masters in Computer Science at Johns Hopkins University
 * Peter Ge - yge15@jhmi.edu
-  * TODO
+  * Pursing PhD in Biomedical Engineering at Johns Hopkins University
 * Samantha Zarate - slzarate@jhu.edu
   * TODO
 
