@@ -5,3 +5,6 @@ pandas
 # Meme generation
 pytorch-lightning
 transformers
+# Image embedding - inception v3
+torchvision 
+torch
