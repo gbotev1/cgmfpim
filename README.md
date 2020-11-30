@@ -40,27 +40,22 @@
 </p>
 
 <!-- TABLE OF CONTENTS -->
-<details open="open">
-  <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Clone Repo</a></li>
-        <li><a href="#installation">Install Requirements</a></li>
-      </ul>
-    </li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgements">References</a></li>
-  </ol>
-</details>
-
-
+## Table of Contents
+<ol>
+  <li><a href="#about-the-project">About The Project</a></li>
+  <li>
+    <a href="#getting-started">Getting Started</a>
+    <ul>
+      <li><a href="#clone-repo">Clone Repo</a></li>
+      <li><a href="#install-requirements">Install Requirements</a></li>
+      <li><a href="#inflate-archives">Inflate Archives</a></li>
+    </ul>
+  </li>
+  <li><a href="#contributing">Contributing</a></li>
+  <li><a href="#license">License</a></li>
+  <li><a href="#contact">Contact</a></li>
+  <li><a href="#references">References</a></li>
+</ol>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -70,7 +65,7 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running follow the following steps.
+The following steps should help you set up your environment:
 
 ### Clone Repo
 
@@ -105,7 +100,7 @@ Contributions are at the very essence of the open source community and are what 
 <!-- LICENSE -->
 ## License
 
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)<br/>
 Distributed under the GNU General Public License v3.0. See [`LICENSE`](LICENSE) for more information.
 
 <!-- CONTACT -->
