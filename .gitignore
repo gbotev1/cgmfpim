@@ -2,6 +2,7 @@
 .ipynb_checkpoints/
 .DS_Store
 captions.tsv
+meme_templates/
 
 # Peter
 .vscode/
