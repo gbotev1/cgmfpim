@@ -3,6 +3,7 @@
 # Keep imports lightweight
 from bs4 import BeautifulSoup as bs
 from bs4 import SoupStrainer as ss
+from bs4 import element
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from os import path, makedirs
@@ -11,6 +12,7 @@ from pandas import DataFrame, concat
 from re import compile as re_compile
 from re import DOTALL
 from sys import stderr
+from typing import Optional, Tuple, Dict
 
 BASE_URL = 'https://imgflip.com'
 MEME_TEMPLATES_URL = f'{BASE_URL}/memetemplates'
@@ -21,15 +23,15 @@ RE_1_SPAN_OFFSETS = (24, 29)
 RE_2 = re_compile(r'\|.*?\|', flags=DOTALL)  # Make sure a newline character in caption does not mess up regex
 RE_2_SPAN_OFFSETS = (3, 2)
 
-def get_bs(url, payload=None, parse_only=None):
+def get_bs(url: str, payload: Dict[str, int] = None, parse_only: ss = None) -> bs:
   r = requests_get(url, params=payload)  # Get HTML source as string
   return bs(r.text, 'html.parser', parse_only=parse_only)  # parse_only: pass SoupStrainer to filter out HTML elements while parsing
 
-def get_meme_template_info(meme_template):
+def get_meme_template_info(meme_template: element) -> Tuple[str, str]:
   link = meme_template.a
   return (link['href'], link.text)
 
-def save_meme_template(meme_href, save_dir):
+def save_meme_template(meme_href: str, save_dir: str) -> None:
   # Follow that URL to get full-resolution meme template image
   s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss('img', alt=RE_0))
   image_url = s.find('img')['src']
@@ -39,7 +41,7 @@ def save_meme_template(meme_href, save_dir):
   with open(f'{save_dir}/{image_name}', 'wb') as outfile:
     outfile.write(image)
 
-def get_meme_info(page, meme_href, meme_name):
+def get_meme_info(page: str, meme_href: str, meme_name: str) -> Optional[DataFrame]:
   dfs = []
   memes = get_bs(f'{BASE_URL}{meme_href}', payload={'page': page}, parse_only=ss(class_='base-unit clearfix'))
   # Break early as needed
@@ -65,7 +67,7 @@ def get_meme_info(page, meme_href, meme_name):
             dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=['type', 'caption', 'tags', 'views', 'upvotes']))
     return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def process_meme_template(meme_template, save_dir, n_pages_per_meme, num_attempts):
+def process_meme_template(meme_template: element, save_dir: str, n_pages_per_meme: int, num_attempts: int) -> Optional[DataFrame]:
   meme_href, meme_name = get_meme_template_info(meme_template)
   save_meme_template(meme_href, save_dir)
   dfs = []
@@ -85,7 +87,7 @@ def process_meme_template(meme_template, save_dir, n_pages_per_meme, num_attempt
       print(f'Attempted {num_attempts}, but all of them failed.', file=stderr)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def process_meme_templates(page, save_dir, n_pages_per_meme, num_attempts):
+def process_meme_templates(page: int, save_dir: str, n_pages_per_meme: int, num_attempts: int) -> Optional[DataFrame]:
   dfs = []
   with ThreadPoolExecutor() as executor:
     futures = [executor.submit(lambda x: process_meme_template(x, save_dir, n_pages_per_meme, num_attempts), meme_template) for meme_template in get_bs(MEME_TEMPLATES_URL, payload={'page': str(page + 1)}, parse_only=ss(class_='mt-title'))]
@@ -95,7 +97,7 @@ def process_meme_templates(page, save_dir, n_pages_per_meme, num_attempts):
         dfs.append(result)
   return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
-def main(n_pages_meme_types, n_pages_per_meme, save_dir, outfile, num_attempts):
+def main(n_pages_meme_types: int, n_pages_per_meme: int, save_dir: str, outfile: str, num_attempts: int) -> None:
   # Create save_dir folder if it doesn't already exist
   if not path.exists(save_dir):
     makedirs(save_dir)
@@ -115,7 +117,7 @@ if __name__ == "__main__":
   parser.add_argument('n_pages_meme_types', type=int, help='number of meme template pages to scrape')  # pages of meme templates
   parser.add_argument('n_pages_per_meme', type=int, help='number of memes per template to scrape')  # pages of memes per template
   parser.add_argument('-d', '--save_dir', type=str, default='meme_templates', help='local directory to save meme templates for which captions were found')
-  parser.add_argument('-o', '--outfile', type=str, default='captions', help='TSV filename (without extension) for scraped captions and metadata')
+  parser.add_argument('-o', '--outfile', type=str, default='data', help='TSV filename (without extension) for scraped captions and metadata')
   parser.add_argument('-a', '--num_attempts', type=int, default=10, help='number of times to retry processing a meme template if an exception is thrown')
   args = parser.parse_args()
   main(args.n_pages_meme_types, args.n_pages_per_meme, args.save_dir, args.outfile, args.num_attempts)
