@@ -4,13 +4,14 @@ from transformers import GPT2TokenizerFast
 from csv import reader as csv_reader
 from typing import Optional, List
 from torch import tensor, Tensor, float16
+from os import path
 import pickle
 
 
 class MemesDataset(Dataset):
     
-    def __init__(self, infile: str) -> None:
-        with open(infile, mode='rb') as handle:
+    def __init__(self, path: str) -> None:
+        with open(path, mode='rb') as handle:
             self.data = pickle.load(handle)
         self.num_memes = len(self.data)  # Precompute length for efficiency
 
@@ -23,8 +24,9 @@ class MemesDataset(Dataset):
 
 class MemesDataModule(LightningDataModule):
 
-    def __init__(self, infile: str = 'data.tsv', outfile: str = 'data.pickle', gpt2_model_type: str = 'gpt2', split_ratios: List[float] = [0.8, 0.1, 0.1], batch_size: int = 1) -> None:
+    def __init__(self, data_dir: str = 'data', infile: str = 'data.tsv', outfile: str = 'data.pickle', gpt2_model_type: str = 'gpt2', split_ratios: List[float] = [0.8, 0.1, 0.1], batch_size: int = 1) -> None:
         super().__init__()
+        self.data_dir = data_dir
         self.infile = infile
         self.outfile = outfile
         self.gpt2_model_type = gpt2_model_type
@@ -34,7 +36,7 @@ class MemesDataModule(LightningDataModule):
     def prepare_data(self) -> None:
         tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
         data = []
-        with open(self.infile, newline='') as tsvfile:
+        with open(path.join(self.data_dir, self.infile), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
@@ -42,7 +44,7 @@ class MemesDataModule(LightningDataModule):
                 meme_caption = meme[2][:tokenizer.model_max_length]  # Trim to maximum length allowed by model
                 tokenizer_input = f'{meme_tags}{meme_caption}{tokenizer.eos_token}'
                 data.append({'caption': tensor(tokenizer.encode(tokenizer_input), dtype=float16), 'views': int(meme[4]), 'upvotes': int(meme[5])})
-        with open(self.outfile, mode='wb') as handle:
+        with open(path.join(self.data_dir, self.outfile), mode='wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
     
     def get_splits(self, data_len: int) -> List[int]:
@@ -57,7 +59,7 @@ class MemesDataModule(LightningDataModule):
         return splits
 
     def setup(self, stage: Optional[str] = None) -> None:
-        data = MemesDataset(self.infile)
+        data = MemesDataset(path.join(self.data_dir, self.infile))
         splits = self.get_splits(len(self.data))
         self.data_train, self.data_val, self.data_test = random_split(data, splits)
     
