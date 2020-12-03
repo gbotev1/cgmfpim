@@ -1,9 +1,9 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
-from transformers import GPT2TokenizerFast, PreTrainedTokenizerBase
+from transformers import GPT2TokenizerFast
 from csv import reader as csv_reader
 from typing import Optional, List
-from torch import tensor, Tensor, float16
+from torch import Tensor, int32
 from os import path
 import pickle
 
@@ -24,7 +24,7 @@ class MemesDataset(Dataset):
 
 class MemesDataModule(LightningDataModule):
 
-    def __init__(self, data_dir: str = 'data', infile: str = 'data.tsv', outfile: str = 'data.pickle', gpt2_model_type: str = 'gpt2', split_ratios: List[float] = [0.8, 0.1, 0.1], batch_size: int = 1, tokenizer: PreTrainedTokenizerBase) -> None:
+    def __init__(self, data_dir: str = 'data', infile: str = 'data.tsv', outfile: str = 'data.pickle', gpt2_model_type: str = 'gpt2', split_ratios: List[float] = [0.8, 0.1, 0.1], batch_size: int = 1) -> None:
         super().__init__()
         self.data_dir = data_dir
         self.infile = infile
@@ -32,18 +32,19 @@ class MemesDataModule(LightningDataModule):
         self.gpt2_model_type = gpt2_model_type
         self.split_ratios = split_ratios
         self.batch_size = batch_size
-        self.tokenizer = tokenizer
     
     def prepare_data(self) -> None:
-        self.tokenizer.pad_token = self.tokenizer.eos_token  # Make sure pad token is also <|endoftext|>
+        tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
+        tokenizer.pad_token = tokenizer.eos_token  # Make sure pad token is also <|endoftext|>
         data = []
         with open(path.join(self.data_dir, self.infile), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
                 meme_tags = f'<|{meme[3]}|>'  # Associate meme's tags to its caption by using custom control code; do not tokenize as special character for generalizability
-                tokenizer_input = f'{meme_tags}{meme[2]}{self.tokenizer.eos_token}'
-                data.append({'caption': self.tokenizer(tokenizer_input, return_tensors='pt', padding=True, truncation=True), dtype=float16), 'views': int(meme[4]), 'upvotes': int(meme[5])})
+                tokenizer_input = f'{meme_tags}{meme[2]}{tokenizer.eos_token}'
+                tokenized_caption = tokenizer(tokenizer_input, padding=True, truncation=True)
+                data.append({'caption': {k: torch.tensor(v, dtype=torch.int32) for k, v in tokenized_caption.items()}, 'views': int(meme[4]), 'upvotes': int(meme[5])})  # Create PyTorch tensor manually to save memory (int32 instead of int64)
         with open(path.join(self.data_dir, self.outfile), mode='wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
     
