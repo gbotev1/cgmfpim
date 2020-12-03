@@ -87,7 +87,7 @@ Listed in alphabetical order by last name:
 * Peter Ge - yge15@jhmi.edu
   * Pursing PhD in Biomedical Engineering at Johns Hopkins University
 * Samantha Zarate - slzarate@jhu.edu
-  * TODO
+  * Pursuing PhD in Computer Science at Johns Hopkins University
 
 <!-- REFERENCES -->
 ## References
