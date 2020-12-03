@@ -1,12 +1,14 @@
 from pytorch_lightning import LightningModule
-from transformers import GPT2DoubleHeadsModel
+from transformers import GPT2TokenizerFast, GPT2DoubleHeadsModel
 
 class GPT2(LightningModule):
 
 
-    def __init__(self, gpt2_model_type: str = 'gpt2', tokenizer: PreTrainedTokenizerBase):
+    def __init__(self, gpt2_model_type: str = 'gpt2'):
         super().__init__()
-        self.model = GPT2DoubleHeadsModel.from_pretrained(gpt2_model_type, pad_token_id=tokenizer.eos_token_id)
+        self.tokenizer = GPT2TokenizerFast.from_pretrained(gpt2_model_type)
+        self.tokenizer.pad_token = self.tokenizer.eos_token  # Make sure pad token is also <|endoftext|>
+        self.model = GPT2DoubleHeadsModel.from_pretrained(gpt2_model_type, pad_token_id=self.tokenizer.eos_token_id)  # Do not forget to update pad token ID too!
 
     def forward(self, inputs):
         return self.model(**inputs)
