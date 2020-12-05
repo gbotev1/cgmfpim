@@ -3,6 +3,7 @@
 .DS_Store
 data.tsv
 meme_templates/
+gcc*
 
 # Peter
 .vscode/
