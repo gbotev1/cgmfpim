@@ -3,14 +3,16 @@ from transformers import GPT2TokenizerFast, GPT2DoubleHeadsModel, get_cosine_sch
 from torch import Tensor
 from typing import Dict, Union
 
-class GPT2(LightningModule):
 
+class GPT2(LightningModule):
 
     def __init__(self, gpt2_model_type: str = 'gpt2', lr: float, num_warmup_steps: int, num_training_steps: int):
         super().__init__()
         self.tokenizer = GPT2TokenizerFast.from_pretrained(gpt2_model_type)
-        self.tokenizer.pad_token = self.tokenizer.eos_token  # Make sure pad token is also <|endoftext|>
-        self.model = GPT2DoubleHeadsModel.from_pretrained(gpt2_model_type, pad_token_id=self.tokenizer.eos_token_id)  # Do not forget to update pad token ID too!
+        # Make sure pad token is also <|endoftext|>
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.model = GPT2DoubleHeadsModel.from_pretrained(
+            gpt2_model_type, pad_token_id=self.tokenizer.eos_token_id)  # Do not forget to update pad token ID too!
         self.lr = lr
         self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps
@@ -20,17 +22,25 @@ class GPT2(LightningModule):
         return self.model(**inputs)
 
     def training_step(self, batch: Dict[str, Union[Tensor, int]], _) -> None:
-        outputs = self({'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})  # Try to predict input IDs by setting them as labels
+        # Try to predict input IDs by setting them as labels
+        outputs = self(
+            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
-        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_loss', loss, on_step=True, on_epoch=True,
+                 prog_bar=True, logger=True, sync_dist=True)
 
     def validation_step(self, batch: Dict[str, Union[Tensor, int]], _) -> None:
-        outputs = self({'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})  # Try to predict input IDs by setting them as labels
+        # Try to predict input IDs by setting them as labels
+        outputs = self(
+            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
-        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_loss', loss, on_step=True, on_epoch=True,
+                 prog_bar=True, logger=True, sync_dist=True)
 
     def test_step(self, batch: Dict[str, Union[Tensor, int]], _) -> None:
-        outputs = self({'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})  # Try to predict input IDs by setting them as labels
+        # Try to predict input IDs by setting them as labels
+        outputs = self(
+            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
 
     def configure_optimizers(self):
@@ -46,5 +56,6 @@ class GPT2(LightningModule):
             },
         ]
         optimizer = AdamW(optimizer_grouped_parameters, lr=self.lr)
-        scheduler = get_cosine_schedule_with_warmup(optimizer, self.num_warmup_steps, self.num_training_steps)
+        scheduler = get_cosine_schedule_with_warmup(
+            optimizer, self.num_warmup_steps, self.num_training_steps)
         return [optimizer], [scheduler]
