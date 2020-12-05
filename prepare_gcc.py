@@ -16,7 +16,7 @@ def process_gcc_split(data_dir: str, tsvname: str) -> List[List[str]]:
             lines.append([detokenizer.detokenize(line[0].split()), line[1]])
     return lines
 
-def main(data_dir: str, train: str, val: str, output: str):
+def main(data_dir: str, train: str, val: str, output: str) -> None:
     lines = process_gcc_split(data_dir, train)
     lines.extend(process_gcc_split(data_dir, val))
     with open(path.join(data_dir, output), mode='w', newline='') as tsvfile:
