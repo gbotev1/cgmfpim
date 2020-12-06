@@ -12,7 +12,7 @@ from numpy import save, vstack
 from numpy import stack as np_stack
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from typing import List
+from typing import List, Optional
 
 
 class Wide_ResNet_101_2:
@@ -42,7 +42,7 @@ class Wide_ResNet_101_2:
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
 
-    def get_tensor(self, line: List[str], outfile: TextIOWrapper) -> Tensor:
+    def get_tensor(self, line: List[str], outfile: TextIOWrapper) -> Optional[Tensor]:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
@@ -51,7 +51,7 @@ class Wide_ResNet_101_2:
             outfile.write(f'{line[0]}\n')
             return tensor
         except:
-            pass
+            return None
 
     def embed_line(self, line: List[str], outfile: TextIOWrapper) -> None:
         try:
@@ -77,8 +77,10 @@ class Wide_ResNet_101_2:
                             line, outfile), line) for line in tsv_reader]
                         for future in as_completed(futures):
                             iters += 1
-                            tensors.append(future.result())
-                            if iters % self.batch_size == 0:
+                            result = future.result()
+                            if result is not None:
+                                tensors.append(result)
+                            if len(tensors) == self.batch_size:
                                 # Run batch through GPU
                                 self.model(torch_stack(tensors))
                                 # Reset batch when done
