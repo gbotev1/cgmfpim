@@ -44,10 +44,10 @@ class Wide_ResNet_101_2:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
-            image = self.transforms(image)
+            tensor = self.transforms(image)
             # Append immediately to stream to save memory
             outfile.write(f'{line[0]}\n')
-            return image
+            return tensor
         except:
             pass
 
