@@ -5,7 +5,7 @@ data.tsv
 meme_templates/
 gcc*
 !gcc_captions.txt
-!gcc_full.tsv.zip
+!gcc_full.tsv.bz2
 
 # Peter
 .vscode/
