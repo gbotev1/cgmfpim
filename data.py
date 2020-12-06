@@ -11,7 +11,7 @@ import pickle
 class MemesDataset(Dataset):
 
     def __init__(self, path: str) -> None:
-        with open(path, mode='rb') as handle:
+        with open(path, 'rb') as handle:
             self.data = pickle.load(handle)
         self.num_memes = len(self.data)  # Precompute length for efficiency
 
@@ -49,7 +49,7 @@ class MemesDataModule(LightningDataModule):
                     tokenizer_input, padding=True, truncation=True)
                 data.append({'caption': {k: torch.tensor(v, dtype=torch.int32) for k, v in tokenized_caption.items()}, 'views': int(
                     meme[4]), 'upvotes': int(meme[5])})  # Create PyTorch tensor manually to save memory (int32 instead of int64)
-        with open(path.join(self.data_dir, self.outfile), mode='wb') as handle:
+        with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
 
     def get_splits(self, data_len: int) -> List[int]:

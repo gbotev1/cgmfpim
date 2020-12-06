@@ -41,10 +41,11 @@ def save_meme_template(meme_href: str, data_dir: str, save_dir: str) -> None:
     s = get_bs(f'{BASE_URL}{meme_href}', parse_only=ss('img', alt=RE_0))
     image_url = s.find('img')['src']
     # Download image
-    image = requests_get(f'{BASE_URL}{image_url}', stream=True).content
-    image_name = image_url.split('/')[-1]
-    with open(path.join(data_dir, save_dir, image_name), 'wb') as outfile:
-        outfile.write(image)
+    with requests_get(f'{BASE_URL}{image_url}', stream=True) as r:
+        image = r.content
+        image_name = image_url.split('/')[-1]
+        with open(path.join(data_dir, save_dir, image_name), 'wb') as outfile:
+            outfile.write(image)
 
 
 def get_meme_info(page: str, meme_href: str, meme_name: str) -> Optional[DataFrame]:

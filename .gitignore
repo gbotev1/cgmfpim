@@ -4,6 +4,7 @@
 data.tsv
 meme_templates/
 gcc*
+!gcc_captions.txt
 
 # Peter
 .vscode/

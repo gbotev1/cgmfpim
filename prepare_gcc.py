@@ -21,7 +21,7 @@ def process_gcc_split(data_dir: str, tsvname: str) -> List[List[str]]:
 def main(data_dir: str, train: str, val: str, output: str) -> None:
     lines = process_gcc_split(data_dir, train)
     lines.extend(process_gcc_split(data_dir, val))
-    with open(path.join(data_dir, output), mode='w', newline='') as tsvfile:
+    with open(path.join(data_dir, output), 'w', newline='') as tsvfile:
         tsv_writer = csv_writer(tsvfile, delimiter='\t')
         tsv_writer.writerows(lines)
 
