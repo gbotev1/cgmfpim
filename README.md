@@ -58,7 +58,7 @@ pip3 install -r requirements.txt
 
 ### Inflate Archives
 
-The following bash script is provided for convenience to extract the `data.tsv` file of scraped captions from [Imgflip](https://imgflip.com) and the `meme_templates` directory of meme image templates into the `data` directory easily.
+The following bash script is provided for convenience to extract the `data.tsv` file of scraped captions from [Imgflip](https://imgflip.com), the `meme_templates` directory of meme image templates into the `data` directory, and the custom [Google's Conceptual Captions dataset](https://ai.google.com/research/ConceptualCaptions/download) easily.
 ```sh
 sh inflate_archives.sh
 ```
