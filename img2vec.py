@@ -4,10 +4,12 @@ from torchvision.models import wide_resnet101_2
 from os import path
 from csv import reader as csv_reader
 from torch import device, cuda, Tensor
+from torch import stack as torch_stack
 import torchvision.transforms as T
 from requests import get as requests_get
 from io import BytesIO, TextIOWrapper
-from numpy import save, stack
+from numpy import save, vstack
+from numpy import stack as np_stack
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import List
@@ -78,14 +80,14 @@ class Wide_ResNet_101_2:
                             tensors.append(future.result())
                             if iters % self.batch_size == 0:
                                 # Run batch through GPU
-                                self.model(torch.stack(tensors))
+                                self.model(torch_stack(tensors))
                                 # Reset batch when done
                                 tensors = []
                             if iters % self.log_every == 0:
                                 print(iters)
             # Check if incomplete batch present
             if len(tensors) > 0:
-                self.model(torch.stack(tensors))
+                self.model(torch_stack(tensors))
                 del tensors
             save(path.join(self.data_dir, self.outfile), vstack(self.embeddings))
         else:
@@ -100,7 +102,8 @@ class Wide_ResNet_101_2:
                             iters += 1
                             if iters % self.log_every == 0:
                                 print(iters)
-            save(path.join(self.data_dir, self.outfile), stack(self.embeddings))
+            save(path.join(self.data_dir, self.outfile),
+                 np_stack(self.embeddings))
 
 
 if __name__ == "__main__":
