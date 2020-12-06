@@ -117,7 +117,7 @@ class Wide_ResNet_101_2:
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Automatically uses (a single) GPU if available.",
+    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Automatically uses (a single) GPU if available. Note that this program will append to the specified '--captions' TSV file, so make sure it does not already exist!",
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
     parser.add_argument('-o', '--outfile', type=str, default='embeddings.npy',
                         help='output filename to save in local data directory of embeddings of GCC dataset images')
-    parser.add_argument('-c', '--captions', type=str, default='gcc_captions.txt',
+    parser.add_argument('-c', '--captions', type=str, default='gcc_captions.tsv',
                         help='output filename to save in local data directory of GCC dataset captions corresponding to images that were actually embedded')
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
                         help="timeout in seconds for requests' GET method")
