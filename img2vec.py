@@ -6,7 +6,7 @@ from csv import reader as csv_reader
 from torch import device, cuda
 import torchvision.transforms as T
 from requests import get as requests_get
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 from numpy import save, stack
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -34,38 +34,34 @@ class Wide_ResNet_101_2:
                                      T.ToTensor(),
                                      T.Normalize(mean=[0.485, 0.456, 0.406],
                                                  std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
-        self.lines = []
         self.embeddings = []
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
 
-    def embed_line(self, line: List[str]) -> None:
+    def embed_line(self, line: List[str], outfile: TextIOWrapper) -> None:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
             self.model(image)
-            self.lines.append(line[0])
+            # Append immediately to stream to save memory
+            outfile.write(f'{line[0]}\n')
         except:
             pass
 
     def run(self) -> None:
         iters = 0
-        with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
-            tsv_reader = csv_reader(tsvfile, delimiter='\t')
-            with ThreadPoolExecutor() as executor:
-                futures = [executor.submit(self.embed_line, line)
-                           for line in tsv_reader]
-                for future in as_completed(futures):
-                    iters += 1
-                    if iters % self.log_every == 0:
-                        print(iters)
-        # Save embeddings
+        with open(path.join(self.data_dir, self.captions), 'a') as outfile:  # Append captions on the fly
+            with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
+                tsv_reader = csv_reader(tsvfile, delimiter='\t')
+                with ThreadPoolExecutor() as executor:
+                    futures = [executor.submit(lambda line: self.embed_line(
+                        line, outfile), line) for line in tsv_reader]
+                    for future in as_completed(futures):
+                        iters += 1
+                        if iters % self.log_every == 0:
+                            print(iters)
         save(path.join(self.data_dir, self.outfile), stack(self.embeddings))
-        # Save corresponding captions
-        with open(path.join(self.data_dir, self.captions), 'w') as outfile:
-            for line in self.lines:
-                outfile.write(f'{line}\n')
 
 
 if __name__ == "__main__":
