@@ -39,16 +39,15 @@ class Wide_ResNet_101_2:
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
 
-    def embed_line(self, line: List[str]) -> bool:
+    def embed_line(self, line: List[str]) -> None:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
-            self.model(tensor)
+            self.model(image)
             self.lines.append(line[0])
-            return True
         except:
-            return False
+            pass
 
     def run(self) -> None:
         iters = 0
@@ -58,15 +57,14 @@ class Wide_ResNet_101_2:
                 futures = [executor.submit(self.embed_line, line)
                            for line in tsv_reader]
                 for future in as_completed(futures):
-                    result = future.result()
                     iters += 1
-                    if result and iters % self.log_every == 0:
+                    if iters % self.log_every == 0:
                         print(iters)
         # Save embeddings
         save(path.join(self.data_dir, self.outfile), stack(self.embeddings))
         # Save corresponding captions
         with open(path.join(self.data_dir, self.captions), 'w') as outfile:
-            for line in lines:
+            for line in self.lines:
                 outfile.write(f'{line}\n')
 
 
