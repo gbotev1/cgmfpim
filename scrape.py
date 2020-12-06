@@ -71,8 +71,8 @@ def get_meme_info(page: str, meme_href: str, meme_name: str) -> Optional[DataFra
                     if len(view_info) >= 4 and tags_search is not None and caption_search is not None:
                         views, upvotes = int(view_info[0]), int(view_info[2])
                         tags_span, caption_span = tags_search.span(), caption_search.span()
-                        tags = alt_text[tags_span[0] + RE_1_SPAN_OFFSETS[0]                                        :tags_span[1] - RE_1_SPAN_OFFSETS[1]]
-                        caption = alt_text[caption_span[0] + RE_2_SPAN_OFFSETS[0]                                           : caption_span[1] - RE_2_SPAN_OFFSETS[1]].replace('; ', '\n')
+                        tags = alt_text[tags_span[0] + RE_1_SPAN_OFFSETS[0]:tags_span[1] - RE_1_SPAN_OFFSETS[1]]
+                        caption = alt_text[caption_span[0] + RE_2_SPAN_OFFSETS[0]:caption_span[1] - RE_2_SPAN_OFFSETS[1]].replace('; ', '\n')
                         dfs.append(DataFrame([[meme_name, caption, tags, views, upvotes]], columns=[
                                    'type', 'caption', 'tags', 'views', 'upvotes']))
         return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
@@ -134,9 +134,8 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Meme caption and metadata curation script for imgflip. Note that the specified folder for saving the meme templates will be created if it does not already exist. In captions, the sequence '; ' is converted to '\n' to normalize the formatting convention of imgflip.", formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('n_pages_meme_types', type=int,
                         help='number of meme template pages to scrape')  # pages of meme templates
-    # pages of memes per template
     parser.add_argument('n_pages_per_meme', type=int,
-                        help='number of memes per template to scrape')
+                        help='number of memes per template to scrape')  # pages of memes per template
     parser.add_argument('-d', '--data_dir', type=str, default='data',
                         help='local directory name where data should be saved')
     parser.add_argument('-s', '--save_dir', type=str, default='meme_templates',

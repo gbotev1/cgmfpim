@@ -1,75 +1,69 @@
 # Keep imports lightweight
 from PIL import Image
 from torchvision.models import wide_resnet101_2
-from os import path, listdir
+from os import path
 from csv import reader as csv_reader
-import torch
+from torch import device, cuda
 import torchvision.transforms as T
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from requests import get as requests_get
 from io import BytesIO
-from numpy import save, vstack
+from numpy import save, stack
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from typing import List
 
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, tsvname: str, outfile: str, captions: str, batch_size: int, timeout: float) -> None:
+    def __init__(self, data_dir: str, tsvname: str, outfile: str, captions: str, timeout: float, log_every: int) -> None:
         # Save parameters
         self.data_dir = data_dir
         self.tsvname = tsvname
         self.outfile = outfile
         self.captions = captions
-        self.batch_size = batch_size
         self.timeout = timeout
+        self.log_every = log_every
         # Pipeline set-up
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Automatically use GPU if available
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model.to(device)  # Move model to device
+        self.model.to(device('cuda' if cuda.is_available()
+                             else 'cpu'))  # Move model to device
         self.model.eval()  # Don't forget to put model in evaluation mode!
         # Transform all images to be minimum allowed square model size for generalizability, efficiency, and batching
         self.transforms = T.Compose([T.Resize((224, 224), interpolation=Image.BICUBIC),  # Use bicubic interpolation for best quality
                                      T.ToTensor(),
                                      T.Normalize(mean=[0.485, 0.456, 0.406],
                                                  std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
+        self.lines = []
         self.embeddings = []
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
 
+    def embed_line(self, line: List[str]) -> bool:
+        try:
+            r = requests_get(line[1], stream=True, timeout=self.timeout)
+            image = Image.open(BytesIO(r.content))
+            image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
+            self.model(tensor)
+            self.lines.append(line[0])
+            return True
+        except:
+            return False
+
     def run(self) -> None:
-        lines = []
-        image_batch = []
-        counter = 0
-        iterations = 0
+        iters = 0
         with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
-            for line in tsv_reader:
-                lines.append(line[0])
-                try:
-                    r = requests_get(line[1], stream=True,
-                                     timeout=self.timeout)
-                    image = Image.open(BytesIO(r.content))
-                    r.close()  # Close stream when done
-                    image_batch.append(self.transforms(image))
-                    counter += 1
-                    if counter % self.batch_size == 0:
-                        # Run image batch
-                        self.model(torch.stack(image_batch))
-                        # Reset counter and image batch
-                        counter = 0
-                        image_batch = []
-                        # Logging
-                        iterations += 1
-                        print(f'Batch {iterations} done: embedded {iterations * self.batch_size} images!')
-                except:
-                    r.close()  # Make sure stream is closed
-                    del lines[-1]  # Prune caption
-        # Handle possible incomplete batch
-        if counter != 0:
-            self.model(torch.stack(image_batch))
-            del image_batch, counter
+            with ProcessPoolExecutor() as executor:
+                futures = [executor.submit(self.embed_line, line)
+                           for line in tsv_reader]
+                for future in as_completed(futures):
+                    result = future.result()
+                    iters += 1
+                    if result and iters % self.log_every == 0:
+                        print(iters)
         # Save embeddings
-        save(path.join(self.data_dir, self.outfile), vstack(self.embeddings))
+        save(path.join(self.data_dir, self.outfile), stack(self.embeddings))
         # Save corresponding captions
         with open(path.join(self.data_dir, self.captions), 'w') as outfile:
             for line in lines:
@@ -77,7 +71,7 @@ class Wide_ResNet_101_2:
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description='img2vec',
+    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet.",
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
@@ -87,11 +81,11 @@ if __name__ == "__main__":
                         help='output filename to save in local data directory of embeddings of GCC dataset images')
     parser.add_argument('-c', '--captions', type=str, default='gcc_captions.txt',
                         help='output filename to save in local data directory of GCC dataset captions corresponding to images that were actually embedded')
-    parser.add_argument('-b', '--batch_size', type=int, default=1024,
-                        help='batch size to use for passing images through model to generate their embeddings')
-    parser.add_argument('-w', '--timeout', type=int, default=1,
-                        help='timeout in seconds for requests GET method')
+    parser.add_argument('-w', '--timeout', type=float, default=1.0,
+                        help="timeout in seconds for requests' GET method")
+    parser.add_argument('-l', '--log_every', type=int, default=1024,
+                        help='how many iterations to print status to stdout stream')
     args = parser.parse_args()
     model = Wide_ResNet_101_2(
-        args.data_dir, args.tsvname, args.outfile, args.captions, args.batch_size, args.timeout)
+        args.data_dir, args.tsvname, args.outfile, args.captions, args.timeout, args.log_every)
     model.run()
