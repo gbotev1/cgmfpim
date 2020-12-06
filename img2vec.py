@@ -12,7 +12,7 @@ from numpy import save, vstack
 from numpy import stack as np_stack
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class Wide_ResNet_101_2:
@@ -42,14 +42,11 @@ class Wide_ResNet_101_2:
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
 
-    def get_tensor(self, line: List[str], outfile: TextIOWrapper) -> Optional[Tensor]:
+    def get_tensor(self, line: List[str]) -> Optional[Tuple[Tensor, str]]:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
-            tensor = self.transforms(image)
-            # Append immediately to stream to save memory
-            outfile.write(f'{line[0]}\n')
-            return tensor
+            return self.transforms(image), line[0]
         except:
             return None
 
@@ -73,17 +70,19 @@ class Wide_ResNet_101_2:
                 with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
                     tsv_reader = csv_reader(tsvfile, delimiter='\t')
                     with ThreadPoolExecutor() as executor:
-                        futures = [executor.submit(lambda line: self.get_tensor(
-                            line, outfile), line) for line in tsv_reader]
+                        futures = [executor.submit(
+                            self.get_tensor, line) for line in tsv_reader]
                         for future in as_completed(futures):
                             iters += 1
                             result = future.result()
                             if result is not None:
-                                tensors.append(result)
+                                tensors.append(result[0])
+                                outfile.write(f'{result[1]}\n')
                             if len(tensors) == self.batch_size:
                                 # Run batch through GPU
                                 batch = torch_stack(tensors)
-                                self.model(batch.to(device('cuda')))  # Must have GPU in this branch
+                                # Must have GPU in this branch
+                                self.model(batch.to(device('cuda')))
                                 del batch  # Free up GPU memory
                                 # Reset batch when done
                                 tensors = []
@@ -92,7 +91,8 @@ class Wide_ResNet_101_2:
             # Check if incomplete batch present
             if len(tensors) > 0:
                 batch = torch_stack(tensors)
-                self.model(batch.to(device('cuda')))  # Must have GPU in this branch
+                # Must have GPU in this branch
+                self.model(batch.to(device('cuda')))
                 del batch, tensors  # Might as well
             save(path.join(self.data_dir, self.outfile), vstack(self.embeddings))
         else:
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
                         help='how many iterations to print status to stdout stream')
-    parser.add_argument('-b', '--batch_size', type=int, default=256,
+    parser.add_argument('-b', '--batch_size', type=int, default=32,
                         help='GPU batch size to use if CUDA/GPU is available')
     args = parser.parse_args()
     model = Wide_ResNet_101_2(
