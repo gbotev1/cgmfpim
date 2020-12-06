@@ -83,7 +83,7 @@ class Wide_ResNet_101_2:
                             if len(tensors) == self.batch_size:
                                 # Run batch through GPU
                                 batch = torch_stack(tensors)
-                                self.model(batch.to(device('cuda' if self.has_cuda else 'cpu')))
+                                self.model(batch.to(device('cuda')))  # Must have GPU in this branch
                                 del batch  # Free up GPU memory
                                 # Reset batch when done
                                 tensors = []
@@ -91,8 +91,9 @@ class Wide_ResNet_101_2:
                                 print(iters)
             # Check if incomplete batch present
             if len(tensors) > 0:
-                self.model(torch_stack(tensors))
-                del tensors
+                batch = torch_stack(tensors)
+                self.model(batch.to(device('cuda')))  # Must have GPU in this branch
+                del batch, tensors  # Might as well
             save(path.join(self.data_dir, self.outfile), vstack(self.embeddings))
         else:
             # Append captions on the fly
