@@ -3,7 +3,7 @@ from PIL import Image
 from torchvision.models import wide_resnet101_2
 from os import path
 from csv import reader as csv_reader
-from torch import device, cuda
+from torch import device, cuda, Tensor
 import torchvision.transforms as T
 from requests import get as requests_get
 from io import BytesIO, TextIOWrapper
@@ -15,7 +15,7 @@ from typing import List
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, tsvname: str, outfile: str, captions: str, timeout: float, log_every: int) -> None:
+    def __init__(self, data_dir: str, tsvname: str, outfile: str, captions: str, timeout: float, log_every: int, batch_size: int) -> None:
         # Save parameters
         self.data_dir = data_dir
         self.tsvname = tsvname
@@ -23,11 +23,13 @@ class Wide_ResNet_101_2:
         self.captions = captions
         self.timeout = timeout
         self.log_every = log_every
+        self.batch_size = batch_size
         # Pipeline set-up
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Automatically use GPU if available
-        self.model.to(device('cuda' if cuda.is_available()
-                             else 'cpu'))  # Move model to device
+        self.has_cuda = cuda.is_available()
+        # Move model to device
+        self.model.to(device('cuda' if self.has_cuda else 'cpu'))
         self.model.eval()  # Don't forget to put model in evaluation mode!
         # Transform all images to be minimum allowed square model size for generalizability, efficiency, and batching
         self.transforms = T.Compose([T.Resize((224, 224), interpolation=Image.BICUBIC),  # Use bicubic interpolation for best quality
@@ -37,6 +39,17 @@ class Wide_ResNet_101_2:
         self.embeddings = []
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
+
+     def get_tensor(self, line: List[str], outfile: TextIOWrapper) -> Tensor:
+        try:
+            r = requests_get(line[1], stream=True, timeout=self.timeout)
+            image = Image.open(BytesIO(r.content))
+            image = self.transforms(image)
+            # Append immediately to stream to save memory
+            outfile.write(f'{line[0]}\n')
+            return image
+        except:
+            pass
 
     def embed_line(self, line: List[str], outfile: TextIOWrapper) -> None:
         try:
@@ -51,21 +64,47 @@ class Wide_ResNet_101_2:
 
     def run(self) -> None:
         iters = 0
-        with open(path.join(self.data_dir, self.captions), 'a') as outfile:  # Append captions on the fly
-            with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
-                tsv_reader = csv_reader(tsvfile, delimiter='\t')
-                with ThreadPoolExecutor() as executor:
-                    futures = [executor.submit(lambda line: self.embed_line(
-                        line, outfile), line) for line in tsv_reader]
-                    for future in as_completed(futures):
-                        iters += 1
-                        if iters % self.log_every == 0:
-                            print(iters)
-        save(path.join(self.data_dir, self.outfile), stack(self.embeddings))
+        if self.has_cuda:
+            tensors = []
+            # Append captions on the fly
+            with open(path.join(self.data_dir, self.captions), 'a') as outfile:
+                with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
+                    tsv_reader = csv_reader(tsvfile, delimiter='\t')
+                    with ThreadPoolExecutor() as executor:
+                        futures = [executor.submit(lambda line: self.get_tensor(
+                            line, outfile), line) for line in tsv_reader]
+                        for future in as_completed(futures):
+                            iters += 1
+                            tensors.append(future.result())
+                            if iters % self.batch_size == 0:
+                                # Run batch through GPU
+                                self.model(torch.stack(tensors))
+                                # Reset batch when done
+                                tensors = []
+                            if iters % self.log_every == 0:
+                                print(iters)
+            # Check if incomplete batch present
+            if len(tensors) > 0:
+                self.model(torch.stack(tensors))
+                del tensors
+            save(path.join(self.data_dir, self.outfile), vstack(self.embeddings))
+        else:
+            # Append captions on the fly
+            with open(path.join(self.data_dir, self.captions), 'a') as outfile:
+                with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
+                    tsv_reader = csv_reader(tsvfile, delimiter='\t')
+                    with ThreadPoolExecutor() as executor:
+                        futures = [executor.submit(lambda line: self.embed_line(
+                            line, outfile), line) for line in tsv_reader]
+                        for future in as_completed(futures):
+                            iters += 1
+                            if iters % self.log_every == 0:
+                                print(iters)
+            save(path.join(self.data_dir, self.outfile), stack(self.embeddings))
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet.",
+    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Automatically uses (a single) GPU if available.",
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
@@ -79,7 +118,9 @@ if __name__ == "__main__":
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
                         help='how many iterations to print status to stdout stream')
+    parser.add_argument('-b', '--batch_size', type=int, default=256,
+                        help='GPU batch size to use if CUDA/GPU is available')
     args = parser.parse_args()
     model = Wide_ResNet_101_2(
-        args.data_dir, args.tsvname, args.outfile, args.captions, args.timeout, args.log_every)
+        args.data_dir, args.tsvname, args.outfile, args.captions, args.timeout, args.log_every, args.batch_size)
     model.run()
