@@ -3,11 +3,12 @@ from PIL import Image
 from torchvision.models import wide_resnet101_2
 from os import path
 from csv import reader as csv_reader
+from csv import writer as csv_writer
 from torch import device, cuda, Tensor
 from torch import stack as torch_stack
 import torchvision.transforms as T
 from requests import get as requests_get
-from io import BytesIO, TextIOWrapper
+from io import BytesIO
 from numpy import save, vstack
 from numpy import stack as np_stack
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -50,25 +51,25 @@ class Wide_ResNet_101_2:
         except:
             return None
 
-    def embed_line(self, line: List[str], outfile: TextIOWrapper) -> None:
+    def embed_line(self, line: List[str]) -> Optional[str]:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
             self.model(image)
-            # Append immediately to stream to save memory
-            outfile.write(f'{line[0]}\n')
+            return line[0]
         except:
-            pass
+            return None
 
     def run(self) -> None:
         iters = 0
         if self.has_cuda:
             tensors = []
             # Append captions on the fly
-            with open(path.join(self.data_dir, self.captions), 'a') as outfile:
+            with open(path.join(self.data_dir, self.captions), 'a', newline='') as outfile:
                 with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
                     tsv_reader = csv_reader(tsvfile, delimiter='\t')
+                    tsv_writer = csv_writer(outfile, delimiter='\t')
                     with ThreadPoolExecutor() as executor:
                         futures = [executor.submit(
                             self.get_tensor, line) for line in tsv_reader]
@@ -77,7 +78,7 @@ class Wide_ResNet_101_2:
                             result = future.result()
                             if result is not None:
                                 tensors.append(result[0])
-                                outfile.write(f'{result[1]}\n')
+                                tsv_writer.writerow([result[1]])
                             if len(tensors) == self.batch_size:
                                 # Run batch through GPU
                                 batch = torch_stack(tensors)
@@ -97,14 +98,18 @@ class Wide_ResNet_101_2:
             save(path.join(self.data_dir, self.outfile), vstack(self.embeddings))
         else:
             # Append captions on the fly
-            with open(path.join(self.data_dir, self.captions), 'a') as outfile:
+            with open(path.join(self.data_dir, self.captions), 'a', newline='') as outfile:
                 with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
                     tsv_reader = csv_reader(tsvfile, delimiter='\t')
+                    tsv_writer = csv_writer(outfile, delimiter='\t')
                     with ThreadPoolExecutor() as executor:
-                        futures = [executor.submit(lambda line: self.embed_line(
-                            line, outfile), line) for line in tsv_reader]
+                        futures = [executor.submit(
+                            self.embed_line, line) for line in tsv_reader]
                         for future in as_completed(futures):
                             iters += 1
+                            result = future.result()
+                            if result is not None:
+                                tsv_writer.writerow([result])
                             if iters % self.log_every == 0:
                                 print(iters)
             save(path.join(self.data_dir, self.outfile),
