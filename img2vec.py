@@ -82,7 +82,9 @@ class Wide_ResNet_101_2:
                                 tensors.append(result)
                             if len(tensors) == self.batch_size:
                                 # Run batch through GPU
-                                self.model(torch_stack(tensors))
+                                batch = torch_stack(tensors)
+                                self.model(batch.to(device('cuda' if self.has_cuda else 'cpu')))
+                                del batch  # Free up GPU memory
                                 # Reset batch when done
                                 tensors = []
                             if iters % self.log_every == 0:
