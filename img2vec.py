@@ -60,7 +60,7 @@ class Wide_ResNet_101_2:
                         image_batch = []
                         # Logging
                         iterations += 1
-                        print(f'Batch {iterations} done!')
+                        print(f'Batch {iterations} done: embedded {iterations * self.batch_size} images!')
                 except:
                     r.close()  # Make sure stream is closed
                     del lines[-1]  # Prune caption
