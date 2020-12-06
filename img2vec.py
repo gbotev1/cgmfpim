@@ -40,7 +40,7 @@ class Wide_ResNet_101_2:
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
 
-     def get_tensor(self, line: List[str], outfile: TextIOWrapper) -> Tensor:
+    def get_tensor(self, line: List[str], outfile: TextIOWrapper) -> Tensor:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
