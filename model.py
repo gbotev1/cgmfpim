@@ -6,8 +6,11 @@ from typing import Dict, Union
 
 class GPT2(LightningModule):
 
-    def __init__(self, gpt2_model_type: str = 'gpt2', lr: float, num_warmup_steps: int, num_training_steps: int):
-        super().__init__()
+    def __init__(self, lr: float,
+                       num_warmup_steps: int,
+                       num_training_steps: int,
+                       gpt2_model_type: str = 'gpt2'):
+        super(GPT2, self).__init__()
         self.tokenizer = GPT2TokenizerFast.from_pretrained(gpt2_model_type)
         # Make sure pad token is also <|endoftext|>
         self.tokenizer.pad_token = self.tokenizer.eos_token
