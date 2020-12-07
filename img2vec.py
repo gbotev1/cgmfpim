@@ -30,7 +30,9 @@ class Wide_ResNet_101_2:
         # Pipeline set-up
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Automatically use GPU if available
-        self.device = torch_device('cuda' if cuda.is_available() else 'cpu')
+        if not cuda.is_available():
+            raise('Must have CUDA installed in order to run this program.')
+        self.device = torch_device('cuda')
         # Move model to device
         self.model.to(self.device)
         self.model.eval()  # Don't forget to put model in evaluation mode!
@@ -63,45 +65,31 @@ class Wide_ResNet_101_2:
         if path.exists(path.join(self.data_dir, self.out_dir)):
             rmtree(path.join(self.data_dir, self.out_dir))
         makedirs(path.join(self.data_dir, self.out_dir))
-        # Switch logic based on CPU/GPU availability
+        # Embed driver
         batches = 0
         caption_indices = []
-        if cuda.is_available():
-            with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
-                tsv_reader = csv_reader(tsvfile, delimiter='\t')
-                for i, line in enumerate(tsv_reader):
-                    result = self.embed_line(i, line)
+        with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
+            tsv_reader = csv_reader(tsvfile, delimiter='\t')
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(embed_line, i, line)
+                           for i, line in tsv_reader]
+                for future in as_completed(futures):
+                    result = future.result()
                     if result is not None:
                         caption_indices.append(result)
-                    if i % self.log_every == 0:
-                        tensors = []
-                        while True:
-                            try:
-                                tensors.append(self.embeddings.get_nowait())
-                            except Empty:
-                                break
-                        print(f'freed {len(tensors)} tensors')
-                        batches += 1
-                        # Save batch
-                        save(path.join(self.data_dir, self.out_dir,
-                                       f'{batches}.npy'), stack(tensors))
-                        print(i)
-            save(path.join(self.data_dir, self.captions_index), caption_indices)
-        else:
-            with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
-                tsv_reader = csv_reader(tsvfile, delimiter='\t')
-                for i, line in enumerate(tsv_reader):
-                    result = self.embed_line(i, line)
-                    if result is not None:
-                        caption_indices.append(result)
-                    if i % self.log_every == 0:
-                        print(i)
-            save(path.join(self.data_dir, self.captions_index), caption_indices)
-            save(path.join(self.data_dir, 'embeddings.npy'), stack(self.embeddings))
+                        if len(caption_indices) % self.log_every == 0:
+                            tensors = []
+                            for i in range(self.log_every):
+                                tensors.append(self.embeddings.get())
+                            batches += 1
+                            save(path.join(self.data_dir, self.out_dir,
+                                           f'{batches}.npy'), stack(tensors))
+                            print(f'Batch {batch} done')
+        save(path.join(self.data_dir, self.captions_index), caption_indices)
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Automatically uses (a single) GPU if available, which is highly recommended as the CPU version currently has an extremely high memory overhead. Note that this program will append to the specified '--captions' TSV file, so it will delete it if it already exists!",
+    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Must have CUDA in order to run. Note that this program will append to the specified '--captions' TSV file, so it will delete it if it already exists!",
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
