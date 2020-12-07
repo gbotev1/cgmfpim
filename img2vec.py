@@ -3,6 +3,7 @@ from PIL import Image
 from torchvision.models import wide_resnet101_2
 from os import path, makedirs
 from os import remove as os_remove
+from shutil import rmtree
 from csv import reader as csv_reader
 from torch import device, cuda, Tensor
 from torch import stack as torch_stack
@@ -65,9 +66,10 @@ class Wide_ResNet_101_2:
         # If captions index file already exists, then delete it
         if path.isfile(path.join(self.data_dir, self.captions_index)):
             os_remove(path.join(self.data_dir, self.captions_index))
-        # Create embeddings directory if it does not already exist
-        if not path.exists(path.join(self.data_dir, self.out_dir)):
-            makedirs(path.join(self.data_dir, self.out_dir))
+        # If embeddings directory already exists, then delete it, otherwise create it
+        if path.exists(path.join(self.data_dir, self.out_dir)):
+            rmtree(path.join(self.data_dir, self.out_dir))
+        makedirs(path.join(self.data_dir, self.out_dir))
         # Switch logic based on CPU/GPU availability
         iters = 0
         batches = 0
