@@ -91,15 +91,17 @@ class Wide_ResNet_101_2:
             # Save last incomplete batch if present
             if len(caption_indices) > 0:
                 tensors = []
+                remaining = 0
                 while True:
                     try:
                         tensors.append(self.embeddings.get_nowait())
+                        remaining += 1
                     except Empty:
                         break
                 with open(path.join(self.data_dir, self.out_dir, f'{batch + 1}.pickle'), 'wb') as outfile:
                     dump(zip(caption_indices, tensors),
                          outfile, protocol=HIGHEST_PROTOCOL)
-                print(f'Saved {batch * self.log_every} images')
+                print(f'Saved {batch * self.log_every + remaining} images')
 
 
 if __name__ == "__main__":
