@@ -27,9 +27,9 @@ class Wide_ResNet_101_2:
         # Pipeline set-up
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Automatically use GPU if available
-        self.has_cuda = cuda.is_available()
+        self.device = device('cuda' if cuda.is_available() else 'cpu')
         # Move model to device
-        self.model.to(device('cuda' if self.has_cuda else 'cpu'))
+        self.model.to(self.device)
         self.model.eval()  # Don't forget to put model in evaluation mode!
         # Transform all images to be minimum allowed square model size for generalizability and efficiency
         self.transforms = T.Compose([T.Resize((224, 224), interpolation=Image.BICUBIC),  # Use bicubic interpolation for best quality
@@ -45,7 +45,9 @@ class Wide_ResNet_101_2:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
+            image.to(self.device)
             self.model(image)
+            del image
             return i
         except:
             return None
@@ -79,16 +81,6 @@ class Wide_ResNet_101_2:
                         print(i)
             # Save caption indices
             save(path.join(self.data_dir, self.captions_index), caption_indices)
-            # Check if incomplete batch present
-            if len(tensors) > 0:
-                batch = torch_stack(tensors)
-                # Must have GPU in this branch
-                self.model(batch.to(device('cuda')))
-                del batch, tensors  # Might as well
-                # Save incomplete batch
-                save(path.join(self.data_dir, self.out_dir,
-                               f'{batches}.npy'), stack(self.embeddings))
-                self.embeddings = []  # Might as well
         else:
             with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
                 tsv_reader = csv_reader(tsvfile, delimiter='\t')
