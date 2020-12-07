@@ -46,8 +46,8 @@ class Wide_ResNet_101_2:
                                    Normalize(mean=[0.485, 0.456, 0.406],
                                              std=[0.229, 0.224, 0.225])])
         self.embeddings = Queue(self.log_every)  # Thread-safe
-        self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.put(
-            m_out.data.detach().cpu().squeeze().numpy()))
+        self.model.avgpool.register_forward_hook(lambda input, output: self.embeddings.put(
+            output.data.detach().cpu().squeeze().numpy()))
 
     def embed_line(self, i: int, line: List[str]) -> Optional[int]:
         try:
@@ -62,9 +62,6 @@ class Wide_ResNet_101_2:
             return None
 
     def run(self) -> None:
-        # If captions index file already exists, then delete it
-        if path.isfile(path.join(self.data_dir, self.captions_index)):
-            os_remove(path.join(self.data_dir, self.captions_index))
         # If embeddings directory already exists, then delete it, otherwise create it
         if path.exists(path.join(self.data_dir, self.out_dir)):
             rmtree(path.join(self.data_dir, self.out_dir))
@@ -101,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--tsvname', type=str, default='gcc_full.tsv',
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
     parser.add_argument('-o', '--out_dir', type=str, default='embeddings',
-                        help='output directory of partial batch results of embeddings of GCC dataset images in local data directory')
+                        help='output directory of partial results of embeddings of GCC dataset images and corresponding caption indices in local data directory')
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
