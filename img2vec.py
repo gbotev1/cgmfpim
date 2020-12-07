@@ -93,12 +93,12 @@ class Wide_ResNet_101_2:
         else:
             with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
                 tsv_reader = csv_reader(tsvfile, delimiter='\t')
-                 for i, line in enumerate(tsv_reader):
-                      result = self.embed_line(i, line)
-                       if result is not None:
-                            caption_indices.append(result)
-                        if i % self.log_every == 0:
-                            print(i)
+                for i, line in enumerate(tsv_reader):
+                    result = self.embed_line(i, line)
+                    if result is not None:
+                        caption_indices.append(result)
+                    if i % self.log_every == 0:
+                        print(i)
             save(path.join(self.data_dir, self.captions_index), caption_indices)
             save(path.join(self.data_dir, 'embeddings.npy'), stack(self.embeddings))
 
