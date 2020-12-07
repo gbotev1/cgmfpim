@@ -24,7 +24,6 @@ class Wide_ResNet_101_2:
         self.captions_index = captions_index
         self.timeout = timeout
         self.log_every = log_every
-        self.batch_size = batch_size
         # Pipeline set-up
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Automatically use GPU if available
