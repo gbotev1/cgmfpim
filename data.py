@@ -67,7 +67,7 @@ class MemesDataModule(LightningDataModule):
         return splits
 
     def setup(self, stage: Optional[str] = None) -> None:
-        data = MemesDataset(path.join(self.data_dir, self.infile))
+        data = MemesDataset(path.join(self.data_dir, self.outfile))
         splits = self.get_splits(len(self.data))
         self.data_train, self.data_val, self.data_test = random_split(
             data, splits)
