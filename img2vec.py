@@ -66,7 +66,7 @@ class Wide_ResNet_101_2:
             rmtree(path.join(self.data_dir, self.out_dir))
         makedirs(path.join(self.data_dir, self.out_dir))
         # Embed driver
-        batches = 0
+        batch = 0
         caption_indices = []
         with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
@@ -81,9 +81,9 @@ class Wide_ResNet_101_2:
                             tensors = []
                             for i in range(self.log_every):
                                 tensors.append(self.embeddings.get())
-                            batches += 1
+                            batch += 1
                             save(path.join(self.data_dir, self.out_dir,
-                                           f'{batches}.npy'), stack(tensors))
+                                           f'{batch}.npy'), stack(tensors))
                             print(f'Batch {batch} done')
         save(path.join(self.data_dir, self.captions_index), caption_indices)
 
