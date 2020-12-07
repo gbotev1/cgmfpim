@@ -63,7 +63,7 @@ class Wide_ResNet_101_2:
         # Switch logic based on CPU/GPU availability
         batches = 0
         caption_indices = []
-        if self.has_cuda:
+        if cuda.is_available():
             tensors = []
             with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
                 tsv_reader = csv_reader(tsvfile, delimiter='\t')
