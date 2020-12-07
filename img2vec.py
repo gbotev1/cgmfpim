@@ -74,16 +74,17 @@ class Wide_ResNet_101_2:
                     if result is not None:
                         caption_indices.append(result)
                     if i % self.log_every == 0:
-                        # Save batch
-                        save(path.join(self.data_dir, self.out_dir,
-                                       f'{batches}.npy'), stack(self.embeddings))
-                        # Reset embeddings to ease memory pressure
+                        tensors = []
                         while True:
                             try:
-                                self.embeddings.get_nowait()
+                                tensors.append(self.embeddings.get_nowait())
                             except Empty:
                                 break
+                        print(f'freed {len(tensors)} tensors')
                         batches += 1
+                        # Save batch
+                        save(path.join(self.data_dir, self.out_dir,
+                                       f'{batches}.npy'), stack(tensors))
                         print(i)
             save(path.join(self.data_dir, self.captions_index), caption_indices)
         else:
