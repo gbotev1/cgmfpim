@@ -4,7 +4,6 @@ from torchvision.models import wide_resnet101_2
 from os import path, makedirs
 from os import remove as os_remove
 from csv import reader as csv_reader
-from csv import writer as csv_writer
 from torch import device, cuda, Tensor
 from torch import stack as torch_stack
 import torchvision.transforms as T
@@ -19,12 +18,12 @@ from typing import List, Optional, Tuple
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, tsvname: str, out_dir: str, captions: str, timeout: float, log_every: int, batch_size: int) -> None:
+    def __init__(self, data_dir: str, tsvname: str, out_dir: str, captions_index: str, timeout: float, log_every: int, batch_size: int) -> None:
         # Save parameters
         self.data_dir = data_dir
         self.tsvname = tsvname
         self.out_dir = out_dir
-        self.captions = captions
+        self.captions_index = captions_index
         self.timeout = timeout
         self.log_every = log_every
         self.batch_size = batch_size
@@ -44,66 +43,66 @@ class Wide_ResNet_101_2:
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
             m_out.data.detach().cpu().squeeze().numpy()))
 
-    def get_tensor(self, line: List[str]) -> Optional[Tuple[Tensor, str]]:
+    def get_tensor(self, i: int, line: List[str]) -> Optional[Tuple[Tensor, int]]:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
-            return self.transforms(image), line[0]
+            return self.transforms(image), i
         except:
             return None
 
-    def embed_line(self, line: List[str]) -> Optional[str]:
+    def embed_line(self, i: int, line: List[str]) -> Optional[int]:
         try:
             r = requests_get(line[1], stream=True, timeout=self.timeout)
             image = Image.open(BytesIO(r.content))
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
             self.model(image)
-            return line[0]
+            return i
         except:
             return None
 
     def run(self) -> None:
-        # If captions TSV file already exists, then delete it
-        if path.isfile(path.join(self.data_dir, self.captions)):
-            os_remove(path.join(self.data_dir, self.captions))
+        # If captions index file already exists, then delete it
+        if path.isfile(path.join(self.data_dir, self.captions_index)):
+            os_remove(path.join(self.data_dir, self.captions_index))
         # Create embeddings directory if it does not already exist
         if not path.exists(path.join(self.data_dir, self.out_dir)):
             makedirs(path.join(self.data_dir, self.out_dir))
         # Switch logic based on CPU/GPU availability
         iters = 0
         batches = 0
+        caption_indices = []
         if self.has_cuda:
             tensors = []
-            # Append captions on the fly
-            with open(path.join(self.data_dir, self.captions), 'a', newline='') as outfile:
-                with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
-                    tsv_reader = csv_reader(tsvfile, delimiter='\t')
-                    tsv_writer = csv_writer(outfile, delimiter='\t')
-                    with ThreadPoolExecutor() as executor:
-                        futures = [executor.submit(
-                            self.get_tensor, line) for line in tsv_reader]
-                        for future in as_completed(futures):
-                            iters += 1
-                            result = future.result()
-                            if result is not None:
-                                tensors.append(result[0])
-                                tsv_writer.writerow([result[1]])
-                            if len(tensors) == self.batch_size:
-                                # Run batch through GPU
-                                batch = torch_stack(tensors)
-                                # Must have GPU in this branch
-                                self.model(batch.to(device('cuda')))
-                                del batch  # Free up GPU memory
-                                # Reset batch when done
-                                tensors = []
-                                # Save batch
-                                save(path.join(self.data_dir, self.out_dir,
-                                               f'{batches}.npy'), vstack(self.embeddings))
-                                # Reset embeddings to ease memory pressure
-                                self.embeddings = []
-                                batches += 1
-                            if iters % self.log_every == 0:
-                                print(iters)
+            with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
+                tsv_reader = csv_reader(tsvfile, delimiter='\t')
+                with ThreadPoolExecutor() as executor:
+                    futures = [executor.submit(
+                        self.get_tensor, i, line) for i, line in enumerate(tsv_reader)]
+                    for future in as_completed(futures):
+                        iters += 1
+                        result = future.result()
+                        if result is not None:
+                            tensors.append(result[0])
+                            caption_indices.append([result[1]])
+                        if len(tensors) == self.batch_size:
+                            # Run batch through GPU
+                            batch = torch_stack(tensors)
+                            # Must have GPU in this branch
+                            self.model(batch.to(device('cuda')))
+                            del batch  # Free up GPU memory
+                            # Reset batch when done
+                            tensors = []
+                            # Save batch
+                            save(path.join(self.data_dir, self.out_dir,
+                                           f'{batches}.npy'), vstack(self.embeddings))
+                            # Reset embeddings to ease memory pressure
+                            self.embeddings = []
+                            batches += 1
+                        if iters % self.log_every == 0:
+                            print(iters)
+            # Save caption indices
+            save(path.join(self.data_dir, self.captions_index), caption_indices)
             # Check if incomplete batch present
             if len(tensors) > 0:
                 batch = torch_stack(tensors)
@@ -115,21 +114,19 @@ class Wide_ResNet_101_2:
                                f'{batches}.npy'), vstack(self.embeddings))
                 self.embeddings = []  # Might as well
         else:
-            # Append captions on the fly
-            with open(path.join(self.data_dir, self.captions), 'a', newline='') as outfile:
-                with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
-                    tsv_reader = csv_reader(tsvfile, delimiter='\t')
-                    tsv_writer = csv_writer(outfile, delimiter='\t')
-                    with ThreadPoolExecutor() as executor:
-                        futures = [executor.submit(
-                            self.embed_line, line) for line in tsv_reader]
-                        for future in as_completed(futures):
-                            iters += 1
-                            result = future.result()
-                            if result is not None:
-                                tsv_writer.writerow([result])
-                            if iters % self.log_every == 0:
-                                print(iters)
+            with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
+                tsv_reader = csv_reader(tsvfile, delimiter='\t')
+                with ThreadPoolExecutor() as executor:
+                    futures = [executor.submit(
+                        self.embed_line, i, line) for i, line in enumerate(tsv_reader)]
+                    for future in as_completed(futures):
+                        iters += 1
+                        result = future.result()
+                        if result is not None:
+                            caption_indices.append(result)
+                        if iters % self.log_every == 0:
+                            print(iters)
+            save(path.join(self.data_dir, self.captions_index), caption_indices)
             save(path.join(self.data_dir, 'embeddings.npy'),
                  np_stack(self.embeddings))
 
@@ -142,9 +139,9 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--tsvname', type=str, default='gcc_full.tsv',
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
     parser.add_argument('-o', '--out_dir', type=str, default='embeddings',
-                        help='output directory of partial batch results of embeddings of GCC dataset images in local data directory')                
-    parser.add_argument('-c', '--captions', type=str, default='gcc_captions.tsv',
-                        help='output filename to save in local data directory of GCC dataset captions corresponding to images that were actually embedded')
+                        help='output directory of partial batch results of embeddings of GCC dataset images in local data directory')
+    parser.add_argument('-c', '--captions_index', type=str, default='gcc_captions.npy',
+                        help='output filename to save in local data directory of indices in GCC dataset captions corresponding to images that were actually embedded')
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
@@ -153,5 +150,5 @@ if __name__ == "__main__":
                         help='GPU batch size to use if CUDA/GPU is available')
     args = parser.parse_args()
     model = Wide_ResNet_101_2(
-        args.data_dir, args.tsvname, args.out_dir, args.captions, args.timeout, args.log_every, args.batch_size)
+        args.data_dir, args.tsvname, args.out_dir, args.captions_index, args.timeout, args.log_every, args.batch_size)
     model.run()
