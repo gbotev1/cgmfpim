@@ -87,7 +87,16 @@ class Wide_ResNet_101_2:
                                 dump(zip(caption_indices, tensors),
                                      outfile, protocol=HIGHEST_PROTOCOL)
                             caption_indices = []
-                            print(f'Embedded {batch * self.log_every} images')
+                            print(f'Saved {batch * self.log_every} images')
+            # Save last incomplete batch if present
+            if len(caption_indices) > 0:
+                tensors = []
+                for i in range(self.log_every):
+                    tensors.append(self.embeddings.get())
+                with open(path.join(self.data_dir, self.out_dir, f'{batch + 1}.pickle'), 'wb') as outfile:
+                    dump(zip(caption_indices, tensors),
+                         outfile, protocol=HIGHEST_PROTOCOL)
+                print(f'Saved {batch * self.log_every} images')
 
 
 if __name__ == "__main__":
