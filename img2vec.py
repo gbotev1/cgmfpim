@@ -41,8 +41,8 @@ class Wide_ResNet_101_2:
                                      T.Normalize(mean=[0.485, 0.456, 0.406],
                                                  std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
         self.embeddings = []
-        self.model.avgpool.register_forward_hook(lambda input, output: self.embeddings.append(
-            output.data.detach().cpu().squeeze().numpy()))
+        self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
+            m_out.data.detach().cpu().squeeze().numpy()))
 
     def get_tensor(self, line: List[str]) -> Optional[Tuple[Tensor, str]]:
         try:
