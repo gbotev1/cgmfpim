@@ -5,8 +5,7 @@ from os import path, makedirs
 from os import remove as os_remove
 from shutil import rmtree
 from csv import reader as csv_reader
-from torch import cuda, Tensor
-from torch import device as torch_device
+from torch import cuda, Tensor, device
 import torchvision.transforms as T
 from requests import get as requests_get
 from io import BytesIO
@@ -29,8 +28,9 @@ class Wide_ResNet_101_2:
         self.log_every = log_every
         # Automatically use GPU if available
         if not cuda.is_available():
-            raise RuntimeError('Must have CUDA installed in order to run this program.')
-        self.device = torch_device('cuda')
+            raise RuntimeError(
+                'Must have CUDA installed in order to run this program.')
+        self.device = device('cuda')
         # Pipeline set-up
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Move model to device
@@ -72,7 +72,7 @@ class Wide_ResNet_101_2:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(self.embed_line, i, line)
-                           for i, line in tsv_reader]
+                           for i, line in enumerate(tsv_reader)]
                 for future in as_completed(futures):
                     result = future.result()
                     if result is not None:
