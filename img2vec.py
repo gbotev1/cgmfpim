@@ -71,7 +71,7 @@ class Wide_ResNet_101_2:
         with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             with ThreadPoolExecutor() as executor:
-                futures = [executor.submit(embed_line, i, line)
+                futures = [executor.submit(self.embed_line, i, line)
                            for i, line in tsv_reader]
                 for future in as_completed(futures):
                     result = future.result()
