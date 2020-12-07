@@ -31,7 +31,7 @@ class Wide_ResNet_101_2:
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Automatically use GPU if available
         if not cuda.is_available():
-            raise('Must have CUDA installed in order to run this program.')
+            raise RuntimeError('Must have CUDA installed in order to run this program.')
         self.device = torch_device('cuda')
         # Move model to device
         self.model.to(self.device)
