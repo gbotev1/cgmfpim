@@ -1,0 +1,143 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Model Testing",
+      "provenance": [],
+      "collapsed_sections": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "JWSEEcVJSCjt"
+      },
+      "source": [
+        "To start, upload:\n",
+        "- `.tsv.tar.bz2` file containing data from most recent scrape\n",
+        "- `data.py`\n",
+        "- `model.py`\n",
+        "- `requirements.txt`"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "epn5hLQ4OFZV"
+      },
+      "source": [
+        "from pytorch_lightning import LightningDataModule\n",
+        "from torch.utils.data import Dataset, DataLoader, random_split\n",
+        "from transformers import GPT2TokenizerFast\n",
+        "from csv import reader as csv_reader\n",
+        "from typing import Optional, List\n",
+        "# from torch import Tensor, int32\n",
+        "import torch\n",
+        "from os import path\n",
+        "import pickle"
+      ],
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "KCBJsnB6A4Ft",
+        "outputId": "943521b2-0514-48ba-d631-f2fc880b403d"
+      },
+      "source": [
+        "!mkdir data/\n",
+        "!tar -xjvf /content/11-25-20_21-1500.tsv.tar.bz2 -C data/"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "./data.tsv\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "LBuV0pbSCeJN"
+      },
+      "source": [
+        "!pip3 install -r requirements.txt"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "sI5Wwn7rtC0C"
+      },
+      "source": [
+        "from model import GPT2"
+      ],
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "34SeAGXwBRsR"
+      },
+      "source": [
+        "import data"
+      ],
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "CfCw_drYyPhy"
+      },
+      "source": [
+        "dataset = data.MemesDataModule()\n",
+        "# dataset.prepare_data() # this generates a pickle\n",
+        "dataset.setup() # generates dataloaders"
+      ],
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ZigU4FekUEe0"
+      },
+      "source": [
+        "x = dataset.train_dataloader()\n",
+        "y = dataset.val_dataloader()\n",
+        "z = dataset.test_dataloader()"
+      ],
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "poak-6rhDkTo"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
