@@ -87,21 +87,21 @@ class Wide_ResNet_101_2:
                         if result is not None:
                             tensors.append(result[0])
                             caption_indices.append([result[1]])
-                        if len(tensors) == self.batch_size:
-                            # Run batch through GPU
-                            batch = torch_stack(tensors)
-                            # Must have GPU in this branch
-                            self.model(batch.to(device('cuda')))
-                            del batch  # Free up GPU memory
-                            # Reset batch when done
-                            tensors = []
+                            if len(tensors) == self.batch_size:
+                                # Run batch through GPU
+                                batch = torch_stack(tensors)
+                                # Must have GPU in this branch
+                                self.model(batch.to(device('cuda')))
+                                del batch  # Free up GPU memory
+                                # Reset batch when done
+                                tensors = []
+                        if iters % self.log_every == 0:
                             # Save batch
                             save(path.join(self.data_dir, self.out_dir,
                                            f'{batches}.npy'), vstack(self.embeddings))
                             # Reset embeddings to ease memory pressure
                             self.embeddings = []
                             batches += 1
-                        if iters % self.log_every == 0:
                             print(iters)
             # Save caption indices
             save(path.join(self.data_dir, self.captions_index), caption_indices)
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
-                        help='how many iterations to print status to stdout stream')
+                        help='how many iterations to save embeddings and print status to stdout stream')
     parser.add_argument('-b', '--batch_size', type=int, default=32,
                         help='GPU batch size to use if CUDA/GPU is available')
     args = parser.parse_args()
