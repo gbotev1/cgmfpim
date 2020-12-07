@@ -64,7 +64,7 @@ class Wide_ResNet_101_2:
 
     def run(self) -> None:
         # If captions TSV file already exists, then delete it
-        if isfile(path.join(self.data_dir, self.captions)):
+        if path.isfile(path.join(self.data_dir, self.captions)):
             os_remove(path.join(self.data_dir, self.captions))
         # Create embeddings directory if it does not already exist
         if not path.exists(path.join(self.data_dir, self.out_dir)):
