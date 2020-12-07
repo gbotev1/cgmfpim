@@ -6,7 +6,7 @@ from os import remove as os_remove
 from shutil import rmtree
 from csv import reader as csv_reader
 from torch import cuda, Tensor, device
-import torchvision.transforms as T
+from torchvision.transforms import Resize, ToTensor, Normalize
 from requests import get as requests_get
 from io import BytesIO
 from numpy import stack
@@ -40,10 +40,10 @@ class Wide_ResNet_101_2:
         self.model.to(self.device)
         self.model.eval()  # Don't forget to put model in evaluation mode!
         # Transform all images to be minimum allowed square model size for generalizability and efficiency
-        self.transforms = T.Compose([T.Resize((224, 224), interpolation=Image.BICUBIC),  # Use bicubic interpolation for best quality
-                                     T.ToTensor(),
-                                     T.Normalize(mean=[0.485, 0.456, 0.406],
-                                                 std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
+        self.transforms = T.Compose([Resize((224, 224), interpolation=Image.BICUBIC),  # Use bicubic interpolation for best quality
+                                     ToTensor(),
+                                     Normalize(mean=[0.485, 0.456, 0.406],
+                                               std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
         self.embeddings = Queue(self.log_every)  # Thread-safe
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.put(
             m_out.data.detach().cpu().squeeze().numpy()))
