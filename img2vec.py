@@ -1,7 +1,7 @@
 # Keep imports lightweight
 from PIL import Image
 from torchvision.models import wide_resnet101_2
-from os import path, isfile
+from os import path, isfile, makedirs
 from os import remove as os_remove
 from csv import reader as csv_reader
 from csv import writer as csv_writer
@@ -66,6 +66,9 @@ class Wide_ResNet_101_2:
         # If captions TSV file already exists, then delete it
         if isfile(path.join(self.data_dir, self.captions)):
             os_remove(path.join(self.data_dir, self.captions))
+        # Create embeddings directory if it does not already exist
+        if not path.exists(path.join(self.data_dir, self.out_dir)):
+            makedirs(path.join(self.data_dir, self.out_dir))
         # Switch logic based on CPU/GPU availability
         iters = 0
         batches = 0
@@ -127,7 +130,7 @@ class Wide_ResNet_101_2:
                                 tsv_writer.writerow([result])
                             if iters % self.log_every == 0:
                                 print(iters)
-            save(path.join(self.data_dir, self.outfile),
+            save(path.join(self.data_dir, 'embeddings.npy'),
                  np_stack(self.embeddings))
 
 
@@ -139,7 +142,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--tsvname', type=str, default='gcc_full.tsv',
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
     parser.add_argument('-o', '--out_dir', type=str, default='embeddings',
-                        help='output directory of partial batch results of embeddings of GCC dataset images in local data directory')
+                        help='output directory of partial batch results of embeddings of GCC dataset images in local data directory')                
     parser.add_argument('-c', '--captions', type=str, default='gcc_captions.tsv',
                         help='output filename to save in local data directory of GCC dataset captions corresponding to images that were actually embedded')
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
