@@ -11,8 +11,10 @@ import torchvision.transforms as T
 from requests import get as requests_get
 from io import BytesIO
 from numpy import save, stack
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import List, Optional, Tuple
+from queue import Queue, Empty
 
 
 class Wide_ResNet_101_2:
@@ -37,8 +39,8 @@ class Wide_ResNet_101_2:
                                      T.ToTensor(),
                                      T.Normalize(mean=[0.485, 0.456, 0.406],
                                                  std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
-        self.embeddings = []
-        self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.append(
+        self.embeddings = Queue()  # Thread-safe
+        self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.put(
             m_out.data.detach().cpu().squeeze().numpy()))
 
     def embed_line(self, i: int, line: List[str]) -> Optional[int]:
@@ -65,7 +67,6 @@ class Wide_ResNet_101_2:
         batches = 0
         caption_indices = []
         if cuda.is_available():
-            tensors = []
             with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
                 tsv_reader = csv_reader(tsvfile, delimiter='\t')
                 for i, line in enumerate(tsv_reader):
@@ -77,10 +78,13 @@ class Wide_ResNet_101_2:
                         save(path.join(self.data_dir, self.out_dir,
                                        f'{batches}.npy'), stack(self.embeddings))
                         # Reset embeddings to ease memory pressure
-                        self.embeddings = []
+                        while True:
+                            try:
+                                self.embeddings.get_nowait()
+                            except Empty:
+                                break
                         batches += 1
                         print(i)
-            # Save caption indices
             save(path.join(self.data_dir, self.captions_index), caption_indices)
         else:
             with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
