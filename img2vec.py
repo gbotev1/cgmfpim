@@ -9,29 +9,32 @@ from torch import cuda, Tensor, device
 import torchvision.transforms as T
 from requests import get as requests_get
 from io import BytesIO
-from numpy import save, stack
+from numpy import stack
+from pickle import dump, HIGHEST_PROTOCOL
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import List, Optional, Tuple
 from queue import Queue, Empty
+from warnings import simplefilter
 
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, tsvname: str, out_dir: str, captions_index: str, timeout: float, log_every: int) -> None:
+    def __init__(self, data_dir: str, tsvname: str, out_dir: str, timeout: float, log_every: int) -> None:
         # Save parameters
         self.data_dir = data_dir
         self.tsvname = tsvname
         self.out_dir = out_dir
-        self.captions_index = captions_index
         self.timeout = timeout
         self.log_every = log_every
+        # Turn PIL warnings into exceptions to filter out bad images
+        simplefilter('error', Image.DecompressionBombWarning)
+        simplefilter('error', UserWarning)
         # Automatically use GPU if available
         if not cuda.is_available():
             raise RuntimeError(
                 'Must have CUDA installed in order to run this program.')
         self.device = device('cuda')
-        # Pipeline set-up
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         # Move model to device
         self.model.to(self.device)
@@ -65,7 +68,6 @@ class Wide_ResNet_101_2:
         if path.exists(path.join(self.data_dir, self.out_dir)):
             rmtree(path.join(self.data_dir, self.out_dir))
         makedirs(path.join(self.data_dir, self.out_dir))
-        # Embed driver
         batch = 0
         caption_indices = []
         with open(path.join(self.data_dir, self.tsvname), newline='') as tsvfile:
@@ -77,16 +79,16 @@ class Wide_ResNet_101_2:
                     result = future.result()
                     if result is not None:
                         caption_indices.append(result)
-                        if len(caption_indices) % self.log_every == 0:
+                        if len(caption_indices) == self.log_every:
                             tensors = []
                             for i in range(self.log_every):
                                 tensors.append(self.embeddings.get())
                             batch += 1
-                            save(path.join(self.data_dir, self.out_dir,
-                                           f'{batch}.npy'), stack(tensors))
-                            print(
-                                f'Batch {batch} done: processed {batch * self.log_every} items')
-        save(path.join(self.data_dir, self.captions_index), caption_indices)
+                            with open(path.join(self.data_dir, self.out_dir, f'{batch}.pickle'), 'wb') as outfile:
+                                dump(zip(caption_indices, tensors),
+                                     outfile, protocol=HIGHEST_PROTOCOL)
+                            caption_indices = []
+                            print(f'Embedded {batch * self.log_every} images')
 
 
 if __name__ == "__main__":
@@ -98,13 +100,11 @@ if __name__ == "__main__":
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
     parser.add_argument('-o', '--out_dir', type=str, default='embeddings',
                         help='output directory of partial batch results of embeddings of GCC dataset images in local data directory')
-    parser.add_argument('-c', '--captions_index', type=str, default='gcc_captions.npy',
-                        help='output filename to save in local data directory of indices in GCC dataset captions corresponding to images that were actually embedded')
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
                         help='how many iterations to save embeddings and print status to stdout stream')
     args = parser.parse_args()
     model = Wide_ResNet_101_2(
-        args.data_dir, args.tsvname, args.out_dir, args.captions_index, args.timeout, args.log_every)
+        args.data_dir, args.tsvname, args.out_dir, args.timeout, args.log_every)
     model.run()
