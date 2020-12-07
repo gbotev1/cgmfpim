@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import GPT2TokenizerFast
 from csv import reader as csv_reader
 from typing import Optional, List
-from torch import Tensor, int32
+import torch
 from os import path
 import pickle
 
@@ -18,7 +18,7 @@ class MemesDataset(Dataset):
     def __len__(self) -> int:
         return self.num_memes
 
-    def __getitem__(self, item: int) -> Tensor:
+    def __getitem__(self, item: int) -> torch.Tensor:
         return self.data[item]
 
 
