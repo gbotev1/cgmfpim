@@ -1,7 +1,7 @@
 # Keep imports lightweight
 from PIL import Image
 from torchvision.models import wide_resnet101_2
-from os import path, isfile, makedirs
+from os import path, makedirs
 from os import remove as os_remove
 from csv import reader as csv_reader
 from csv import writer as csv_writer
