@@ -46,8 +46,8 @@ class Wide_ResNet_101_2:
                                    Normalize(mean=[0.485, 0.456, 0.406],
                                              std=[0.229, 0.224, 0.225])])
         self.embeddings = Queue(self.log_every)  # Thread-safe
-        self.model.avgpool.register_forward_hook(lambda input, output: self.embeddings.put(
-            output.data.detach().cpu().squeeze().numpy()))
+        self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.put(
+            m_out.data.detach().cpu().squeeze().numpy()))
 
     def embed_line(self, i: int, line: List[str]) -> Optional[int]:
         try:
