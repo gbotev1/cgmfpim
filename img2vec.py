@@ -6,7 +6,7 @@ from os import remove as os_remove
 from shutil import rmtree
 from csv import reader as csv_reader
 from torch import cuda, Tensor, device
-from torchvision.transforms import Resize, ToTensor, Normalize, Compose
+from torchvision.transforms import Resize, CenterCrop, ToTensor, Normalize, Compose
 from requests import get as requests_get
 from io import BytesIO
 from numpy import stack
@@ -39,11 +39,12 @@ class Wide_ResNet_101_2:
         # Move model to device
         self.model.to(self.device)
         self.model.eval()  # Don't forget to put model in evaluation mode!
-        # Transform all images' smallest side to 224 (minimum for ImageNet neural networks)
-        self.transforms = Compose([Resize(224, interpolation=Image.BICUBIC),  # Use bicubic interpolation for best quality
+        # Use recommended sequence of transforms for ImageNet pretrained models
+        self.transforms = Compose([Resize(256, interpolation=Image.BICUBIC),  # Default is bilinear
+                                   CenterCrop(224),
                                    ToTensor(),
                                    Normalize(mean=[0.485, 0.456, 0.406],
-                                             std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
+                                             std=[0.229, 0.224, 0.225])])
         self.embeddings = Queue(self.log_every)  # Thread-safe
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.put(
             m_out.data.detach().cpu().squeeze().numpy()))
