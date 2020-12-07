@@ -41,7 +41,7 @@ class Wide_ResNet_101_2:
                                      T.ToTensor(),
                                      T.Normalize(mean=[0.485, 0.456, 0.406],
                                                  std=[0.229, 0.224, 0.225])])  # Recommended normalization for torchvision ImageNet pretrained models
-        self.embeddings = Queue()  # Thread-safe
+        self.embeddings = Queue(self.log_every)  # Thread-safe
         self.model.avgpool.register_forward_hook(lambda m, m_in, m_out: self.embeddings.put(
             m_out.data.detach().cpu().squeeze().numpy()))
 
