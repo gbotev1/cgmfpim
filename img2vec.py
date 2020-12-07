@@ -84,7 +84,8 @@ class Wide_ResNet_101_2:
                             batch += 1
                             save(path.join(self.data_dir, self.out_dir,
                                            f'{batch}.npy'), stack(tensors))
-                            print(f'Batch {batch} done')
+                            print(
+                                f'Batch {batch} done: processed {batch * self.log_every} items')
         save(path.join(self.data_dir, self.captions_index), caption_indices)
 
 
