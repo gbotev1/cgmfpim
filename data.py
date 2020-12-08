@@ -47,8 +47,8 @@ class MemesDataModule(LightningDataModule):
                 tokenizer_input = f'{meme_tags}{meme[2]}{tokenizer.eos_token}'
                 tokenized_caption = tokenizer(
                     tokenizer_input, padding=True, truncation=True)
-                data.append({'caption': {k: torch.tensor(v, dtype=torch.int32) for k, v in tokenized_caption.items()}, 'views': int(
-                    meme[4]), 'upvotes': int(meme[5])})  # Create PyTorch tensor manually to save memory (int32 instead of int64)
+                data.append({'caption': {k: torch.tensor(v, dtype=torch.long) for k, v in tokenized_caption.items()}, 'views': int(
+                    meme[4]), 'upvotes': int(meme[5])})
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
 
