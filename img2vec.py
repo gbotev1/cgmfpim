@@ -111,7 +111,7 @@ if __name__ == "__main__":
                         default='data', help='local data directory')
     parser.add_argument('-t', '--tsvname', type=str, default='gcc_full.tsv',
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
-    parser.add_argument('-o', '--embed_dir', type=str, default='embeddings',
+    parser.add_argument('-e', '--embed_dir', type=str, default='embeddings',
                         help='sub-directory of local data directory to save embedding dumps (with caption index) from GCC dataset')
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
                         help="timeout in seconds for requests' GET method")
