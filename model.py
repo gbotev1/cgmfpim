@@ -1,6 +1,7 @@
 from pytorch_lightning import LightningModule
 from transformers import GPT2TokenizerFast, GPT2DoubleHeadsModel, get_cosine_schedule_with_warmup
-from torch import Tensor
+import torch
+import torch.optim as optim
 from typing import Dict, Union
 
 
@@ -19,12 +20,12 @@ class GPT2(LightningModule):
         self.lr = lr
         self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps
-        self.save_hyperparameters('model', 'lr')
+        self.save_hyperparameters('lr')
 
     def forward(self, inputs):
         return self.model(**inputs)
 
-    def training_step(self, batch: Dict[str, Union[Tensor, int]], _) -> None:
+    def training_step(self, batch: Dict[str, Union[torch.Tensor, int]], _) -> None:
         # Try to predict input IDs by setting them as labels
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
@@ -32,7 +33,7 @@ class GPT2(LightningModule):
         self.log('train_loss', loss, on_step=True, on_epoch=True,
                  prog_bar=True, logger=True, sync_dist=True)
 
-    def validation_step(self, batch: Dict[str, Union[Tensor, int]], _) -> None:
+    def validation_step(self, batch: Dict[str, Union[torch.Tensor, int]], _) -> None:
         # Try to predict input IDs by setting them as labels
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
@@ -40,7 +41,7 @@ class GPT2(LightningModule):
         self.log('train_loss', loss, on_step=True, on_epoch=True,
                  prog_bar=True, logger=True, sync_dist=True)
 
-    def test_step(self, batch: Dict[str, Union[Tensor, int]], _) -> None:
+    def test_step(self, batch: Dict[str, Union[torch.Tensor, int]], _) -> None:
         # Try to predict input IDs by setting them as labels
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
@@ -48,17 +49,14 @@ class GPT2(LightningModule):
 
     def configure_optimizers(self):
         no_decay = ["bias", "LayerNorm.weight"]
-        optimizer_grouped_parameters = [
-            {
-                "params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-                "weight_decay": self.hparams.weight_decay,
-            },
-            {
-                "params": [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
-                "weight_decay": 0.0,
-            },
-        ]
-        optimizer = AdamW(optimizer_grouped_parameters, lr=self.lr)
+        if "weight_decay" in self.hparams:
+            weight_decay = self.hparams
+        else:
+            weight_decay = 0.0
+
+        optimizer_grouped_parameters = [{ "params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                                         "weight_decay": weight_decay }]
+        optimizer = optim.AdamW(optimizer_grouped_parameters, lr=self.lr)
         scheduler = get_cosine_schedule_with_warmup(
             optimizer, self.num_warmup_steps, self.num_training_steps)
         return [optimizer], [scheduler]
