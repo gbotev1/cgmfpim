@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import GPT2TokenizerFast
 from csv import reader as csv_reader
 from typing import Optional, List
-import torch
+from torch import Tensor
 from os import path
 import pickle
 
@@ -18,7 +18,7 @@ class MemesDataset(Dataset):
     def __len__(self) -> int:
         return self.num_memes
 
-    def __getitem__(self, item: int) -> torch.Tensor:
+    def __getitem__(self, item: int) -> Tensor:
         return self.data[item]
 
 
@@ -47,7 +47,7 @@ class MemesDataModule(LightningDataModule):
                 tokenizer_input = f'{meme_tags}{meme[2]}{tokenizer.eos_token}'
                 tokenized_caption = tokenizer(
                     tokenizer_input, padding=True, truncation=True)
-                data.append({'caption': {k: torch.tensor(v, dtype=torch.int32) for k, v in tokenized_caption.items()}, 'views': int(
+                data.append({'caption': {k: Tensor(v) for k, v in tokenized_caption.items()}, 'views': int(
                     meme[4]), 'upvotes': int(meme[5])})  # Create PyTorch tensor manually to save memory (int32 instead of int64)
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
