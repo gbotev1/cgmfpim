@@ -20,11 +20,11 @@ from warnings import simplefilter
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, tsvname: str, out_dir: str, timeout: float, log_every: int) -> None:
+    def __init__(self, data_dir: str, tsvname: str, embed_dir: str, timeout: float, log_every: int) -> None:
         # Save parameters
         self.data_dir = data_dir
         self.tsvname = tsvname
-        self.out_dir = out_dir
+        self.embed_dir = embed_dir
         self.timeout = timeout
         self.log_every = log_every
         # Turn PIL warnings into exceptions to filter out bad images
@@ -63,9 +63,9 @@ class Wide_ResNet_101_2:
 
     def run(self) -> None:
         # If embeddings directory already exists, then delete it, otherwise create it
-        if path.exists(path.join(self.data_dir, self.out_dir)):
-            rmtree(path.join(self.data_dir, self.out_dir))
-        makedirs(path.join(self.data_dir, self.out_dir))
+        if path.exists(path.join(self.data_dir, self.embed_dir)):
+            rmtree(path.join(self.data_dir, self.embed_dir))
+        makedirs(path.join(self.data_dir, self.embed_dir))
 
         batch = 0
         caption_indices = []
@@ -83,7 +83,7 @@ class Wide_ResNet_101_2:
                             for i in range(self.log_every):
                                 tensors.append(self.embeddings.get())
                             batch += 1
-                            with open(path.join(self.data_dir, self.out_dir, f'{batch}.pickle'), 'wb') as outfile:
+                            with open(path.join(self.data_dir, self.embed_dir, f'{batch}.pickle'), 'wb') as outfile:
                                 dump(zip(caption_indices, tensors),
                                      outfile, protocol=HIGHEST_PROTOCOL)
                             caption_indices = []
@@ -98,7 +98,7 @@ class Wide_ResNet_101_2:
                         remaining += 1
                     except Empty:
                         break
-                with open(path.join(self.data_dir, self.out_dir, f'{batch + 1}.pickle'), 'wb') as outfile:
+                with open(path.join(self.data_dir, self.embed_dir, f'{batch + 1}.pickle'), 'wb') as outfile:
                     dump(zip(caption_indices, tensors),
                          outfile, protocol=HIGHEST_PROTOCOL)
                 print(f'Saved {batch * self.log_every + remaining} images')
@@ -111,8 +111,8 @@ if __name__ == "__main__":
                         default='data', help='local data directory')
     parser.add_argument('-t', '--tsvname', type=str, default='gcc_full.tsv',
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
-    parser.add_argument('-o', '--out_dir', type=str, default='embeddings',
-                        help='output directory of partial results of embeddings of GCC dataset images and corresponding caption indices in local data directory')
+    parser.add_argument('-o', '--embed_dir', type=str, default='embeddings',
+                        help='sub-directory of local data directory to save embedding dumps (with caption index) from GCC dataset')
     parser.add_argument('-w', '--timeout', type=float, default=1.0,
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     model = Wide_ResNet_101_2(
         args.data_dir,
         args.tsvname,
-        args.out_dir,
+        args.embed_dir,
         args.timeout,
         args.log_every)
     model.run()
