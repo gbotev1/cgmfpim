@@ -32,10 +32,10 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
     parser.add_argument('-t', '--train', type=str, default='gcc_train.tsv',
-                        help='filename in local data directory of training split of GCC dataset')
+                        help='TSV input filename in local data directory of training split of GCC dataset')
     parser.add_argument('-v', '--val', type=str, default='gcc_val.tsv',
-                        help='filename in local data directory of validation split of GCC dataset')
+                        help='TSV input filename in local data directory of validation split of GCC dataset')
     parser.add_argument('-o', '--output', type=str, default='gcc_full.tsv',
-                        help='output filename to save in local data directory of combined, detokenized GCC dataset')
+                        help='TSV output filename to save in local data directory of combined, detokenized GCC dataset')
     args = parser.parse_args()
     main(args.data_dir, args.train, args.val, args.output)
