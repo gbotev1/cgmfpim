@@ -12,7 +12,7 @@
     <img alt="Python 3.8" src="https://img.shields.io/badge/python-3.8-blue.svg?style=for-the-badge"/>
     <img alt="repo size" src="https://img.shields.io/github/repo-size/gbotev1/cgmfpim?style=for-the-badge"/>
     <img alt="total lines" src="https://img.shields.io/tokei/lines/github/gbotev1/cgmfpim?style=for-the-badge"/>
-    <img alt="GPL-3.0" src="https://img.shields.io/github/license/gbotev1/cgmfpim?style=for-the-badge"/>
+    <img alt="AGPL-3.0" src="https://img.shields.io/github/license/gbotev1/cgmfpim?style=for-the-badge"/>
 </p>
 
 <!-- TABLE OF CONTENTS -->
@@ -76,7 +76,7 @@ Contributions are at the very essence of the open source community and are what 
 
 <!-- LICENSE -->
 ## License
-Distributed under the GNU General Public License v3.0. See [`LICENSE`](LICENSE) for more information.
+Distributed under the GNU Affero General Public License v3.0. See [`LICENSE`](LICENSE) for more information.
 
 <!-- CONTACT -->
 ## Contact
