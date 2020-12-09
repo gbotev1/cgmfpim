@@ -140,7 +140,7 @@ if __name__ == "__main__":
                         help='local directory name where data should be saved')
     parser.add_argument('-s', '--save_dir', type=str, default='meme_templates',
                         help='name of directory to save meme templates for which captions were found')
-    parser.add_argument('-o', '--outfile', type=str, default='data.tsv',
+    parser.add_argument('-o', '--outfile', type=str, default='meme_data.tsv',
                         help='TSV filename for scraped captions and metadata')
     parser.add_argument('-a', '--num_attempts', type=int, default=10,
                         help='number of times to retry processing a meme template if an exception is thrown')

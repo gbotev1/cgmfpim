@@ -1,12 +1,8 @@
 # George
 .ipynb_checkpoints/
 .DS_Store
-data.tsv
-meme_templates/
-gcc*
-!gcc_captions.txt
-!gcc_full.tsv.tar.bz2
-data/embeddings
+data/
+!data/*.lrz
 
 # Peter
 .vscode/

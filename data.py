@@ -24,7 +24,7 @@ class MemesDataset(Dataset):
 
 class MemesDataModule(LightningDataModule):
 
-    def __init__(self, data_dir: str = 'data', infile: str = 'data.tsv', outfile: str = 'data.pickle', gpt2_model_type: str = 'gpt2', split_ratios: List[float] = [0.8, 0.1, 0.1], batch_size: int = 1) -> None:
+    def __init__(self, data_dir: str = 'data', infile: str = 'meme_data.tsv', outfile: str = 'data.pickle', gpt2_model_type: str = 'gpt2', split_ratios: List[float] = [0.8, 0.1, 0.1], batch_size: int = 1) -> None:
         super().__init__()
         self.data_dir = data_dir
         self.infile = infile
