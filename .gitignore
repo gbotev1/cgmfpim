@@ -3,6 +3,7 @@
 .DS_Store
 data/*
 !data/*.lrz
+!data/*.tar
 
 # Peter
 .vscode/
