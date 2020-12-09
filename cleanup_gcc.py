@@ -13,16 +13,20 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
     filenames = glob(path.join(data_dir, embed_dir, '*.pickle'))
     # Sort filenames in-place by numerical value of file (not lexicographically)
     filenames.sort(key=lambda filename: int(filename.split('/')[-1][:-7]))
+    print('Sorted partial embedding files')
     for filename in filenames:
         with open(filename, 'rb') as partial_embed:
             # Zip iterator of (caption index, 2048-dim NumPy image embedding)
             for index, embed in load(partial_embed):
                 caption_indices.add(index)
                 embeddings.append(embed)
+    print('Started stacking embeddings after loading them into memory')
     # Stack embeddings together into single matrix before saving
     embeddings = stack(embeddings)
+    print('Finished stacking embeddings')
     with open(path.join(data_dir, outfile), 'wb') as outfile:
-        dump(caption_indices, outfile, protocol=HIGHEST_PROTOCOL)
+        dump(embeddings, outfile, protocol=HIGHEST_PROTOCOL)
+    print('Finished saving embeddings')
     # Save pruned captions as simple text file (no need for TSV anymore)
     with open(path.join(data_dir, infile), newline='') as tsvfile:
         tsv_reader = csv_reader(tsvfile, delimiter='\t')
@@ -30,10 +34,11 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
             for i, row in enumerate(tsv_reader):
                 if i in caption_indices:
                     outfile.write(f'{row[0]}\n')
+    print('Finished saving pruned captions')
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Performs clean-up tasks after processing the GCC dataset in img2vec.py.",
+    parser = ArgumentParser(description='Executes clean-up tasks on partial zip iterators of caption indices to corresponding embeddings generated after running img2vec.py. Prints helpful progress logs to stdout.',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
