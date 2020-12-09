@@ -24,7 +24,7 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
     # Stack embeddings together into single matrix before saving
     embeddings = stack(embeddings)
     print('Finished stacking embeddings')
-    save(embeddings, outfile)
+    save(outfile, embeddings)
     print('Finished saving embeddings')
     # Save pruned captions as simple text file (no need for TSV anymore)
     with open(path.join(data_dir, infile), newline='') as tsvfile:
