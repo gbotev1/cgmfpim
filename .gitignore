@@ -2,7 +2,7 @@
 .ipynb_checkpoints/
 .DS_Store
 data/
-!data/*.lrz
+!*.lrz
 
 # Peter
 .vscode/
