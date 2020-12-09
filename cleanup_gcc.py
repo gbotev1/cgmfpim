@@ -4,6 +4,7 @@ from os import path
 from csv import reader as csv_reader
 from pickle import load, dump, HIGHEST_PROTOCOL
 from numpy import stack
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
 def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfile: str) -> None:
