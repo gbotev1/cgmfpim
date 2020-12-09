@@ -12,7 +12,7 @@
     <img alt="Python 3.8" src="https://img.shields.io/badge/python-3.8-blue.svg?style=for-the-badge"/>
     <img alt="repo size" src="https://img.shields.io/github/repo-size/gbotev1/cgmfpim?style=for-the-badge"/>
     <img alt="total lines" src="https://img.shields.io/tokei/lines/github/gbotev1/cgmfpim?style=for-the-badge"/>
-    <img alt="GPL-3.0" src="https://img.shields.io/github/license/gbotev1/cgmfpim?style=for-the-badge"/>
+    <img alt="AGPL-3.0" src="https://img.shields.io/github/license/gbotev1/cgmfpim?style=for-the-badge"/>
 </p>
 
 <!-- TABLE OF CONTENTS -->
@@ -58,7 +58,7 @@ pip3 install -r requirements.txt
 
 ### Inflate Archives
 
-The following bash script is provided for convenience to extract the `data.tsv` file of scraped captions from [Imgflip](https://imgflip.com), the `meme_templates` directory of meme image templates into the `data` directory, and our custom [Google's Conceptual Captions dataset](https://ai.google.com/research/ConceptualCaptions/download) easily.
+The following bash script is provided for convenience to easily extract the [`data.tsv`](data/11-25-20_21-1500.tsv.tar.bz2) file of scraped captions from [Imgflip](https://imgflip.com), the `meme_templates` directory of meme image templates into the `data` directory, and our custom [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download). Once extracted, the GCC dataset file [`gcc_full.tsv`](data/gcc_full.tsv.tar.bz2) we provide is nothing but a concatenation of the train and validation files available for download from the official linked dataset page after running each of the captions through [NLTK's Penn Treebank detokenizer](https://www.nltk.org/_modules/nltk/tokenize/treebank.html#TreebankWordDetokenizer). For the curious, this logic is defined in [`prepare_gcc.py`](prepare_gcc.py).
 ```sh
 sh inflate_archives.sh
 ```
@@ -76,7 +76,7 @@ Contributions are at the very essence of the open source community and are what 
 
 <!-- LICENSE -->
 ## License
-Distributed under the GNU General Public License v3.0. See [`LICENSE`](LICENSE) for more information.
+Distributed under the GNU Affero General Public License v3.0. See [`LICENSE`](LICENSE) for more information.
 
 <!-- CONTACT -->
 ## Contact

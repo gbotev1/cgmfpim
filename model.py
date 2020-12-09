@@ -25,7 +25,7 @@ class GPT2(LightningModule):
     def forward(self, inputs):
         return self.model(**inputs)
 
-    def training_step(self, batch: Dict[str, Union[torch.Tensor, int]], _) -> None:
+    def train_step(self, batch: Dict[str, Union[torch.Tensor, int]], _) -> None:
         # Try to predict input IDs by setting them as labels
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
@@ -33,7 +33,7 @@ class GPT2(LightningModule):
         self.log('train_loss', loss, on_step=True, on_epoch=True,
                  prog_bar=True, logger=True, sync_dist=True)
 
-    def validation_step(self, batch: Dict[str, Union[torch.Tensor, int]], _) -> None:
+    def val_step(self, batch: Dict[str, Union[torch.Tensor, int]], _) -> None:
         # Try to predict input IDs by setting them as labels
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
