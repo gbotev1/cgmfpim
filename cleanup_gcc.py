@@ -12,7 +12,7 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
     embeddings = []
     filenames = glob(path.join(data_dir, embed_dir, '*.pickle'))
     # Sort filenames in-place by numerical value of file (not lexicographically)
-    filenames.sort(lambda filename: int(filename.split('/')[-1][:-7]))
+    filenames.sort(key=lambda filename: int(filename.split('/')[-1][:-7]))
     for filename in filenames:
         with open(filename, 'rb') as partial_embed:
             # Zip iterator of (caption index, 2048-dim NumPy image embedding)
