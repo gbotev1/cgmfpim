@@ -2,8 +2,8 @@
 from glob import glob
 from os import path
 from csv import reader as csv_reader
-from pickle import load, dump, HIGHEST_PROTOCOL
-from numpy import stack
+from pickle import load
+from numpy import stack, save
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
@@ -24,8 +24,7 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
     # Stack embeddings together into single matrix before saving
     embeddings = stack(embeddings)
     print('Finished stacking embeddings')
-    with open(path.join(data_dir, outfile), 'wb') as outfile:
-        dump(embeddings, outfile, protocol=HIGHEST_PROTOCOL)
+    save(embeddings, outfile)
     print('Finished saving embeddings')
     # Save pruned captions as simple text file (no need for TSV anymore)
     with open(path.join(data_dir, infile), newline='') as tsvfile:
@@ -49,7 +48,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--pruned_captions', type=str,
                         default='gcc_captions.txt', help='output text filename in local data directory for pruned GCC dataset captions corresponding to rows of embeddings matrix')
     parser.add_argument('-o', '--outfile', type=str,
-                        default='embeddings.pickle', help='filename of combined NumPy embeddings matrix to save in local data directory')
+                        default='embeddings.npy', help='filename of combined NumPy embeddings matrix to save in local data directory')
     args = parser.parse_args()
     main(args.data_dir,
          args.embed_dir,
