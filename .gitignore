@@ -6,6 +6,7 @@ meme_templates/
 gcc*
 !gcc_captions.txt
 !gcc_full.tsv.tar.bz2
+data/embeddings
 
 # Peter
 .vscode/
