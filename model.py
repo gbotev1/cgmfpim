@@ -16,8 +16,8 @@ class GPT2(LightningModule):
         super(GPT2, self).__init__()
         self.tokenizer = GPT2TokenizerFast.from_pretrained(gpt2_model_type)
         # Make sure to initialize tokenizer the same way as in DataModule
-        tokenizer.add_special_tokens(
-            {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
+        self.tokenizer.add_special_tokens(
+            {'pad_token': self.tokenizer.eos_token, 'sep_token': '<|SEP|>'})
         # Update both pad_token and newly added sep_token
         self.model = GPT2DoubleHeadsModel.from_pretrained(
             gpt2_model_type, pad_token_id=self.tokenizer.eos_token_id, sep_token_id=self.tokenizer.sep_token_id)
