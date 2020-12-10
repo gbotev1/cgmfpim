@@ -1,10 +1,10 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import GPT2TokenizerFast
+from os import path, cpu_count
 from csv import reader as csv_reader
 from typing import Optional, List
 import torch
-from os import path
 import pickle
 
 
@@ -25,11 +25,11 @@ class MemesDataset(Dataset):
 class MemesDataModule(LightningDataModule):
 
     def __init__(self, data_dir: str = 'data',
-                       infile: str = 'meme_data.tsv',
-                       outfile: str = 'data.pickle',
-                       gpt2_model_type: str = 'gpt2',
-                       split_ratios: List[float] = [0.8, 0.1, 0.1],
-                       batch_size: int = 1) -> None:
+                 infile: str = 'meme_data.tsv',
+                 outfile: str = 'data.pickle',
+                 gpt2_model_type: str = 'gpt2',
+                 split_ratios: List[float] = [0.8, 0.1, 0.1],
+                 batch_size: int = 1) -> None:
         super().__init__()
         self.data_dir = data_dir
         self.infile = infile
@@ -38,8 +38,9 @@ class MemesDataModule(LightningDataModule):
         self.split_ratios = split_ratios
         self.batch_size = batch_size
         self.gpu_boole = torch.cuda.is_available()
+        self.cpu_count = cpu_count()
 
-    ### prepare_data(): called first on MemesDataModule() object
+    # prepare_data(): called first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
     def prepare_data(self) -> None:
         tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
@@ -53,14 +54,15 @@ class MemesDataModule(LightningDataModule):
             for meme in tsv_reader:
                 # Associate meme's tags to its caption by separating with sep_token
                 tokenizer_input = f'{meme[3]}{tokenizer.sep_token}{tokenizer.eos_token}'
-                tokenized_caption = tokenizer(tokenizer_input, return_tensors='pt', padding=True, truncation=True)
+                tokenized_caption = tokenizer(
+                    tokenizer_input, return_tensors='pt', padding=True, truncation=True)
                 data.append({'caption': tokenized_caption,
                              'views': int(meme[4]),
                              'upvotes': int(meme[5])})
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
 
-    ### get_splits(): called by setup() function
+    # get_splits(): called by setup() function
     # produces sizes of train/validation/test dataloaders for use later
     def get_splits(self, data_len: int) -> List[int]:
         # Error handling
@@ -76,18 +78,19 @@ class MemesDataModule(LightningDataModule):
         splits.append(data_len - sum(splits))
         return splits
 
-    ### setup(): calleds second on MemesDataModule object
+    # setup(): calleds second on MemesDataModule object
     # produces train, validation, and test dataloaders
     def setup(self, stage: Optional[str] = None) -> None:
         data = MemesDataset(path.join(self.data_dir, self.outfile))
         splits = self.get_splits(len(data))
-        self.data_train, self.data_val, self.data_test = random_split(data, splits)
+        self.data_train, self.data_val, self.data_test = random_split(
+            data, splits)
 
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole)
+        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole, num_workers=self.cpu_count())
 
     def val_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole)
+        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole, num_workers=self.cpu_count())
 
     def test_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole)
+        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole, num_workers=self.cpu_count())

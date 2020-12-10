@@ -14,6 +14,7 @@ def calculate_training_steps(dataset,
     effective_batch_size = batch_size * accumulate_grad_batches * num_devices
     return (len(dataset.train_dataloader()) / effective_batch_size) * num_epochs
 
+
 def main(gpus: Optional[Union[int, str, List[int]]],
          accelerator: Optional[str],
          train_sharded: bool,
@@ -29,7 +30,8 @@ def main(gpus: Optional[Union[int, str, List[int]]],
 
     img_flip = MemesDataModule()
 
-    model = GPT2(lr=learning_rate, num_warmup_steps=num_warmup_steps, weight_decay=weight_decay)
+    model = GPT2(lr=learning_rate, num_warmup_steps=num_warmup_steps,
+                 weight_decay=weight_decay)
     trainer = Trainer(gpus=gpus,
                       accelerator=accelerator,
                       plugins='ddp_sharded' if use_sharded and accelerator == 'ddp' else None,
