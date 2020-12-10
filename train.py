@@ -46,9 +46,9 @@ if __name__ == "__main__":
         'accelerator', type=Optional[str], help="PyTorch Lightning Trainer's class accelerator keyword argument")
     parser.add_argument('-a', '--amp_backend', type=str,
                         default='native', help='which mixed precision backend to use ("native" or "apex")')
-    parser.add_argument('-b', '--accumulate_grad_batches', type=Union[int, Dict[int, int], List[list]],
+    parser.add_argument('--accumulate_grad_batches', type=Union[int, Dict[int, int], List[list]],
                         default=1, help="Accumulates gradients every k batches or as set up in the dict (in line with PyTorch Lightning's API")
-    parser.add_argument('-as', '--autoscale_batch_size', type=str,
+    parser.add_argument('--autoscale_batch_size', type=str, choices=[None, "power", "binsearch"],
                         default=None, help='auto scale batch size? (None (no scaling), "power" scaling, or "binsearch" scaling)')
     parser.add_argument('-l', '--learning_rate', type=float,
                         default=5e-5, help='initial learning rate for AdamW optimizer')
