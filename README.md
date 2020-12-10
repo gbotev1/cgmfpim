@@ -46,35 +46,31 @@
 
 The following steps should help you set up your environment:
 
-### Install Git-LFS
+### 1. Install Git-LFS
 
-This repository uses [Git Large File Storage](https://git-lfs.github.com), which should be downloaded, installed, and set-up for your user account before cloning our repository.
+This repository uses [Git Large File Storage](https://git-lfs.github.com), which should be downloaded, installed, and set up for your user account before cloning our repository.
 
-### Install Long Range Zip
-
-This repository uses [lrzip](https://github.com/ckolivas/lrzip) to compress data archives for Git-LFS. This utility can be compiled from source, installed via [Homebrew](https://formulae.brew.sh/formula/lrzip), or even using a pre-built package on Linux.
-
-### Clone Repo
+### 2. Clone repository
 
 ```sh
 git clone https://github.com/gbotev1/cgmfpim.git
 ```
 
-### Install Requirements
+### 3. Install requirements
 
 Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you only plan on using our pre-computed archives, not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which we require that an appropriate version of CUDA is installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled linux version from Anaconda with CUDA Toolkit 10.2 to enable GPU support.
 ```sh
 pip3 install -r requirements.txt
 ```
 
-### Inflate Archives
+### 4. Inflate archives
 
-The following bash script is provided for convenience to easily extract the [`data.tsv`](data/11-25-20_21-1500.tsv.tar.bz2) file of scraped captions from [Imgflip](https://imgflip.com), the `meme_templates` directory of meme image templates into the `data` directory, and our custom [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download). Once extracted, the GCC dataset file [`gcc_full.tsv`](data/gcc_full.tsv.tar.bz2) we provide is nothing but a concatenation of the train and validation files available for download from the official linked dataset page after running each of the captions through [NLTK's Penn Treebank detokenizer](https://www.nltk.org/_modules/nltk/tokenize/treebank.html#TreebankWordDetokenizer). For the curious, this logic is defined in [`prepare_gcc.py`](prepare_gcc.py).
+The following sh script is provided for convenience to easily extract the [`data.tsv`](data/11-25-20_21-1500.tsv.tar.gz) file of scraped captions from [Imgflip](https://imgflip.com), the `meme_templates` directory of meme image templates into the `data` directory, and our custom [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download). Once extracted, the GCC dataset file [`gcc_full.tsv`](data/gcc_full.tsv.tar.gz) we provide is nothing but a concatenation of the train and validation files available for download from the official linked dataset page after running each of the captions through [NLTK's Penn Treebank detokenizer](https://www.nltk.org/_modules/nltk/tokenize/treebank.html#TreebankWordDetokenizer). For those curious, this logic is defined in [`prepare_gcc.py`](prepare_gcc.py).
 ```sh
 sh inflate_archives.sh
 ```
 
-### Download GCC Embeddings
+### 5. Download GCC embeddings
 Along with the scripts that we used to generate these embeddings, we also provide a ready-to-use download of 2,841,059 2,048-dimensional embeddings for every image we could access from the [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download) training and validation splits. These embeddings were obtained from the output of the `avgpool` layer from the pre-trained [Wide ResNet-101-2](https://pytorch.org/docs/stable/torchvision/models.html#wide-resnet) on the ImageNet dataset.
 
 <!-- CONTRIBUTING -->
@@ -82,11 +78,11 @@ Along with the scripts that we used to generate these embeddings, we also provid
 
 Contributions are at the very essence of the open source community and are what keep projects alive and useful to the community that uses them. **We wholeheartedly welcome any and all contributions.**
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/DankFeature`)
-3. Commit your Changes (`git commit -m 'Made memes more dank'`)
-4. Push to the Branch (`git push origin feature/DankFeature`)
-5. Open a Pull Request
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/DankFeature`)
+3. Commit your changes (`git commit -m 'Made memes more dank'`)
+4. Push to the branch (`git push origin feature/DankFeature`)
+5. Open a pull request
 
 <!-- LICENSE -->
 ## License
