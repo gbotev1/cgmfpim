@@ -24,7 +24,12 @@ class MemesDataset(Dataset):
 
 class MemesDataModule(LightningDataModule):
 
-    def __init__(self, data_dir: str = 'data', infile: str = 'meme_data.tsv', outfile: str = 'data.pickle', gpt2_model_type: str = 'gpt2', split_ratios: List[float] = [0.8, 0.1, 0.1], batch_size: int = 1) -> None:
+    def __init__(self, data_dir: str = 'data',
+                       infile: str = 'meme_data.tsv',
+                       outfile: str = 'data.pickle',
+                       gpt2_model_type: str = 'gpt2',
+                       split_ratios: List[float] = [0.8, 0.1, 0.1],
+                       batch_size: int = 1) -> None:
         super().__init__()
         self.data_dir = data_dir
         self.infile = infile
@@ -32,6 +37,7 @@ class MemesDataModule(LightningDataModule):
         self.gpt2_model_type = gpt2_model_type
         self.split_ratios = split_ratios
         self.batch_size = batch_size
+        self.gpu_boole = torch.cuda.is_available()
 
     ### prepare_data(): call this first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
@@ -78,10 +84,10 @@ class MemesDataModule(LightningDataModule):
         self.data_train, self.data_val, self.data_test = random_split(data, splits)
 
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size)
+        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole)
 
     def val_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_val, batch_size=self.batch_size)
+        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole)
 
     def test_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_test, batch_size=self.batch_size)
+        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole)

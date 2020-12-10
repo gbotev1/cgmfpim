@@ -5,6 +5,11 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import Optional, Union, List, Dict
 
 
+def calculate_training_steps(self) -> int:
+    num_devices = max(1, self.hparams.gpus)  # TODO: consider num_tpu_cores
+    effective_batch_size = self.hparams.train_batch_size * self.hparams.accumulate_grad_batches * num_devices
+    return (self.dataset_size / effective_batch_size) * self.hparams.max_epochs
+
 def main(gpus: Optional[Union[int, str, List[int]]],
          accelerator: Optional[str],
          train_sharded: bool,
@@ -18,7 +23,11 @@ def main(gpus: Optional[Union[int, str, List[int]]],
          num_epochs: int,
          weight_decay: float) -> None:
 
+    gpu_boole = torch.cuda.is_available()
     img_flip = MemesDataModule()
+
+pin memory if training on GPUs
+from torch import cuda
 
     model = GPT2(lr=learning_rate, num_warmup_steps=num_warmup_steps,
                  num_training_steps=num_training_steps, weight_decay=weight_decay)
