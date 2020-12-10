@@ -23,7 +23,6 @@
     <a href="#getting-started">Getting Started</a>
     <ul>
       <li><a href="#install-git-lfs">Install Git-LFS</a></li>
-      <li><a href="#install-long-range-zip">Install Long Range Zip</a></li>
       <li><a href="#clone-repo">Clone Repo</a></li>
       <li><a href="#install-requirements">Install Requirements</a></li>
       <li><a href="#inflate-archives">Inflate Archives</a></li>
