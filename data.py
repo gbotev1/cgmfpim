@@ -39,7 +39,7 @@ class MemesDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.gpu_boole = torch.cuda.is_available()
 
-    ### prepare_data(): call this first on MemesDataModule() object
+    ### prepare_data(): called first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
     def prepare_data(self) -> None:
         tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
@@ -76,7 +76,7 @@ class MemesDataModule(LightningDataModule):
         splits.append(data_len - sum(splits))
         return splits
 
-    ### setup(): call this second on MemesDataModule object
+    ### setup(): calleds second on MemesDataModule object
     # produces train, validation, and test dataloaders
     def setup(self, stage: Optional[str] = None) -> None:
         data = MemesDataset(path.join(self.data_dir, self.outfile))
