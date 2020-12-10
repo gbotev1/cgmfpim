@@ -29,7 +29,7 @@ def main(gpus: Optional[Union[int, str, List[int]]],
     if autoscale_batch_size is not None:
         batch_size = tuner.scale_batch_size(model) # extra parameters here?
     else:
-        batch_size = img_flip.batch_size()
+        batch_size = img_flip.batch_size
 
     model.hparams.num_training_steps = # todo
 
