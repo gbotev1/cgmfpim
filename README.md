@@ -23,7 +23,7 @@
     <a href="#getting-started">Getting Started</a>
     <ul>
       <li><a href="#install-git-lfs">Install Git-LFS</a></li>
-      <li><a href="#install-long-range-zip">Install Long Range Zip (LRZIP)</a></li>
+      <li><a href="#install-long-range-zip">Install Long Range Zip</a></li>
       <li><a href="#clone-repo">Clone Repo</a></li>
       <li><a href="#install-requirements">Install Requirements</a></li>
       <li><a href="#inflate-archives">Inflate Archives</a></li>
@@ -50,10 +50,9 @@ The following steps should help you set up your environment:
 
 This repository uses [Git Large File Storage](https://git-lfs.github.com), which should be downloaded, installed, and set-up for your user account before cloning our repository.
 
-### Install Long Range Zip (lrzip)
+### Install Long Range Zip
 
 This repository uses [lrzip](https://github.com/ckolivas/lrzip) to compress data archives for Git-LFS. This utility can be compiled from source, installed via [Homebrew](https://formulae.brew.sh/formula/lrzip), or even using a pre-built package on Linux.
-
 
 ### Clone Repo
 
