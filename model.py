@@ -8,15 +8,17 @@ from typing import Dict, Union
 class GPT2(LightningModule):
 
     def __init__(self, lr: float,
-                       num_warmup_steps: int,
-                       num_training_steps: int,
-                       gpt2_model_type: str = 'gpt2'):
+                 num_warmup_steps: int,
+                 num_training_steps: int,
+                 gpt2_model_type: str = 'gpt2'):
         super(GPT2, self).__init__()
         self.tokenizer = GPT2TokenizerFast.from_pretrained(gpt2_model_type)
-        # Make sure pad token is also <|endoftext|>
-        self.tokenizer.pad_token = self.tokenizer.eos_token
+        # Make sure to initialize tokenizer the same way as in DataModule
+        tokenizer.add_special_tokens(
+            {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
+        # Do not forget to update pad token ID too!
         self.model = GPT2DoubleHeadsModel.from_pretrained(
-            gpt2_model_type, pad_token_id=self.tokenizer.eos_token_id)  # Do not forget to update pad token ID too!
+            gpt2_model_type, pad_token_id=self.tokenizer.eos_token_id, sep_token_id=self.tokenizer.sep_token_id)
         self.lr = lr
         self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps
@@ -54,8 +56,8 @@ class GPT2(LightningModule):
         else:
             weight_decay = 0.0
 
-        optimizer_grouped_parameters = [{ "params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-                                         "weight_decay": weight_decay }]
+        optimizer_grouped_parameters = [{"params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                                         "weight_decay": weight_decay}]
         optimizer = optim.AdamW(optimizer_grouped_parameters, lr=self.lr)
         scheduler = get_cosine_schedule_with_warmup(
             optimizer, self.num_warmup_steps, self.num_training_steps)
