@@ -63,6 +63,7 @@ if __name__ == "__main__":
          args.accelerator,
          args.amp_backend,
          args.accumulate_grad_batches,
+         args.autoscale_batch_size,
          args.learning_rate,
          args.num_warmup_steps,
          args.num_epochs,
