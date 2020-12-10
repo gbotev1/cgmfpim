@@ -7,9 +7,11 @@ from typing import Optional, Union, List, Dict
 
 def main(gpus: Optional[Union[int, str, List[int]]],
          accelerator: Optional[str],
+         train_sharded: bool,
          amp_backend: str,
+         amp_level: str,
+         precision: int,
          accumulate_grad_batches: Union[int, Dict[int, int], List[list]],
-         use_sharded: bool,
          autoscale_batch_size: str,
          learning_rate: float,
          num_warmup_steps: int,
@@ -24,6 +26,8 @@ def main(gpus: Optional[Union[int, str, List[int]]],
                       accelerator=accelerator,
                       plugins='ddp_sharded' if use_sharded and accelerator == 'ddp' else None,
                       amp_backend=amp_backend,
+                      amp_level=amp_level,
+                      precision=precision,
                       accumulate_grad_batches=accumulate_grad_batches,
                       auto_scale_batch_size=autoscale_batch_size)
     tuner = Tuner(trainer)
@@ -45,12 +49,16 @@ if __name__ == "__main__":
         'gpus', type=Optional[Union[int, str, List[int]]], help="PyTorch Lightning Trainer's class gpus keyword argument")
     parser.add_argument(
         'accelerator', type=Optional[str], help="PyTorch Lightning Trainer's class accelerator keyword argument")
-    parser.add_argument('-a', '--amp_backend', type=str, default='native',
+    parser.add_argument('--train_sharded', action='store_true',
+                        help='use sharded training powered by FairScale')
+    parser.add_argument('--amp_backend', type=str, default='native',
                         choices=['native', 'apex'], help='which mixed precision backend to use ("native" or "apex")')
+    parser.add_argument('--amp_level', type=str, default='O1',
+                        choices=['O0', 'O1', 'O2', 'O3'], help='which optimization level to use for APEX backend')
+    parser.add_argument('--precision', type=int, default=32, choices=[16, 32],
+                        help='whether to use full precision (32) or half precision (16) for CPU, GPU, or TPU')
     parser.add_argument('--accumulate_grad_batches', type=Union[int, Dict[int, int], List[list]],
                         default=1, help="Accumulates gradients every k batches or as set up in the dict (in line with PyTorch Lightning's API")
-    parser.add_argument('-s', '--use_sharded', action='store_true',
-                        help='use sharded training powered by FairScale')
     parser.add_argument('--autoscale_batch_size', type=str, choices=[None, 'power', 'binsearch'],
                         default=None, help='auto scale batch size: (None (no scaling), "power" scaling, or "binsearch" scaling)')
     parser.add_argument('-l', '--learning_rate', type=float,
@@ -64,9 +72,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     main(args.gpus,
          args.accelerator,
+         args.train_sharded,
          args.amp_backend,
+         args.amp_level,
+         args.precision,
          args.accumulate_grad_batches,
-         args.use_sharded,
          args.autoscale_batch_size,
          args.learning_rate,
          args.num_warmup_steps,
