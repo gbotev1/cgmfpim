@@ -26,6 +26,7 @@
       <li><a href="#clone-repo">Clone Repo</a></li>
       <li><a href="#install-requirements">Install Requirements</a></li>
       <li><a href="#inflate-archives">Inflate Archives</a></li>
+      <li><a href="#download-gcc-embeddings">Download GCC Embeddings</a></li>
     </ul>
   </li>
   <li><a href="#contributing">Contributing</a></li>
