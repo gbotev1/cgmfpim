@@ -22,11 +22,11 @@
   <li>
     <a href="#getting-started">Getting Started</a>
     <ol>
-      <li><a href="#install-git-lfs">Install Git-LFS</a></li>
-      <li><a href="#clone-repo">Clone repository</a></li>
-      <li><a href="#install-requirements">Install requirements</a></li>
-      <li><a href="#inflate-archives">Inflate archives</a></li>
-      <li><a href="#download-gcc-embeddings">Download GCC embeddings</a></li>
+      <li><a href="#1-install-git-lfs">Install Git-LFS</a></li>
+      <li><a href="#2-clone-repository">Clone repository</a></li>
+      <li><a href="#3-install-requirements">Install requirements</a></li>
+      <li><a href="#4-inflate-archives">Inflate archives</a></li>
+      <li><a href="#5-download-gcc-embeddings">Download GCC embeddings</a></li>
     </ol>
   </li>
   <li><a href="#contributing">Contributing</a></li>
