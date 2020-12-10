@@ -2,7 +2,7 @@ bs4
 requests
 numpy
 pandas
-pytorch-lightning
+pytorch-lightning["extra"]
 transformers
 torchvision 
 torch
