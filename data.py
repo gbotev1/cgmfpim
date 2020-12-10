@@ -33,11 +33,13 @@ class MemesDataModule(LightningDataModule):
         self.split_ratios = split_ratios
         self.batch_size = batch_size
 
+    ### prepare_data(): call this first on MemesDataModule() object
+    # produces pickle object at location data_dir/outfile
     def prepare_data(self) -> None:
         tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
         # Make sure pad token is also <|endoftext|> and set special separater token
-        tokenizer.add_special_tokens(
-            {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
+        tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token,
+                                      'sep_token': '<|SEP|>'})
         data = []
         with open(path.join(self.data_dir, self.infile), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
@@ -45,13 +47,15 @@ class MemesDataModule(LightningDataModule):
             for meme in tsv_reader:
                 # Associate meme's tags to its caption by separating with sep_token
                 tokenizer_input = f'{meme[3]}{tokenizer.sep_token}{tokenizer.eos_token}'
-                tokenized_caption = tokenizer(
-                    tokenizer_input, return_tensors='pt', padding=True, truncation=True)
-                data.append({'caption': tokenized_caption, 'views': int(
-                    meme[4]), 'upvotes': int(meme[5])})
+                tokenized_caption = tokenizer(tokenizer_input, return_tensors='pt', padding=True, truncation=True)
+                data.append({'caption': tokenized_caption,
+                             'views': int(meme[4]),
+                             'upvotes': int(meme[5])})
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
 
+    ### get_splits(): called by setup() function
+    # produces sizes of train/validation/test dataloaders for use later
     def get_splits(self, data_len: int) -> List[int]:
         # Error handling
         if sum(self.split_ratios) != 1.0:
@@ -66,11 +70,12 @@ class MemesDataModule(LightningDataModule):
         splits.append(data_len - sum(splits))
         return splits
 
+    ### setup(): call this second on MemesDataModule object
+    # produces train, validation, and test dataloaders
     def setup(self, stage: Optional[str] = None) -> None:
         data = MemesDataset(path.join(self.data_dir, self.outfile))
         splits = self.get_splits(len(data))
-        self.data_train, self.data_val, self.data_test = random_split(
-            data, splits)
+        self.data_train, self.data_val, self.data_test = random_split(data, splits)
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size)
