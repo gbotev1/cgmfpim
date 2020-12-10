@@ -9,11 +9,10 @@ def main(gpus: Optional[Union[int, str, List[int]]], accelerator: Optional[str],
     img_flip = MemesDataModule()
     model = GPT2(lr=learning_rate, num_warmup_steps=num_warmup_steps,
                  num_training_steps=num_training_steps, weight_decay=weight_decay)
-    train(model,
-          img_flip,
-          gpus=gpus,
-          accelerator=accelerator,
-          amp_backend=amp_backend)
+    trainer = Trainer(gpus=gpus,
+                      accelerator=accelerator,
+                      amp_backend=amp_backend)
+    trainer.fit(model, img_flip)
 
 
 if __name__ == "__main__":
