@@ -17,26 +17,26 @@
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
-<ol>
-  <li><a href="#about-the-project">About The Project</a></li>
+<ul>
+  <li><a href="#about-the-project">About the Project</a></li>
   <li>
     <a href="#getting-started">Getting Started</a>
-    <ul>
+    <ol>
       <li><a href="#install-git-lfs">Install Git-LFS</a></li>
-      <li><a href="#clone-repo">Clone Repo</a></li>
-      <li><a href="#install-requirements">Install Requirements</a></li>
-      <li><a href="#inflate-archives">Inflate Archives</a></li>
-      <li><a href="#download-gcc-embeddings">Download GCC Embeddings</a></li>
-    </ul>
+      <li><a href="#clone-repo">Clone repository</a></li>
+      <li><a href="#install-requirements">Install requirements</a></li>
+      <li><a href="#inflate-archives">Inflate archives</a></li>
+      <li><a href="#download-gcc-embeddings">Download GCC embeddings</a></li>
+    </ol>
   </li>
   <li><a href="#contributing">Contributing</a></li>
   <li><a href="#license">License</a></li>
   <li><a href="#contact">Contact</a></li>
   <li><a href="#references">References</a></li>
-</ol>
+</ul>
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About the Project
 
 [TODO]
 
