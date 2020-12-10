@@ -35,19 +35,19 @@ class MemesDataModule(LightningDataModule):
 
     def prepare_data(self) -> None:
         tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
-        # Make sure pad token is also <|endoftext|>
-        tokenizer.pad_token = tokenizer.eos_token
+        # Make sure pad token is also <|endoftext|> and set special separater token
+        tokenizer.add_special_tokens(
+            {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
         data = []
         with open(path.join(self.data_dir, self.infile), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
-                # Associate meme's tags to its caption by using custom control code; do not tokenize as special character for generalizability
-                meme_tags = f'<|{meme[3]}|>'
-                tokenizer_input = f'{meme_tags}{meme[2]}{tokenizer.eos_token}'
+                # Associate meme's tags to its caption by separating with sep_token
+                tokenizer_input = f'{meme[3]}{tokenizer.sep_token}{tokenizer.eos_token}'
                 tokenized_caption = tokenizer(
-                    tokenizer_input, padding=True, truncation=True)
-                data.append({'caption': {k: torch.tensor(v, dtype=torch.long) for k, v in tokenized_caption.items()}, 'views': int(
+                    tokenizer_input, return_tensors='pt', padding=True, truncation=True)
+                data.append({'caption': tokenized_caption, 'views': int(
                     meme[4]), 'upvotes': int(meme[5])})
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
