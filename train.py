@@ -18,7 +18,7 @@ def calculate_training_steps(dataset,
 def main(args) -> None:
     img_flip = MemesDataModule()
 
-    model = GPT2(lr=learning_rate, num_warmup_steps=num_warmup_steps, weight_decay=weight_decay)
+    model = GPT2(lr=args.learning_rate, num_warmup_steps=args.num_warmup_steps, weight_decay=args.weight_decay)
     trainer = Trainer.from_argparse_args(args)
     tuner = Tuner(trainer)
 
