@@ -22,6 +22,7 @@
   <li>
     <a href="#getting-started">Getting Started</a>
     <ul>
+      <li><a href="#install-git-lfs">Install Git-LFS</a></li>
       <li><a href="#clone-repo">Clone Repo</a></li>
       <li><a href="#install-requirements">Install Requirements</a></li>
       <li><a href="#inflate-archives">Inflate Archives</a></li>
@@ -43,6 +44,10 @@
 
 The following steps should help you set up your environment:
 
+### Install Git-LFS
+
+This repository uses [Git Large File Storage](https://git-lfs.github.com), which should be downloaded, installed, and set-up for your user account before cloning our repository.
+
 ### Clone Repo
 
 ```sh
@@ -51,7 +56,7 @@ git clone https://github.com/gbotev1/cgmfpim.git
 
 ### Install Requirements
 
-Our code is tested using Python 3.8.
+Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you only plan on using our pre-computed archives, not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which we require that an appropriate version of CUDA is installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled linux version from Anaconda with CUDA Toolkit 10.2 to enable GPU support.
 ```sh
 pip3 install -r requirements.txt
 ```
@@ -62,6 +67,9 @@ The following bash script is provided for convenience to easily extract the [`da
 ```sh
 sh inflate_archives.sh
 ```
+
+### Download GCC Embeddings
+Along with the scripts that we used to generate these embeddings, we also provide a ready-to-use download of 2,841,059 2,048-dimensional embeddings for every image we could access from the [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download) training and validation splits. These embeddings were obtained from the output of the `avgpool` layer from the pre-trained [Wide ResNet-101-2](https://pytorch.org/docs/stable/torchvision/models.html#wide-resnet) on the ImageNet dataset.
 
 <!-- CONTRIBUTING -->
 ## Contributing
