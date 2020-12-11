@@ -26,8 +26,8 @@ class faiss_embeddings_search:
     def __init__(self, img_dir: str, capt: str, embed: str) -> None:
         # Save parameters
         self.img_dir = img_dir
-        self.img_list = []
-        self.cap_list = []
+        # self.img_list = []
+        # self.cap_list = []
         with open(capt) as handle:
             self.capt = handle.readlines()
         print('Number of gcc captions =', len(self.capt))
@@ -56,7 +56,8 @@ class faiss_embeddings_search:
 
     def search_img_embed(self):
         for filename in glob(path.join(self.img_dir, '*.jpg')):  # assuming gif
-            self.img_list.append(filename)
+            print(filename)
+            # self.img_list.append(filename)
             image = Image.open(filename)
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
             result = self.model(image)
@@ -64,7 +65,8 @@ class faiss_embeddings_search:
 
     def find_index(self, embedding, k=1):
         D, I = self.index.search(embedding, k)
-        self.cap_list.append(self.capt[I.item()])
+        # print(self.img_list[-1])
+        print(self.capt[I.item()])
 
 
 if __name__ == '__main__':
@@ -85,5 +87,3 @@ if __name__ == '__main__':
         args.captions,
         args.embeddings)
     img2cap.search_img_embed()
-    for img, cap in zip(self.img_list, self.cap_list):
-        print(img, cap)
