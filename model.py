@@ -25,7 +25,7 @@ class GPT2(LightningModule):
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.lr = lr
         self.num_warmup_steps = num_warmup_steps
-        self.num_training_steps = None
+        self.num_training_steps = 0  # Avoid problems with tuner
         self.weight_decay = weight_decay
         self.batch_size = batch_size
         self.save_hyperparameters('lr', 'weight_decay')
@@ -55,14 +55,10 @@ class GPT2(LightningModule):
         self.log('test_loss', loss, prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
-        no_decay = ["bias", "LayerNorm.weight"]
-        optimizer_grouped_parameters = [{"params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-                                         "weight_decay": self.weight_decay}]
+        no_decay = ['bias', 'LayerNorm.weight']
+        optimizer_grouped_parameters = [{'params': [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                                         'weight_decay': self.weight_decay}]
         optimizer = optim.AdamW(optimizer_grouped_parameters, lr=self.lr)
-        if self.num_training_steps is not None:
-            scheduler = get_cosine_schedule_with_warmup(
-                optimizer, self.num_warmup_steps, self.num_training_steps)
-        else:
-            raise ValueError(
-                'Must define "self.num_training_steps" before trying to configure optimizers')
+        scheduler = get_cosine_schedule_with_warmup(
+            optimizer, self.num_warmup_steps, self.num_training_steps)
         return [optimizer], [scheduler]
