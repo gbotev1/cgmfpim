@@ -2,7 +2,7 @@ bs4
 requests
 numpy
 pandas
-pytorch-lightning[extra]
+pytorch-lightning[fairscale]
 transformers
 torchvision 
 torch
