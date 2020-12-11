@@ -76,6 +76,12 @@ class MemesDataModule(LightningDataModule):
         splits.append(data_len - sum(splits))
         return splits
 
+    def get_train_len(self) -> int:
+        data = MemesDataset(
+            path.join(self.data_dir, self.outfile), self.tokenizer)
+        splits = self.get_splits(len(data))
+        return splits[0]
+
     # setup(): called second on MemesDataModule object
     # produces train, validation, and test dataloaders
     def setup(self, stage: Optional[str] = None) -> None:

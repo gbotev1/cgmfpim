@@ -7,39 +7,14 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import Optional, Union, List, Dict
 
 
-def calculate_training_steps(data_module: LightningDataModule,
-                             gpus: Optional[Union[int, str, List[int]]],
-                             batch_size: int,
-                             accumulate_grad_batches: Union[int, Dict[int, int], List[list]],
-                             num_epochs: int) -> int:
-    if gpus is None:
-        num_devices = 1
-    elif type(gpus) == int:
-        num_devices = max(1, gpus)  # -1 bug here!
-    elif type(gpus) == list:
-        num_devices = len(gpus)
-    elif type(gpus) == str:
-        num_devices = len(gpus.split(','))  # -1 bug here!
-    else:
-        raise ValueError(
-            'Unexpected type encountered for "gpus" keyword argument. Type should be one of Optional[Union[int, str, List[int]]].')
-    effective_batch_size = batch_size * accumulate_grad_batches * num_devices
-    return data_module.train_len / effective_batch_size * num_epochs
-
-
 def main(args) -> None:
-    model = GPT2(lr=args.learning_rate, num_warmup_steps=args.num_warmup_steps,
-                 weight_decay=args.weight_decay)
+    model = GPT2(args)
     trainer = Trainer.from_argparse_args(
         args, progress_bar_refresh_rate=20, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])  # Use 20 here to prevent Google Colab warning
-    data = MemesDataModule()
-    trainer.tune(model, datamodule=data)
-    model.num_training_steps = calculate_training_steps(data,
-                                                        args.gpus,
-                                                        data.batch_size,
-                                                        args.accumulate_grad_batches,
-                                                        args.max_epochs)
-    trainer.fit(model, data)
+    datamodule = MemesDataModule()
+    trainer.tune(model, datamodule=datamodule)
+    model.set_num_train_steps(datamodule.get_train_len())  # jank
+    trainer.fit(model, datamodule)
 
 
 if __name__ == "__main__":
