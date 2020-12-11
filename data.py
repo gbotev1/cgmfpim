@@ -56,7 +56,7 @@ class MemesDataModule(LightningDataModule):
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
                 # Associate meme's tags to its caption by separating with sep_token
-                tokenizer_input = f'{meme[3]}{tokenizer.sep_token}{meme_data[2]}{tokenizer.eos_token}'
+                tokenizer_input = f'{meme[3]}{tokenizer.sep_token}{meme[2]}{tokenizer.eos_token}'
                 tokenized_caption = tokenizer(
                     tokenizer_input, return_tensors='pt', padding=True, truncation=True)
                 data.append({'caption': tokenized_caption,
