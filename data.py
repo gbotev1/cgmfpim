@@ -25,7 +25,7 @@ class MemesDataset(Dataset):
 class MemesDataModule(LightningDataModule):
 
     def __init__(self,
-                 batch_size: int,
+                 batch_size: int = 1,
                  data_dir: str = 'data',
                  infile: str = 'meme_data.tsv',
                  outfile: str = 'data.pickle',

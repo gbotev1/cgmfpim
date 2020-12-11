@@ -32,21 +32,22 @@ def main(args) -> None:
                  weight_decay=args.weight_decay)
     trainer = Trainer.from_argparse_args(
         args, progress_bar_refresh_rate=20, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])  # Use 20 here to prevent Google Colab warning
-    if args.auto_scale_batch_size:
-        if type(args.auto_scale_batch_size) == str:
-            batch_size = scale_batch_size(
-                trainer, model, mode=args.auto_scale_batch_size)
-        else:
-            batch_size = scale_batch_size(trainer, model)
-    else:
-        # Use default batch size specified in model
-        batch_size = model.batch_size
+    # if args.auto_scale_batch_size:
+    #     if type(args.auto_scale_batch_size) == str:
+    #         batch_size = scale_batch_size(
+    #             trainer, model, mode=args.auto_scale_batch_size)
+    #     else:
+    #         batch_size = scale_batch_size(trainer, model)
+    # else:
+    #     # Use default batch size specified in model
+    #     batch_size = model.batch_size
+    data = MemesDataModule()
+    trainer.tune(model, datamodule=data)
     model.hparams.num_training_steps = calculate_training_steps(img_flip,
                                                                 args.gpus,
-                                                                batch_size,
+                                                                data.batch_size,
                                                                 args.accumulate_grad_batches,
                                                                 args.max_epochs)
-    data = MemesDataModule(batch_size)
     trainer.fit(model, data)
 
 
