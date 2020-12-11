@@ -1,5 +1,5 @@
 from pytorch_lightning import LightningModule
-from transformers import GPT2TokenizerFast, PreTrainedTokenizerBase, GPT2DoubleHeadsModel, get_cosine_schedule_with_warmup
+from transformers import GPT2TokenizerFast, PreTrainedTokenizerBase, GPT2LMHeadModel, get_cosine_schedule_with_warmup
 import torch
 import torch.optim as optim
 from typing import Dict, Union
@@ -13,10 +13,15 @@ class GPT2(LightningModule):
                  ):
         super(GPT2, self).__init__()
         # Update both pad_token and newly added sep_token
-        self.model = GPT2DoubleHeadsModel.from_pretrained(
+        self.model = GPT2LMHeadModel.from_pretrained(
             args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, sep_token_id=tokenizer.sep_token_id)
         # Resize model's token embedding
         self.model.resize_token_embeddings(len(tokenizer))
+        # Freeze encoder if requested
+        if args.freeze_encoder:
+            for param in self.model.base_model.parameters():
+                param.requires_grad = False
+        # Save hyperparameters
         self.save_hyperparameters(args)
 
     def set_num_train_steps(self, train_len: int) -> None:
