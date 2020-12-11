@@ -27,7 +27,7 @@ class GPT2(LightningModule):
         self.num_warmup_steps = num_warmup_steps
         self.weight_decay = weight_decay
         self.batch_size = batch_size
-        self.save_hyperparameters('lr', 'weight_decay', 'batch_size')
+        self.save_hyperparameters('lr', 'weight_decay')
 
     def forward(self, inputs):
         return self.model(**inputs)
