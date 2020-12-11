@@ -29,7 +29,7 @@ if __name__ == '__main__':
                         default=0.0, help="weight decay")
     parser.add_argument('-c', '--gradient_checkpointing', action='store_true',
                         help='use gradient checkpointing to save memory at expense of slower backward pass')
-    parser.add_argument('-g', '--gpt2_model_type', type=str, choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
+    parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
                         help='pre-trained model ID string for GPT-2')
     args = parser.parse_args()
     main(args)
