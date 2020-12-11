@@ -1,7 +1,7 @@
 from data import MemesDataModule
 from model import GPT2
 from pytorch_lightning import Trainer, Tuner, LightningDataModule
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint, GPUStatsMonitor, ProgressBar
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import Optional, Union, List, Dict
 
@@ -30,7 +30,8 @@ def main(args) -> None:
     img_flip = MemesDataModule()
     model = GPT2(lr=args.learning_rate, num_warmup_steps=args.num_warmup_steps,
                  weight_decay=args.weight_decay)
-    trainer = Trainer.from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(
+        args, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])
     tuner = Tuner(trainer)
     if args.auto_scale_batch_size is not None:
         batch_size = tuner.scale_batch_size(
