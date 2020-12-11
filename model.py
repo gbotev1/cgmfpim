@@ -71,5 +71,5 @@ class GPT2(LightningModule):
         optimizer = optim.AdamW(
             optimizer_grouped_parameters, lr=self.hparams.learning_rate)
         scheduler = get_cosine_schedule_with_warmup(
-            optimizer, self.hparams.num_warmup_steps, self.hparams.num_training_steps)
+            optimizer, self.hparams.num_training_steps)
         return [optimizer], [scheduler]
