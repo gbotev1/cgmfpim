@@ -10,7 +10,6 @@ class GPT2(LightningModule):
     def __init__(self,
                  lr: float,
                  num_warmup_steps: int,
-                 num_training_steps: int,
                  weight_decay: float,
                  gpt2_model_type: str = 'gpt2'):
         super(GPT2, self).__init__()
@@ -25,7 +24,6 @@ class GPT2(LightningModule):
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.lr = lr
         self.num_warmup_steps = num_warmup_steps
-        self.num_training_steps = num_training_steps
         self.weight_decay = weight_decay
         self.save_hyperparameters('lr', 'weight_decay')
 
@@ -59,5 +57,5 @@ class GPT2(LightningModule):
                                          "weight_decay": self.weight_decay}]
         optimizer = optim.AdamW(optimizer_grouped_parameters, lr=self.lr)
         scheduler = get_cosine_schedule_with_warmup(
-            optimizer, self.num_warmup_steps, self.num_training_steps)
+            optimizer, self.num_warmup_steps)
         return [optimizer], [scheduler]
