@@ -13,7 +13,7 @@ def main(args) -> None:
     trainer = Trainer.from_argparse_args(
         args, progress_bar_refresh_rate=20, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])  # Use 20 here to prevent Google Colab warning
     trainer.tune(model, datamodule=datamodule)
-    model.set_num_train_steps(datamodule.get_train_len())  # jank
+    model.set_num_train_steps(datamodule.splits[0])
     trainer.fit(model, datamodule)
 
 

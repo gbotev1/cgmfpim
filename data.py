@@ -62,6 +62,7 @@ class MemesDataModule(LightningDataModule):
                 # Associate meme's tags to its caption by separating with sep_token
                 captions.append(
                     f'{meme[3]}{self.tokenizer.sep_token}{meme[2]}{self.tokenizer.eos_token}')
+        self.splits = self.get_splits(len(captions))
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(captions, handle, pickle.HIGHEST_PROTOCOL)
 
@@ -81,19 +82,10 @@ class MemesDataModule(LightningDataModule):
         splits.append(data_len - sum(splits))
         return splits
 
-    def get_train_len(self) -> int:
-        data = MemesDataset(
-            path.join(self.data_dir, self.outfile))
-        splits = self.get_splits(len(data))
-        return splits[0]
-
     # setup(): called second on MemesDataModule object
     # produces train, validation, and test dataloaders
     def setup(self, stage: Optional[str] = None) -> None:
-        data = MemesDataset(
-            path.join(self.data_dir, self.outfile))
-        splits = self.get_splits(len(data))
-        self.train_len = splits[0]
+        data = MemesDataset(path.join(self.data_dir, self.outfile))
         self.data_train, self.data_val, self.data_test = random_split(
             data, splits)
 
