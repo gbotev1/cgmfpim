@@ -2,8 +2,9 @@
 from glob import glob
 from os import path
 from csv import reader as csv_reader
-from pickle import load, dump, HIGHEST_PROTOCOL
-from numpy import stack
+from pickle import load
+from numpy import stack, save
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
 def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfile: str) -> None:
@@ -11,17 +12,20 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
     embeddings = []
     filenames = glob(path.join(data_dir, embed_dir, '*.pickle'))
     # Sort filenames in-place by numerical value of file (not lexicographically)
-    filenames.sort(lambda filename: int(filename.split('/')[-1][:-7]))
+    filenames.sort(key=lambda filename: int(filename.split('/')[-1][:-7]))
+    print('Sorted partial embedding files')
     for filename in filenames:
         with open(filename, 'rb') as partial_embed:
             # Zip iterator of (caption index, 2048-dim NumPy image embedding)
             for index, embed in load(partial_embed):
                 caption_indices.add(index)
                 embeddings.append(embed)
+    print('Started stacking embeddings after loading them into memory')
     # Stack embeddings together into single matrix before saving
     embeddings = stack(embeddings)
-    with open(path.join(data_dir, outfile), 'wb') as outfile:
-        dump(caption_indices, outfile, protocol=HIGHEST_PROTOCOL)
+    print('Finished stacking embeddings')
+    save(path.join(data_dir, outfile), embeddings)
+    print('Finished saving embeddings')
     # Save pruned captions as simple text file (no need for TSV anymore)
     with open(path.join(data_dir, infile), newline='') as tsvfile:
         tsv_reader = csv_reader(tsvfile, delimiter='\t')
@@ -29,10 +33,11 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
             for i, row in enumerate(tsv_reader):
                 if i in caption_indices:
                     outfile.write(f'{row[0]}\n')
+    print('Finished saving pruned captions')
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Performs clean-up tasks after processing the GCC dataset in img2vec.py.",
+    parser = ArgumentParser(description='Executes clean-up tasks on partial zip iterators of caption indices to corresponding embeddings generated after running img2vec.py. Prints helpful progress logs to stdout.',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
@@ -43,7 +48,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--pruned_captions', type=str,
                         default='gcc_captions.txt', help='output text filename in local data directory for pruned GCC dataset captions corresponding to rows of embeddings matrix')
     parser.add_argument('-o', '--outfile', type=str,
-                        default='embeddings.pickle', help='filename of combined NumPy embeddings matrix to save in local data directory')
+                        default='embeddings.npy', help='filename of combined NumPy embeddings matrix to save in local data directory')
     args = parser.parse_args()
     main(args.data_dir,
          args.embed_dir,

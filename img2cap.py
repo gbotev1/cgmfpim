@@ -1,0 +1,86 @@
+# Keep imports lightweight
+from PIL import Image
+import glob
+from torchvision.models import wide_resnet101_2
+import torch
+import torch.nn as nn
+from torchvision.transforms import Resize, CenterCrop, ToTensor, Normalize, Compose
+import torchvision.datasets as dataset
+import numpy as np
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
+import faiss
+
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+        
+    def forward(self, x):
+        return x
+
+class faiss_embeddings_search:
+
+    def __init__(self, img_dir: str, capt: str, embed: str) -> None:
+        # Save parameters
+        self.img_dir = img_dir
+        self.img_list = []
+        with open(capt, 'r') as handle:
+            self.capt = [line for line in handle]
+        print('Number of gcc captions =', len(self.capt))
+        self.embed = np.load(embed)
+
+        # # Automatically use GPU if available
+        # if not cuda.is_available():
+        #     raise RuntimeError(
+        #         'Must have CUDA installed in order to run this program.')
+        # self.device = device('cuda')
+        self.model = wide_resnet101_2(pretrained=True, progress=True)
+        # # Move model to device
+        # self.model.to(self.device)
+        self.model.eval()  # Don't forget to put model in evaluation mode!
+        self.model.fc = Identity()
+        # Use recommended sequence of transforms for ImageNet pretrained models
+        self.transforms = Compose([Resize(256, interpolation=Image.BICUBIC),  # Default is bilinear
+                                   CenterCrop(224),
+                                   ToTensor(),
+                                   Normalize(mean=[0.485, 0.456, 0.406],
+                                             std=[0.229, 0.224, 0.225])])
+        
+    def embed_img(self):
+        image_list = []
+        for filename in glob.glob(self.img_dir+'*.jpg'): #assuming gif
+            self.img_list.append(filename)
+            image = Image.open(filename)
+            image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
+            image_list.append(image)
+        images = torch.stack(image_list, dim=1).squeeze(0)
+
+        return self.model(images)
+
+    def search(self, d=2048, k=1):
+        index = faiss.IndexFlatL2(d)
+        print(index.is_trained)
+        index.add(self.embed)
+        print(index.ntotal)
+
+        D, I = index.search(self.embed_img(), k)
+        print(I)
+        
+        
+    
+if __name__ == '__main__':
+    parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Must have CUDA in order to run. Note that this program will wipe the specified embedding sub-directory of the (specified) local data directory.",
+                            formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-i', '--image_dir', type=str,
+                        default='data', help='local data directory')
+    parser.add_argument('-c', '--captions', type=str, default='data/gcc_captions.txt',
+                        help='filename in local data directory of combined, detokenized GCC dataset captions')
+    parser.add_argument('-e', '--embeddings', type=str, default='embeddings.npy',
+                        help='filename for local embedding dumps (with caption index) from GCC dataset')
+
+    args = parser.parse_args()
+    img2cap = faiss_embeddings_search(
+        args.image_dir,
+        args.captions,
+        args.embeddings)
+    img2cap.search()

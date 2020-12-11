@@ -17,24 +17,26 @@
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
-<ol>
-  <li><a href="#about-the-project">About The Project</a></li>
+<ul>
+  <li><a href="#about-the-project">About the Project</a></li>
   <li>
     <a href="#getting-started">Getting Started</a>
-    <ul>
-      <li><a href="#clone-repo">Clone Repo</a></li>
-      <li><a href="#install-requirements">Install Requirements</a></li>
-      <li><a href="#inflate-archives">Inflate Archives</a></li>
-    </ul>
+    <ol>
+      <li><a href="#1-install-git-lfs">Install Git-LFS</a></li>
+      <li><a href="#2-clone-repository">Clone repository</a></li>
+      <li><a href="#3-install-requirements">Install requirements</a></li>
+      <li><a href="#4-inflate-archives">Inflate archives</a></li>
+      <li><a href="#5-download-gcc-embeddings">Download GCC embeddings</a></li>
+    </ol>
   </li>
   <li><a href="#contributing">Contributing</a></li>
   <li><a href="#license">License</a></li>
   <li><a href="#contact">Contact</a></li>
   <li><a href="#references">References</a></li>
-</ol>
+</ul>
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About the Project
 
 [TODO]
 
@@ -43,36 +45,43 @@
 
 The following steps should help you set up your environment:
 
-### Clone Repo
+### 1. Install Git-LFS
+
+This repository uses [Git Large File Storage](https://git-lfs.github.com), which should be downloaded, installed, and set up for your user account before cloning our repository.
+
+### 2. Clone repository
 
 ```sh
 git clone https://github.com/gbotev1/cgmfpim.git
 ```
 
-### Install Requirements
+### 3. Install requirements
 
-Our code is tested using Python 3.8.
+Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you only plan on using our pre-computed archives, not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which we require that an appropriate version of CUDA is installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled linux version from Anaconda with CUDA Toolkit 10.2 to enable GPU support.
 ```sh
 pip3 install -r requirements.txt
 ```
 
-### Inflate Archives
+### 4. Inflate archives
 
-The following bash script is provided for convenience to easily extract the [`data.tsv`](data/11-25-20_21-1500.tsv.tar.bz2) file of scraped captions from [Imgflip](https://imgflip.com), the `meme_templates` directory of meme image templates into the `data` directory, and our custom [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download). Once extracted, the GCC dataset file [`gcc_full.tsv`](data/gcc_full.tsv.tar.bz2) we provide is nothing but a concatenation of the train and validation files available for download from the official linked dataset page after running each of the captions through [NLTK's Penn Treebank detokenizer](https://www.nltk.org/_modules/nltk/tokenize/treebank.html#TreebankWordDetokenizer). For the curious, this logic is defined in [`prepare_gcc.py`](prepare_gcc.py).
+The following sh script is provided for convenience to easily extract the [`data.tsv`](data/11-25-20_21-1500.tsv.tar.gz) file of scraped captions from [Imgflip](https://imgflip.com), the `meme_templates` directory of meme image templates into the `data` directory, and our custom [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download). Once extracted, the GCC dataset file [`gcc_full.tsv`](data/gcc_full.tsv.tar.gz) we provide is nothing but a concatenation of the train and validation files available for download from the official linked dataset page after running each of the captions through [NLTK's Penn Treebank detokenizer](https://www.nltk.org/_modules/nltk/tokenize/treebank.html#TreebankWordDetokenizer). For those curious, this logic is defined in [`prepare_gcc.py`](prepare_gcc.py).
 ```sh
 sh inflate_archives.sh
 ```
+
+### 5. Download GCC embeddings
+Along with the scripts that we used to generate these embeddings, we also provide a ready-to-use download of 2,841,059 2,048-dimensional embeddings for every image we could access from the [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download) training and validation splits. These embeddings were obtained from the output of the `avgpool` layer from the pre-trained [Wide ResNet-101-2](https://pytorch.org/docs/stable/torchvision/models.html#wide-resnet) on the ImageNet dataset.
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
 Contributions are at the very essence of the open source community and are what keep projects alive and useful to the community that uses them. **We wholeheartedly welcome any and all contributions.**
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/DankFeature`)
-3. Commit your Changes (`git commit -m 'Made memes more dank'`)
-4. Push to the Branch (`git push origin feature/DankFeature`)
-5. Open a Pull Request
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/DankFeature`)
+3. Commit your changes (`git commit -m 'Made memes more dank'`)
+4. Push to the branch (`git push origin feature/DankFeature`)
+5. Open a pull request
 
 <!-- LICENSE -->
 ## License
@@ -92,7 +101,23 @@ Listed in alphabetical order by last name:
 <!-- REFERENCES -->
 ## References
 
-A collection of papers from which we took inspiration:
+**Libraries**
+* [Huggingface's 🤗Transformers: State-of-the-art Natural Language Processing for Pytorch and TensorFlow 2.0.](https://github.com/huggingface/transformers)
+	```
+	@inproceedings{wolf-etal-2020-transformers,
+	    title = "Transformers: State-of-the-Art Natural Language Processing",
+	    author = "Thomas Wolf and Lysandre Debut and Victor Sanh and Julien Chaumond and Clement Delangue and Anthony Moi and Pierric Cistac and Tim Rault and Rémi Louf and Morgan Funtowicz and Joe Davison and Sam Shleifer and Patrick von Platen and Clara Ma and Yacine Jernite and Julien Plu and Canwen Xu and Teven Le Scao and Sylvain Gugger and Mariama Drame and Quentin Lhoest and Alexander M. Rush",
+	    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations",
+	    month = oct,
+	    year = "2020",
+	    address = "Online",
+	    publisher = "Association for Computational Linguistics",
+	    url = "https://www.aclweb.org/anthology/2020.emnlp-demos.6",
+	    pages = "38--45"
+	}
+	```
+
+**Papers**
 * [Dank Learning: Generating Memes Using Deep Neural Networks](https://arxiv.org/pdf/1806.04510.pdf)
 	```
 	@misc{peirson2018dank,

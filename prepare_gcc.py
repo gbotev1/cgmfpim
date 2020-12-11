@@ -26,7 +26,7 @@ def main(data_dir: str, train: str, val: str, output: str) -> None:
         tsv_writer.writerows(lines)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = ArgumentParser(description="Combines the already downloaded train and validation files from Google's Conceptual Captions dataset into a single TSV file, detokenizing its captions using NLTK's TreebankWordDetokenizer.",
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,

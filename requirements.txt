@@ -1,11 +1,9 @@
-# Scraper
 bs4
 requests
+numpy
 pandas
-# Meme generation
-pytorch-lightning
+pytorch-lightning[extra]
 transformers
-# Image embeddings
 torchvision 
 torch
 nltk

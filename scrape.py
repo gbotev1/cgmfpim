@@ -130,7 +130,7 @@ def main(n_pages_meme_types: int, n_pages_per_meme: int, data_dir: str, save_dir
         df.to_csv(path.join(data_dir, outfile), sep='\t')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = ArgumentParser(description="Meme caption and metadata curation script for imgflip. Note that the specified folder for saving the meme templates will be created if it does not already exist. In captions, the sequence '; ' is converted to '\n' to normalize the formatting convention of imgflip.", formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('n_pages_meme_types', type=int,
                         help='number of meme template pages to scrape')  # pages of meme templates
@@ -140,7 +140,7 @@ if __name__ == "__main__":
                         help='local directory name where data should be saved')
     parser.add_argument('-s', '--save_dir', type=str, default='meme_templates',
                         help='name of directory to save meme templates for which captions were found')
-    parser.add_argument('-o', '--outfile', type=str, default='data.tsv',
+    parser.add_argument('-o', '--outfile', type=str, default='meme_data.tsv',
                         help='TSV filename for scraped captions and metadata')
     parser.add_argument('-a', '--num_attempts', type=int, default=10,
                         help='number of times to retry processing a meme template if an exception is thrown')

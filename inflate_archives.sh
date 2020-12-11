@@ -1,5 +1,6 @@
 #!/bin/sh
 
-tar -xjvf data/11-25-20_21-1500.tsv.tar.bz2 -C data/
-tar -xjvf data/meme_templates.tar.bz2 -C data/
-tar -xjvf data/gcc_full.tsv.tar.bz2 -C data/
+tar -xvf data/meme_templates.tar -C data/
+tar -xjvf data/11-25-20_21-1500.tar.bz2 -C data/
+tar -xjvf data/gcc_captions.tar.bz2 -C data/
+tar -xjvf data/gcc_full.tar.bz2 -C data/
