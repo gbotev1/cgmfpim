@@ -10,7 +10,6 @@ class GPT2(LightningModule):
     def __init__(self,
                  args,
                  tokenizer: PreTrainedTokenizerBase,
-                 batch_size: int = 1,
                  ):
         super(GPT2, self).__init__()
         # Update both pad_token and newly added sep_token
