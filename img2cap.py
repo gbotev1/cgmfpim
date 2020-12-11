@@ -63,10 +63,12 @@ class faiss_embeddings_search:
             result = self.model(image)
             self.find_index(result.detach().cpu().numpy())
 
-    def find_index(self, embedding, k=1):
+    def find_index(self, embedding, k=5):
         D, I = self.index.search(embedding, k)
         # print(self.img_list[-1])
-        print(self.capt[I.item()])
+        for i in I:
+            print(self.capt[i])
+        print('banana')
 
 
 if __name__ == '__main__':
