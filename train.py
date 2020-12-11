@@ -33,7 +33,7 @@ def main(args) -> None:
     trainer = Trainer.from_argparse_args(
         args, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])
     if args.auto_scale_batch_size:
-        if type(args.auto_scale_batch_size) = str:
+        if type(args.auto_scale_batch_size) == str:
             batch_size = scale_batch_size(
                 trainer, model, mode=args.auto_scale_batch_size)
         else:
