@@ -55,10 +55,8 @@ class MemesDataModule(LightningDataModule):
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
                 # Associate meme's tags to its caption by separating with sep_token
-                raw_caption = f'{meme[3]}{self.tokenizer.sep_token}{meme[2]}{self.tokenizer.eos_token}'
-                data.append({'caption': raw_caption,
-                             'views': int(meme[4]),
-                             'upvotes': int(meme[5])})
+                data.append(
+                    f'{meme[3]}{self.tokenizer.sep_token}{meme[2]}{self.tokenizer.eos_token}')
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
             pickle.dump(data, handle, pickle.HIGHEST_PROTOCOL)
 
