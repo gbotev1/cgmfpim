@@ -1,7 +1,7 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import GPT2TokenizerFast
-from os import path, environ
+from os import path, environ, cpu_count
 from csv import reader as csv_reader
 from typing import Optional, List
 import torch
@@ -39,6 +39,7 @@ class MemesDataModule(LightningDataModule):
         self.gpt2_model_type = gpt2_model_type
         self.split_ratios = split_ratios
         self.gpu_boole = torch.cuda.is_available()
+        self.num_cpus = cpu_count()
         # There should be no parallelism: stop warnings
         environ['TOKENIZERS_PARALLELISM'] = 'false'
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
@@ -90,10 +91,10 @@ class MemesDataModule(LightningDataModule):
             data, self.splits)
 
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn)
+        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn, num_workers=self.num_cpus)
 
     def val_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn)
+        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn, num_workers=self.num_cpus)
 
     def test_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn)
+        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn, num_workers=self.num_cpus)
