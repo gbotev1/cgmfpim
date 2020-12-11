@@ -5,7 +5,7 @@ data/*
 !data/*.tar.bz2
 !data/*.tar
 __pycache__/
-lightning_logs/
+lightning_logs/*/checkpoints/*.ckpt
 
 # Peter
 .vscode/
