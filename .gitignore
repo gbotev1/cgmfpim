@@ -2,9 +2,10 @@
 .ipynb_checkpoints/
 .DS_Store
 data/*
-!data/*.bz2
+!data/*.tar.bz2
 !data/*.tar
 __pycache__/
+lightning_logs/
 
 # Peter
 .vscode/

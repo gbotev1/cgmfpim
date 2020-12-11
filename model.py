@@ -1,5 +1,5 @@
+from transformers import GPT2TokenizerFast, PreTrainedTokenizerBase, GPT2LMHeadModel, get_cosine_schedule_with_warmup
 from pytorch_lightning import LightningModule
-from transformers import GPT2TokenizerFast, PreTrainedTokenizerBase, GPT2DoubleHeadsModel, get_cosine_schedule_with_warmup
 import torch
 import torch.optim as optim
 from typing import Dict, Union
@@ -13,10 +13,11 @@ class GPT2(LightningModule):
                  ):
         super(GPT2, self).__init__()
         # Update both pad_token and newly added sep_token
-        self.model = GPT2DoubleHeadsModel.from_pretrained(
+        self.model = GPT2LMHeadModel.from_pretrained(
             args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, sep_token_id=tokenizer.sep_token_id)
         # Resize model's token embedding
         self.model.resize_token_embeddings(len(tokenizer))
+        # Save hyperparameters
         self.save_hyperparameters(args)
 
     def set_num_train_steps(self, train_len: int) -> None:
@@ -43,7 +44,8 @@ class GPT2(LightningModule):
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
-        # No need to log training loss explicitly: https://pytorch-lightning.readthedocs.io/en/latest/new-project.html#logging; is sync_dist=True though?
+        loss = outputs[0]
+        self.log('train_loss', loss, prog_bar=True, sync_dist=True)
         return outputs[0]
 
     def validation_step(self, batch: Dict[str, Union[torch.Tensor, int]], batch_index: int) -> None:
@@ -69,5 +71,5 @@ class GPT2(LightningModule):
         optimizer = optim.AdamW(
             optimizer_grouped_parameters, lr=self.hparams.learning_rate)
         scheduler = get_cosine_schedule_with_warmup(
-            optimizer, self.hparams.num_warmup_steps, self.hparams.num_training_steps)
+            optimizer, 0, self.hparams.num_training_steps)  # "num_warmup_steps" seems to not work, so hard-code 0 instead
         return [optimizer], [scheduler]
