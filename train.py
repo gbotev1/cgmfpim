@@ -8,7 +8,7 @@ from typing import Optional, Union, List, Dict
 
 
 def main(args) -> None:
-    datamodule = MemesDataModule()
+    datamodule = MemesDataModule(args.batch_size)
     model = GPT2(args, datamodule.tokenizer)
     trainer = Trainer.from_argparse_args(
         args, progress_bar_refresh_rate=20, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])  # Use 20 here to prevent Google Colab warning
@@ -23,6 +23,8 @@ if __name__ == '__main__':
     parser = Trainer.add_argparse_args(parser)
     parser.add_argument('-l', '--learning_rate', type=float,
                         default=5e-5, help='initial learning rate for AdamW optimizer')
+    parser.add_argument('-b', '--batch_size', type=int,
+                        default=1, help='initial batch size')
     parser.add_argument('-w', '--num_warmup_steps', type=int,
                         default=0, help='number of warmup steps')
     parser.add_argument('-d', '--weight_decay', type=float,
