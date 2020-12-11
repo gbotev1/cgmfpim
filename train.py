@@ -26,8 +26,8 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--num_warmup_steps', type=int,
                         default=0, help='number of warmup steps')
     parser.add_argument('-d', '--weight_decay', type=float,
-                        default=0.0, help="weight decay")
-    parser.add_argument('-c', '--gradient_checkpointing', type=bool, action="store_true",
-                        default=False, help="Whether or not to use gradient checkpointing to save memory at the expense of slower backward pass.")
+                        default=0.0, help='weight decay')
+    parser.add_argument('-c', '--gradient_checkpointing', type=bool, action='store_true',
+                        default=False, help='use gradient checkpointing to save memory at expense of slower backward pass')
     args = parser.parse_args()
     main(args)
