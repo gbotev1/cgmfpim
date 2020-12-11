@@ -1,10 +1,8 @@
 from data import MemesDataModule
 from model import GPT2
-from pytorch_lightning import Trainer, LightningDataModule
-from pytorch_lightning.tuner.batch_size_scaling import scale_batch_size
+from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, GPUStatsMonitor, ProgressBar
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from typing import Optional, Union, List, Dict
 
 
 def main(args) -> None:
