@@ -64,7 +64,7 @@ class faiss_embeddings_search:
             print(result.shape)
             self.find_index(result.detach().cpu().squeeze().numpy())
 
-    def find_index(self, embedding, k=1):
+    def find_index(self, embedding, k=2):
         D, I = self.index.search(embedding, k)
         print(I)
         print(self.capt[I[0]])
