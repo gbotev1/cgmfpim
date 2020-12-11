@@ -34,7 +34,7 @@ class GPT2(LightningModule):
         effective_batch_size = self.hparams.batch_size * \
             self.hparams.accumulate_grad_batches * num_devices
         self.hparams.num_training_steps = train_len / \
-            effective_batch_size * self.hparams.num_epochs
+            effective_batch_size * self.hparams.max_epochs
 
     def forward(self, inputs):
         return self.model(**inputs)
