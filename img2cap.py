@@ -27,6 +27,7 @@ class faiss_embeddings_search:
         # Save parameters
         self.img_dir = img_dir
         self.img_list = []
+        self.cap_list = []
         with open(capt) as handle:
             self.capt = handle.readlines()
         print('Number of gcc captions =', len(self.capt))
@@ -59,20 +60,18 @@ class faiss_embeddings_search:
             image = Image.open(filename)
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
             result = self.model(image)
-            print(result)
-            print(result.dtype)
-            print(result.shape)
             self.find_index(result.detach().cpu().numpy())
 
     def find_index(self, embedding, k=1):
         D, I = self.index.search(embedding, k)
-        print(I)
-        print(self.capt[I.item()])
+        self.cap_list.append(self.capt[I.item()])
 
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Must have CUDA in order to run. Note that this program will wipe the specified embedding sub-directory of the (specified) local data directory.",
                             formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-d', '--data_dir', type=str,
+                        default='data', help='local data directory')
     parser.add_argument('-i', '--image_dir', type=str,
                         default='data', help='local data directory')
     parser.add_argument('-c', '--captions', type=str, default='data/gcc_captions.txt',
@@ -86,3 +85,5 @@ if __name__ == '__main__':
         args.captions,
         args.embeddings)
     img2cap.search_img_embed()
+    for img, cap in zip(self.img_list, self.cap_list):
+        print(img, cap)
