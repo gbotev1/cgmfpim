@@ -10,7 +10,6 @@ class GPT2(LightningModule):
     def __init__(self,
                  lr: float,
                  num_warmup_steps: int,
-                 num_training_steps: int,
                  weight_decay: float,
                  batch_size: int = 1,
                  gpt2_model_type: str = 'gpt2'):
@@ -64,5 +63,6 @@ class GPT2(LightningModule):
             scheduler = get_cosine_schedule_with_warmup(
                 optimizer, self.num_warmup_steps, self.num_training_steps)
         else:
-          raise ValueError("self.num_training_steps not defined")
+            raise ValueError(
+                'Must define "self.num_training_steps" before trying to configure optimizers')
         return [optimizer], [scheduler]
