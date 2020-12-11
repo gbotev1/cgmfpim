@@ -29,7 +29,7 @@ class GPT2(LightningModule):
         self.accumulate_grad_batches = args.accumulate_grad_batches
         self.num_epochs = args.max_epochs
         self.batch_size = batch_size
-        self.save_hyperparameters('learning_rate', 'weight_decay')
+        self.save_hyperparameters(args)
 
     def set_num_train_steps(self, train_len: int) -> None:
         if self.gpus is None:
@@ -75,7 +75,7 @@ class GPT2(LightningModule):
         no_decay = ['bias', 'LayerNorm.weight']
         optimizer_grouped_parameters = [{'params': [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
                                          'weight_decay': self.weight_decay}]
-        optimizer = optim.AdamW(optimizer_grouped_parameters, lr=self.lr)
+        optimizer = optim.AdamW(optimizer_grouped_parameters, lr=self.learning_rate)
         scheduler = get_cosine_schedule_with_warmup(
             optimizer, self.num_warmup_steps, self.num_training_steps)
         return [optimizer], [scheduler]
