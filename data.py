@@ -48,7 +48,7 @@ class MemesDataModule(LightningDataModule):
         self.tokenizer.add_special_tokens(
             {'pad_token': self.tokenizer.eos_token, 'sep_token': '<|SEP|>'})
         # Define custom collate function for data loader to tokenize batch properly
-        self.collate_fn = lambda batch: tokenizer(
+        self.collate_fn = lambda batch: self.tokenizer(
             batch, return_tensors='pt', padding=True, truncation=True)
 
     # prepare_data(): called first on MemesDataModule() object
