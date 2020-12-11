@@ -26,8 +26,6 @@ class faiss_embeddings_search:
     def __init__(self, img_dir: str, capt: str, embed: str) -> None:
         # Save parameters
         self.img_dir = img_dir
-        # self.img_list = []
-        # self.cap_list = []
         with open(capt) as handle:
             self.capt = handle.readlines()
         print('Number of gcc captions =', len(self.capt))
@@ -66,7 +64,7 @@ class faiss_embeddings_search:
     def find_index(self, embedding, k=5):
         D, I = self.index.search(embedding, k)
         # print(self.img_list[-1])
-        for i in I:
+        for i in I[0]:
             print(self.capt[i])
         print('banana')
 
@@ -76,8 +74,8 @@ if __name__ == '__main__':
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
-    parser.add_argument('-i', '--image_dir', type=str,
-                        default='data', help='local data directory')
+    parser.add_argument('-i', '--images_dir', type=str,
+                        default='meme_templates_test', help='local data directory')
     parser.add_argument('-c', '--captions', type=str, default='data/gcc_captions.txt',
                         help='filename in local data directory of combined, detokenized GCC dataset captions')
     parser.add_argument('-e', '--embeddings', type=str, default='embeddings.npy',
