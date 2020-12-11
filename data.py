@@ -1,6 +1,6 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
-from transformers import GPT2TokenizerFast, PreTrainedTokenizer
+from transformers import GPT2TokenizerFast, PreTrainedTokenizerBase
 from os import path, environ
 from csv import reader as csv_reader
 from typing import Optional, List
@@ -10,7 +10,7 @@ import pickle
 
 class MemesDataset(Dataset):
 
-    def __init__(self, path: str, tokenizer: PreTrainedTokenizer) -> None:
+    def __init__(self, path: str, tokenizer: PreTrainedTokenizerBase) -> None:
         with open(path, 'rb') as handle:
             self.data = pickle.load(handle)
         self.num_memes = len(self.data)  # Precompute length for efficiency
