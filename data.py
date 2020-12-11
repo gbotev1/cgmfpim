@@ -32,7 +32,7 @@ class MemesDataModule(LightningDataModule):
         self.gpu_boole = torch.cuda.is_available()
         self.num_cpus = cpu_count()
         # There should be no parallelism: stop warnings
-        # environ['TOKENIZERS_PARALLELISM'] = 'false'
+        # environ['TOKENIZERS_PARALLELISM'] = 'false' (maybe it should actually be 'true'?)
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
             args.gpt2_model_type)
         # Make sure pad token is also <|endoftext|> and set special separater token
