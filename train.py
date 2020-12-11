@@ -43,11 +43,11 @@ def main(args) -> None:
     #     batch_size = model.batch_size
     data = MemesDataModule()
     trainer.tune(model, datamodule=data)
-    model.hparams.num_training_steps = calculate_training_steps(img_flip,
-                                                                args.gpus,
-                                                                data.batch_size,
-                                                                args.accumulate_grad_batches,
-                                                                args.max_epochs)
+    model.num_training_steps = calculate_training_steps(img_flip,
+                                                        args.gpus,
+                                                        data.batch_size,
+                                                        args.accumulate_grad_batches,
+                                                        args.max_epochs)
     trainer.fit(model, data)
 
 
