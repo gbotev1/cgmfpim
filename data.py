@@ -83,7 +83,7 @@ class MemesDataModule(LightningDataModule):
 
     def get_train_len(self) -> int:
         data = MemesDataset(
-            path.join(self.data_dir, self.outfile), self.tokenizer)
+            path.join(self.data_dir, self.outfile))
         splits = self.get_splits(len(data))
         return splits[0]
 
