@@ -14,13 +14,13 @@ class MemesDataset(Dataset):
         with open(path, 'rb') as handle:
             self.data = pickle.load(handle)
         # Precompute length for efficiency
-        self.num_memes = len(self.data['input_ids'])
+        self.num_memes = len(self.data)
 
     def __len__(self) -> int:
         return self.num_memes
 
     def __getitem__(self, index) -> torch.Tensor:
-        return {'input_ids': self.data['input_ids'][index], 'attention_mask': self.data['attention_mask'][index]}
+        return self.data[index]
 
 
 class MemesDataModule(LightningDataModule):
@@ -47,6 +47,9 @@ class MemesDataModule(LightningDataModule):
         # Make sure pad token is also <|endoftext|> and set special separater token
         self.tokenizer.add_special_tokens(
             {'pad_token': self.tokenizer.eos_token, 'sep_token': '<|SEP|>'})
+        # Define custom collate function for data loader to tokenize batch properly
+        self.collate_fn = lambda batch: tokenizer(
+            batch, return_tensors='pt', padding=True, truncation=True)
 
     # prepare_data(): called first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
@@ -60,12 +63,7 @@ class MemesDataModule(LightningDataModule):
                 captions.append(
                     f'{meme[3]}{self.tokenizer.sep_token}{meme[2]}{self.tokenizer.eos_token}')
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
-            pickle.dump(self.tokenizer(captions,
-                                       return_tensors='pt',
-                                       padding=True,
-                                       truncation=True),
-                        handle,
-                        pickle.HIGHEST_PROTOCOL)
+            pickle.dump(captions, handle, pickle.HIGHEST_PROTOCOL)
 
     # get_splits(): called by setup() function
     # produces sizes of train/validation/test dataloaders for use later
@@ -100,10 +98,10 @@ class MemesDataModule(LightningDataModule):
             data, splits)
 
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole)
+        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn)
 
     def val_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole)
+        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn)
 
     def test_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole)
+        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole, collate_fn=self.collate_fn)
