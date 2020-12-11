@@ -24,6 +24,7 @@ class GPT2(LightningModule):
         self.weight_decay = args.weight_decay
         self.gpus = args.gpus
         self.accumulate_grad_batches = args.accumulate_grad_batches
+        self.gradient_checkpointing = args.gradient_checkpointing
         self.num_epochs = args.max_epochs
         self.batch_size = batch_size
         self.save_hyperparameters(args)
