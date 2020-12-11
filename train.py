@@ -34,7 +34,7 @@ def main(args) -> None:
         args, progress_bar_refresh_rate=20, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])  # Use 20 here to prevent Google Colab warning
     data = MemesDataModule()
     trainer.tune(model, datamodule=data)
-    model.num_training_steps = calculate_training_steps(img_flip,
+    model.num_training_steps = calculate_training_steps(data,
                                                         args.gpus,
                                                         data.batch_size,
                                                         args.accumulate_grad_batches,
