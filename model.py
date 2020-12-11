@@ -52,8 +52,8 @@ class GPT2(LightningModule):
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
-        loss = outputs[0]
         # No need to log training loss explicitly: https://pytorch-lightning.readthedocs.io/en/latest/new-project.html#logging; is sync_dist=True though?
+        return outputs[0]
 
     def validation_step(self, batch: Dict[str, Union[torch.Tensor, int]], batch_index: int) -> None:
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
@@ -61,6 +61,7 @@ class GPT2(LightningModule):
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
         self.log('val_loss', loss, prog_bar=True, sync_dist=True)
+        return loss
 
     def test_step(self, batch: Dict[str, Union[torch.Tensor, int]], batch_index: int) -> None:
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
@@ -68,6 +69,7 @@ class GPT2(LightningModule):
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
         self.log('test_loss', loss, prog_bar=True, sync_dist=True)
+        return loss
 
     def configure_optimizers(self):
         no_decay = ['bias', 'LayerNorm.weight']
