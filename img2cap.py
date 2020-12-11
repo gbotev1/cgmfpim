@@ -11,12 +11,14 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import faiss
 
+
 class Identity(nn.Module):
     def __init__(self):
         super(Identity, self).__init__()
-        
+
     def forward(self, x):
         return x
+
 
 class faiss_embeddings_search:
 
@@ -46,14 +48,13 @@ class faiss_embeddings_search:
                                    ToTensor(),
                                    Normalize(mean=[0.485, 0.456, 0.406],
                                              std=[0.229, 0.224, 0.225])])
-        
+
     def search_img_embed(self):
-        for filename in glob.glob(self.img_dir+'*.jpg'): #assuming gif
+        for filename in glob.glob(self.img_dir+'*.jpg'):  # assuming gif
             self.img_list.append(filename)
             image = Image.open(filename)
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
             self.find_index(self.model(image))
-
 
     def find_index(self, embedding, d=2048, k=1):
         index = faiss.IndexFlatL2(d)
@@ -63,7 +64,9 @@ class faiss_embeddings_search:
 
         D, I = index.search(embedding, k)
         print(I)
-        
+        print(self.capt[I[0]])
+
+
 if __name__ == '__main__':
     parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Must have CUDA in order to run. Note that this program will wipe the specified embedding sub-directory of the (specified) local data directory.",
                             formatter_class=ArgumentDefaultsHelpFormatter)
