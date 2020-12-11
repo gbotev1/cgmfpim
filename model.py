@@ -21,13 +21,13 @@ class GPT2(LightningModule):
             gpt2_model_type, pad_token_id=self.tokenizer.eos_token_id, sep_token_id=self.tokenizer.sep_token_id)
         # Resize model's token embedding
         self.model.resize_token_embeddings(len(self.tokenizer))
-        self.lr = args.lr
+        self.lr = args.learning_rate
         self.num_warmup_steps = args.num_warmup_steps
         self.num_training_steps = 0  # Avoid problems with tuner
         self.weight_decay = args.weight_decay
         self.gpus = args.gpus
         self.accumulate_grad_batches = args.accumulate_grad_batches
-        self.num_epochs = args.num_epochs
+        self.num_epochs = args.max_epochs
         self.batch_size = batch_size
         self.save_hyperparameters('lr', 'weight_decay')
 
