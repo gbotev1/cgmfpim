@@ -1,11 +1,12 @@
 from data import MemesDataModule
 from model import GPT2
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ProgressBar
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
 def main(args) -> None:
+    seed_everything(0)  # For reproducability
     datamodule = MemesDataModule(args)
     model = GPT2(args, datamodule.tokenizer)
     trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar()])
