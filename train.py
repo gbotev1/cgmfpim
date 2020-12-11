@@ -31,7 +31,7 @@ def main(args) -> None:
     model = GPT2(lr=args.learning_rate, num_warmup_steps=args.num_warmup_steps,
                  weight_decay=args.weight_decay)
     trainer = Trainer.from_argparse_args(
-        args, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])
+        args, callbacks=[GPUStatsMonitor(), ProgressBar(refresh_rate=20), ModelCheckpoint()])  # Use 20 here to prevent Google Colab warning
     if args.auto_scale_batch_size:
         if type(args.auto_scale_batch_size) = str:
             batch_size = scale_batch_size(
