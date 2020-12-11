@@ -22,10 +22,10 @@ if __name__ == '__main__':
                         default=5e-5, help='initial learning rate for AdamW optimizer')
     parser.add_argument('-b', '--batch_size', type=int,
                         default=1, help='initial batch size')
-    parser.add_argument('-w', '--num_warmup_steps', type=int,
+    parser.add_argument('-s', '--num_warmup_steps', type=int,
                         default=0, help='number of warmup steps')
-    parser.add_argument('-d', '--weight_decay', type=float,
-                        default=0.0, help="weight decay")
+    parser.add_argument('-w', '--weight_decay', type=float,
+                        default=0.0, help='weight decay')
     parser.add_argument('-c', '--gradient_checkpointing', action='store_true',
                         help='use gradient checkpointing to save memory at expense of slower backward pass')
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
