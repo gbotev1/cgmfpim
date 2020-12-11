@@ -1,6 +1,6 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
-from transformers import GPT2TokenizerFast
+from transformers import GPT2TokenizerFast, PreTrainedTokenizer
 from os import path, environ
 from csv import reader as csv_reader
 from typing import Optional, List
@@ -10,21 +10,17 @@ import pickle
 
 class MemesDataset(Dataset):
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, tokenizer: PreTrainedTokenizer) -> None:
         with open(path, 'rb') as handle:
             self.data = pickle.load(handle)
         self.num_memes = len(self.data)  # Precompute length for efficiency
-        self.tokenizer = GPT2TokenizerFast.from_pretrained(
-            self.gpt2_model_type)
+        self.tokenizer = tokenizer
 
     def __len__(self) -> int:
         return self.num_memes
 
     def __getitem__(self, index) -> torch.Tensor:
-        # Make sure pad token is also <|endoftext|> and set special separater token
-        self.tokenizer.add_special_tokens(
-            {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
-        return tokenizer(self.data[index], return_tensors='pt', padding=True, truncation=True)
+        return self.tokenizer(self.data[index], return_tensors='pt', padding=True, truncation=True)
 
 
 class MemesDataModule(LightningDataModule):
@@ -44,6 +40,11 @@ class MemesDataModule(LightningDataModule):
         self.gpt2_model_type = gpt2_model_type
         self.split_ratios = split_ratios
         self.gpu_boole = torch.cuda.is_available()
+        self.tokenizer = GPT2TokenizerFast.from_pretrained(
+            self.gpt2_model_type)
+        # Make sure pad token is also <|endoftext|> and set special separater token
+        self.tokenizer.add_special_tokens(
+            {'pad_token': self.tokenizer.eos_token, 'sep_token': '<|SEP|>'})
 
     # prepare_data(): called first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
@@ -54,7 +55,7 @@ class MemesDataModule(LightningDataModule):
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
                 # Associate meme's tags to its caption by separating with sep_token
-                raw_caption = f'{meme[3]}{tokenizer.sep_token}{meme[2]}{tokenizer.eos_token}'
+                raw_caption = f'{meme[3]}{self.tokenizer.sep_token}{meme[2]}{self.tokenizer.eos_token}'
                 data.append({'caption': raw_caption,
                              'views': int(meme[4]),
                              'upvotes': int(meme[5])})
@@ -80,7 +81,8 @@ class MemesDataModule(LightningDataModule):
     # setup(): called second on MemesDataModule object
     # produces train, validation, and test dataloaders
     def setup(self, stage: Optional[str] = None) -> None:
-        data = MemesDataset(path.join(self.data_dir, self.outfile))
+        data = MemesDataset(
+            path.join(self.data_dir, self.outfile), self.tokenizer)
         splits = self.get_splits(len(data))
         self.train_len = splits[0]
         self.data_train, self.data_val, self.data_test = random_split(
