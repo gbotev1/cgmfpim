@@ -40,6 +40,8 @@ class MemesDataModule(LightningDataModule):
         self.gpt2_model_type = gpt2_model_type
         self.split_ratios = split_ratios
         self.gpu_boole = torch.cuda.is_available()
+        # There should be no parallelism: stop warnings
+        environ['TOKENIZERS_PARALLELISM'] = 'false'
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
             self.gpt2_model_type)
         # Make sure pad token is also <|endoftext|> and set special separater token

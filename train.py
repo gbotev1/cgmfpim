@@ -8,10 +8,10 @@ from typing import Optional, Union, List, Dict
 
 
 def main(args) -> None:
-    model = GPT2(args)
+    datamodule = MemesDataModule()
+    model = GPT2(args, datamodule.tokenizer)
     trainer = Trainer.from_argparse_args(
         args, progress_bar_refresh_rate=20, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])  # Use 20 here to prevent Google Colab warning
-    datamodule = MemesDataModule()
     trainer.tune(model, datamodule=datamodule)
     model.set_num_train_steps(datamodule.get_train_len())  # jank
     trainer.fit(model, datamodule)
