@@ -1,7 +1,7 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import GPT2TokenizerFast
-from os import path, cpu_count, environ
+from os import path, environ
 from csv import reader as csv_reader
 from typing import Optional, List
 import torch
@@ -14,12 +14,19 @@ class MemesDataset(Dataset):
         with open(path, 'rb') as handle:
             self.data = pickle.load(handle)
         self.num_memes = len(self.data)  # Precompute length for efficiency
+        self.tokenizer = GPT2TokenizerFast.from_pretrained(
+            self.gpt2_model_type)
+        # Fix warning message by disabling parallelism from huggingface's library
+        environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     def __len__(self) -> int:
         return self.num_memes
 
-    def __getitem__(self, item: int) -> torch.Tensor:
-        return self.data[item]
+    def __getitem__(self, index) -> torch.Tensor:
+        # Make sure pad token is also <|endoftext|> and set special separater token
+        self.tokenizer.add_special_tokens(
+            {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
+        return tokenizer(self.data[index], return_tensors='pt', padding=True, truncation=True)
 
 
 class MemesDataModule(LightningDataModule):
@@ -39,27 +46,18 @@ class MemesDataModule(LightningDataModule):
         self.gpt2_model_type = gpt2_model_type
         self.split_ratios = split_ratios
         self.gpu_boole = torch.cuda.is_available()
-        self.num_cpu = cpu_count()
 
     # prepare_data(): called first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
     def prepare_data(self) -> None:
-        # Fix warning message by disabling parallelism from huggingface's library
-        environ['TOKENIZERS_PARALLELISM'] = 'false'
-        tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
-        # Make sure pad token is also <|endoftext|> and set special separater token
-        tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token,
-                                      'sep_token': '<|SEP|>'})
         data = []
         with open(path.join(self.data_dir, self.infile), newline='') as tsvfile:
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
                 # Associate meme's tags to its caption by separating with sep_token
-                tokenizer_input = f'{meme[3]}{tokenizer.sep_token}{meme[2]}{tokenizer.eos_token}'
-                tokenized_caption = tokenizer(
-                    tokenizer_input, return_tensors='pt', padding=True, truncation=True)
-                data.append({'caption': tokenized_caption,
+                raw_caption = f'{meme[3]}{tokenizer.sep_token}{meme[2]}{tokenizer.eos_token}'
+                data.append({'caption': raw_caption,
                              'views': int(meme[4]),
                              'upvotes': int(meme[5])})
         with open(path.join(self.data_dir, self.outfile), 'wb') as handle:
@@ -91,10 +89,10 @@ class MemesDataModule(LightningDataModule):
             data, splits)
 
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole, num_workers=num_cpu)
+        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, pin_memory=self.gpu_boole)
 
     def val_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole, num_workers=self.num_cpu)
+        return DataLoader(self.data_val, batch_size=self.batch_size, pin_memory=self.gpu_boole)
 
     def test_dataloader(self) -> DataLoader:
-        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole, num_workers=self.num_cpu)
+        return DataLoader(self.data_test, batch_size=self.batch_size, pin_memory=self.gpu_boole)
