@@ -1,6 +1,7 @@
 from data import MemesDataModule
 from model import GPT2
-from pytorch_lightning import Trainer, tuner, LightningDataModule
+from pytorch_lightning import Trainer, LightningDataModule
+from pytorch_lightning.tuner import scale_batch_size
 from pytorch_lightning.callbacks import ModelCheckpoint, GPUStatsMonitor, ProgressBar
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import Optional, Union, List, Dict
@@ -32,10 +33,9 @@ def main(args) -> None:
                  weight_decay=args.weight_decay)
     trainer = Trainer.from_argparse_args(
         args, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])
-    tuner = tuner(trainer)
     if args.auto_scale_batch_size is not None:
         batch_size = tuner.scale_batch_size(
-            model, mode=args.auto_scale_batch_size)
+            trainer, model, mode=args.auto_scale_batch_size)
     else:
         # Use specified batch size in data module
         batch_size = img_flip.batch_size
