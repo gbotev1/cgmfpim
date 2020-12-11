@@ -16,8 +16,6 @@ class MemesDataset(Dataset):
         self.num_memes = len(self.data)  # Precompute length for efficiency
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
             self.gpt2_model_type)
-        # Fix warning message by disabling parallelism from huggingface's library
-        environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     def __len__(self) -> int:
         return self.num_memes
