@@ -1,6 +1,7 @@
 # Keep imports lightweight
 from PIL import Image
-import glob
+from glob import glob
+from os import path
 from torchvision.models import wide_resnet101_2
 import torch
 import torch.nn as nn
@@ -26,12 +27,15 @@ class faiss_embeddings_search:
         # Save parameters
         self.img_dir = img_dir
         self.img_list = []
-        with open(capt, 'r') as handle:
-            self.capt = [line for line in handle]
+        with open(capt) as handle:
+            self.capt = handle.readlines()
         print('Number of gcc captions =', len(self.capt))
         self.embed = np.load(embed)
         print('Number of gcc embeddings =', self.embed.shape[0])
-
+        self.index = faiss.IndexFlatL2(2048)
+        print(self.index.is_trained)
+        self.index.add(self.embed)
+        print(self.index.ntotal)
         # # Automatically use GPU if available
         # if not cuda.is_available():
         #     raise RuntimeError(
@@ -50,19 +54,14 @@ class faiss_embeddings_search:
                                              std=[0.229, 0.224, 0.225])])
 
     def search_img_embed(self):
-        for filename in glob.glob(self.img_dir+'*.jpg'):  # assuming gif
+        for filename in glob(path.join(self.img_dir, '*.jpg')):  # assuming gif
             self.img_list.append(filename)
             image = Image.open(filename)
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
-            self.find_index(self.model(image))
+            self.find_index(self.model(image).detach().cpu().squeeze().numpy())
 
-    def find_index(self, embedding, d=2048, k=1):
-        index = faiss.IndexFlatL2(d)
-        print(index.is_trained)
-        index.add(self.embed)
-        print(index.ntotal)
-
-        D, I = index.search(embedding, k)
+    def find_index(self, embedding, k=1):
+        D, I = self.index.search(embedding, k)
         print(I)
         print(self.capt[I[0]])
 
