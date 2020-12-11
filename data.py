@@ -41,8 +41,8 @@ class MemesDataModule(LightningDataModule):
         # Define custom collate function for data loader to tokenize batch properly
         self.collate_fn = lambda batch: self.tokenizer(
             batch, return_tensors='pt', padding=True, truncation=True)
-        # Save hyperparameters
-        self.save_hyperparameters(args)
+        # Save hyperparameters using hack b/c this is a data module
+        self.hparams = args
 
     # prepare_data(): called first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
