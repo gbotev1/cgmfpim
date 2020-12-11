@@ -58,7 +58,11 @@ class faiss_embeddings_search:
             self.img_list.append(filename)
             image = Image.open(filename)
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
-            self.find_index(self.model(image).detach().cpu().squeeze().numpy())
+            result = self.model(image)
+            print(result)
+            print(result.dtype)
+            print(result.shape)
+            self.find_index(result.detach().cpu().squeeze().numpy())
 
     def find_index(self, embedding, k=1):
         D, I = self.index.search(embedding, k)
