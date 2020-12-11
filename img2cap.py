@@ -62,12 +62,12 @@ class faiss_embeddings_search:
             print(result)
             print(result.dtype)
             print(result.shape)
-            self.find_index(result.detach().cpu().squeeze().numpy())
+            self.find_index(result.detach().cpu().numpy())
 
     def find_index(self, embedding, k=2):
         D, I = self.index.search(embedding, k)
         print(I)
-        print(self.capt[I[0]])
+        print(self.capt[I.item()])
 
 
 if __name__ == '__main__':
