@@ -28,6 +28,7 @@ class faiss_embeddings_search:
             self.capt = [line for line in handle]
         print('Number of gcc captions =', len(self.capt))
         self.embed = np.load(embed)
+        print('Number of gcc embeddings =', self.embed.shape[0])
 
         # # Automatically use GPU if available
         # if not cuda.is_available():
@@ -46,28 +47,23 @@ class faiss_embeddings_search:
                                    Normalize(mean=[0.485, 0.456, 0.406],
                                              std=[0.229, 0.224, 0.225])])
         
-    def embed_img(self):
-        image_list = []
+    def search_img_embed(self):
         for filename in glob.glob(self.img_dir+'*.jpg'): #assuming gif
             self.img_list.append(filename)
             image = Image.open(filename)
             image = self.transforms(image).unsqueeze(0)  # Fake batch-size of 1
-            image_list.append(image)
-        images = torch.stack(image_list, dim=1).squeeze(0)
+            self.find_index(self.model(image))
 
-        return self.model(images)
 
-    def search(self, d=2048, k=1):
+    def find_index(self, embedding, d=2048, k=1):
         index = faiss.IndexFlatL2(d)
         print(index.is_trained)
         index.add(self.embed)
         print(index.ntotal)
 
-        D, I = index.search(self.embed_img(), k)
+        D, I = index.search(embedding, k)
         print(I)
         
-        
-    
 if __name__ == '__main__':
     parser = ArgumentParser(description="Generates 2048-dimensional embeddings for images from Google's Conceptual Captions dataset using a pretrained Wide ResNet-101-2 neural network on ImageNet. Must have CUDA in order to run. Note that this program will wipe the specified embedding sub-directory of the (specified) local data directory.",
                             formatter_class=ArgumentDefaultsHelpFormatter)
@@ -83,4 +79,4 @@ if __name__ == '__main__':
         args.image_dir,
         args.captions,
         args.embeddings)
-    img2cap.search()
+    img2cap.search_img_embed()

@@ -11,5 +11,4 @@ lightning_logs/
 .vscode/
 templates/
 *.pdf
-data/embeddings.npy
-faiss/
+!data/meme_templates_test
