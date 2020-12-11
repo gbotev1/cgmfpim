@@ -22,8 +22,6 @@ if __name__ == '__main__':
                         default=5e-5, help='initial learning rate for AdamW optimizer')
     parser.add_argument('-b', '--batch_size', type=int,
                         default=1, help='initial batch size')
-    parser.add_argument('-s', '--num_warmup_steps', type=int,
-                        default=0, help='number of warmup steps')
     parser.add_argument('-w', '--weight_decay', type=float,
                         default=0.0, help='weight decay')
     parser.add_argument('-c', '--gradient_checkpointing', action='store_true',
