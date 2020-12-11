@@ -1,7 +1,7 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import GPT2TokenizerFast
-from os import path, cpu_count
+from os import path, cpu_count, environ
 from csv import reader as csv_reader
 from typing import Optional, List
 import torch
@@ -44,6 +44,8 @@ class MemesDataModule(LightningDataModule):
     # prepare_data(): called first on MemesDataModule() object
     # produces pickle object at location data_dir/outfile
     def prepare_data(self) -> None:
+        # Fix warning message by disabling parallelism from huggingface's library
+        environ['TOKENIZERS_PARALLELISM'] = 'false'
         tokenizer = GPT2TokenizerFast.from_pretrained(self.gpt2_model_type)
         # Make sure pad token is also <|endoftext|> and set special separater token
         tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token,
