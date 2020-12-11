@@ -10,6 +10,7 @@ class GPT2(LightningModule):
     def __init__(self,
                  lr: float,
                  num_warmup_steps: int,
+                 num_training_steps: int,
                  weight_decay: float,
                  batch_size: int = 1,
                  gpt2_model_type: str = 'gpt2'):
@@ -25,6 +26,7 @@ class GPT2(LightningModule):
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.lr = lr
         self.num_warmup_steps = num_warmup_steps
+        self.num_training_steps = None
         self.weight_decay = weight_decay
         self.batch_size = batch_size
         self.save_hyperparameters('lr', 'weight_decay')
@@ -58,6 +60,9 @@ class GPT2(LightningModule):
         optimizer_grouped_parameters = [{"params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
                                          "weight_decay": self.weight_decay}]
         optimizer = optim.AdamW(optimizer_grouped_parameters, lr=self.lr)
-        scheduler = get_cosine_schedule_with_warmup(
-            optimizer, self.num_warmup_steps)
+        if self.num_training_steps is not None:
+            scheduler = get_cosine_schedule_with_warmup(
+                optimizer, self.num_warmup_steps, self.num_training_steps)
+        else:
+          raise ValueError("self.num_training_steps not defined")
         return [optimizer], [scheduler]
