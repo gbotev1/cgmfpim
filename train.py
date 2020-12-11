@@ -32,9 +32,12 @@ def main(args) -> None:
                  weight_decay=args.weight_decay)
     trainer = Trainer.from_argparse_args(
         args, callbacks=[GPUStatsMonitor(), ProgressBar(), ModelCheckpoint()])
-    if args.auto_scale_batch_size is not None:
-        batch_size = scale_batch_size(
-            trainer, model, mode=args.auto_scale_batch_size)
+    if args.auto_scale_batch_size:
+        if type(args.auto_scale_batch_size) = str:
+            batch_size = scale_batch_size(
+                trainer, model, mode=args.auto_scale_batch_size)
+        else:
+            batch_size = scale_batch_size(trainer, model)
     else:
         # Use default batch size specified in model
         batch_size = model.batch_size
@@ -51,8 +54,6 @@ if __name__ == "__main__":
     parser = ArgumentParser(description='Fine-tunes pre-trained GPT-2 model with weights from HuggingFace on MemesDataModule using PyTorch Lightning',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser = Trainer.add_argparse_args(parser)
-    parser.add_argument('-s', '--train_sharded', action='store_true',
-                        help='use sharded training powered by FairScale')
     parser.add_argument('-l', '--learning_rate', type=float,
                         default=5e-5, help='initial learning rate for AdamW optimizer')
     parser.add_argument('-w', '--num_warmup_steps', type=int,
