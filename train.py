@@ -28,8 +28,6 @@ if __name__ == '__main__':
                         help='use gradient checkpointing to save memory at expense of slower backward pass')
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
                         help='pre-trained model ID string for GPT-2')
-    parser.add_argument('-f', '--freeze_encoder', action='store_true',
-                        help='freeze pre-trained weights in encoder "base_model" part of GPT-2')
     parser.add_argument('-d', '--data_dir', type=str, default='data',
                         help='local data directory')
     parser.add_argument('-i', '--infile', type=str, default='meme_data_top.tsv',

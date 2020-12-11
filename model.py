@@ -17,10 +17,6 @@ class GPT2(LightningModule):
             args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, sep_token_id=tokenizer.sep_token_id)
         # Resize model's token embedding
         self.model.resize_token_embeddings(len(tokenizer))
-        # Freeze encoder if requested
-        if args.freeze_encoder:
-            for param in self.model.transformer.parameters():
-                param.requires_grad = False
         # Save hyperparameters
         self.save_hyperparameters(args)
 
