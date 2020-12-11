@@ -17,7 +17,7 @@ def main(args) -> None:
     trainer.fit(model, datamodule)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = ArgumentParser(description='Fine-tunes pre-trained GPT-2 model with weights from HuggingFace on MemesDataModule using PyTorch Lightning',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser = Trainer.add_argparse_args(parser)
@@ -28,7 +28,8 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--weight_decay', type=float,
                         default=0.0, help="weight decay")
     parser.add_argument('-c', '--gradient_checkpointing', action="store_true",
-                        help="Whether or not to use gradient checkpointing to save memory at the expense of slower backward pass.")
-
+                        help='whether or not to use gradient checkpointing to save memory at the expense of slower backward pass')
+    parser.add_argument('-g', '--gpt2_model_type', type=str, choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
+                        help='pre-trained model ID string for GPT-2')
     args = parser.parse_args()
     main(args)

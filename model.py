@@ -1,5 +1,5 @@
 from pytorch_lightning import LightningModule
-from transformers import GPT2TokenizerFast, GPT2DoubleHeadsModel, get_cosine_schedule_with_warmup
+from transformers import GPT2TokenizerFast, PreTrainedTokenizerBase, GPT2DoubleHeadsModel, get_cosine_schedule_with_warmup
 import torch
 import torch.optim as optim
 from typing import Dict, Union
@@ -9,13 +9,13 @@ class GPT2(LightningModule):
 
     def __init__(self,
                  args,
-                 tokenizer,
+                 tokenizer: PreTrainedTokenizerBase,
                  batch_size: int = 1,
-                 gpt2_model_type: str = 'gpt2'):
+                 ):
         super(GPT2, self).__init__()
         # Update both pad_token and newly added sep_token
         self.model = GPT2DoubleHeadsModel.from_pretrained(
-            gpt2_model_type, pad_token_id=tokenizer.eos_token_id, sep_token_id=tokenizer.sep_token_id)
+            args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, sep_token_id=tokenizer.sep_token_id)
         # Resize model's token embedding
         self.model.resize_token_embeddings(len(tokenizer))
         self.learning_rate = args.learning_rate
@@ -53,7 +53,7 @@ class GPT2(LightningModule):
         outputs = self(
             {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
-        self.log('train_loss', loss, prog_bar=True, sync_dist=True)
+        self.log('loss', loss, prog_bar=True, sync_dist=True)
 
     def validation_step(self, batch: Dict[str, Union[torch.Tensor, int]], batch_index: int) -> None:
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
