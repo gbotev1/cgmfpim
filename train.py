@@ -28,7 +28,6 @@ def calculate_training_steps(data_module: LightningDataModule,
 
 
 def main(args) -> None:
-    img_flip = MemesDataModule()
     model = GPT2(lr=args.learning_rate, num_warmup_steps=args.num_warmup_steps,
                  weight_decay=args.weight_decay)
     trainer = Trainer.from_argparse_args(
@@ -37,14 +36,15 @@ def main(args) -> None:
         batch_size = scale_batch_size(
             trainer, model, mode=args.auto_scale_batch_size)
     else:
-        # Use specified batch size in data module
-        batch_size = img_flip.batch_size
+        # Use default batch size specified in model
+        batch_size = model.batch_size
     model.hparams.num_training_steps = calculate_training_steps(img_flip,
                                                                 args.gpus,
                                                                 batch_size,
                                                                 args.accumulate_grad_batches,
                                                                 args.max_epochs)
-    trainer.fit(model, img_flip)
+    data = MemesDataModule(batch_size)
+    trainer.fit(model, data)
 
 
 if __name__ == "__main__":

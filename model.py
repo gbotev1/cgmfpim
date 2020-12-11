@@ -11,6 +11,7 @@ class GPT2(LightningModule):
                  lr: float,
                  num_warmup_steps: int,
                  weight_decay: float,
+                 batch_size: int = 1,
                  gpt2_model_type: str = 'gpt2'):
         super(GPT2, self).__init__()
         self.tokenizer = GPT2TokenizerFast.from_pretrained(gpt2_model_type)
@@ -25,7 +26,8 @@ class GPT2(LightningModule):
         self.lr = lr
         self.num_warmup_steps = num_warmup_steps
         self.weight_decay = weight_decay
-        self.save_hyperparameters('lr', 'weight_decay')
+        self.batch_size = batch_size
+        self.save_hyperparameters('lr', 'weight_decay', 'batch_size')
 
     def forward(self, inputs):
         return self.model(**inputs)
