@@ -4,6 +4,7 @@
 data/*
 !data/*.bz2
 !data/*.tar
+__pycache__/
 
 # Peter
 .vscode/
