@@ -31,5 +31,7 @@ if __name__ == '__main__':
                         help='use gradient checkpointing to save memory at expense of slower backward pass')
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
                         help='pre-trained model ID string for GPT-2')
+    parser.add_argument('--num_training_steps', type=int, default=0,
+                        help='DO NOT CHANGE: will be automatically set but added here for code readability')
     args = parser.parse_args()
     main(args)
