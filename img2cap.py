@@ -31,7 +31,7 @@ class faiss_embeddings_search:
         print('Number of gcc captions =', len(self.capt))
         self.embed = np.load(embed)
         print('Number of gcc embeddings =', self.embed.shape[0])
-        self.index = faiss.IndexFlatIP(2048)
+        self.index = faiss.IndexFlat(2048, faiss.MERIC_Canberra)
         faiss.normalize_L2(self.embed)
         print(self.index.is_trained)
         self.index.add(self.embed)
