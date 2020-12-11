@@ -32,7 +32,6 @@ class faiss_embeddings_search:
         self.embed = np.load(embed)
         print('Number of gcc embeddings =', self.embed.shape[0])
         self.index = faiss.IndexFlat(2048, faiss.MERIC_Canberra)
-        faiss.normalize_L2(self.embed)
         print(self.index.is_trained)
         self.index.add(self.embed)
         print(self.index.ntotal)
@@ -63,7 +62,6 @@ class faiss_embeddings_search:
             self.find_index(result.detach().cpu().numpy())
 
     def find_index(self, embedding, k=5):
-        faiss.normalize_L2(embedding)
         D, I = self.index.search(embedding, k)
         # print(self.img_list[-1])
         for i in I[0]:
@@ -85,7 +83,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     img2cap = faiss_embeddings_search(
-        args.data_dir,
+        # args.data_dir,
         args.images_dir,
         args.captions,
         args.embeddings)
