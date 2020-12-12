@@ -25,7 +25,7 @@ class Wide_ResNet_101_2:
         self.images_dir = images_dir
         with open(path.join(self.data_dir, captions)) as infile:
             self.captions = infile.readlines()
-        self.embeddings = load(embeddings)
+        self.embeddings = load(path.join(self.data_dir, embeddings))
         self.index = faiss.IndexFlat(2048, faiss.METRIC_Canberra)
         self.index.add(self.embeddings)
 
