@@ -5,9 +5,9 @@ from os import path
 from torchvision.models import wide_resnet101_2
 from torch.nn import Module
 from torchvision.transforms import Resize, CenterCrop, ToTensor, Normalize, Compose
-from numpy import load
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import faiss
+import numpy
 
 
 class Identity(Module):
@@ -25,7 +25,7 @@ class Wide_ResNet_101_2:
         self.images_dir = images_dir
         with open(path.join(self.data_dir, captions)) as infile:
             self.captions = infile.readlines()
-        self.embeddings = load(path.join(self.data_dir, embeddings))
+        self.embeddings = np.load(path.join(self.data_dir, embeddings))
         self.k = k
         self.metric = metric
 
