@@ -13,6 +13,7 @@
     <img alt="repo size" src="https://img.shields.io/github/repo-size/gbotev1/cgmfpim?style=for-the-badge"/>
     <img alt="total lines" src="https://img.shields.io/tokei/lines/github/gbotev1/cgmfpim?style=for-the-badge"/>
     <img alt="AGPL-3.0" src="https://img.shields.io/github/license/gbotev1/cgmfpim?style=for-the-badge"/>
+    <img alt="beta mode" src="https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg"/>
 </p>
 
 <!-- TABLE OF CONTENTS -->
