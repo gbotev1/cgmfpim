@@ -46,7 +46,7 @@ class Wide_ResNet_101_2:
                 image = self.transforms(Image.open(filename)).unsqueeze(
                     0)  # Fake batch-size of 1
                 embed = self.model(image).detach().numpy()
-                self.index.search(embed, self.k)
+                D, I = self.index.search(embed, self.k)
                 for i in I[0]:
                     print(self.capt[i])
                 print()  # For spacing
