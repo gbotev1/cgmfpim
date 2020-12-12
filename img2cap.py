@@ -20,13 +20,13 @@ class Identity(Module):
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, images_dir: str, captions: str, embeddings: str, k: int) -> None:
+    def __init__(self, data_dir: str, images_dir: str, captions: str, embeddings: str, k: int, metric: int) -> None:
         self.data_dir = data_dir
         self.images_dir = images_dir
         with open(path.join(self.data_dir, captions)) as infile:
             self.captions = infile.readlines()
         self.embeddings = load(path.join(self.data_dir, embeddings))
-        self.index = faiss.IndexFlat(2048, metric=faiss.METRIC_Canberra)
+        self.index = faiss.IndexFlat(2048, metric)
         self.index.add(self.embeddings)
 
         self.model = wide_resnet101_2(pretrained=True, progress=True)
@@ -67,6 +67,8 @@ if __name__ == '__main__':
                         help='filename for embeddings NumPy archive')
     parser.add_argument('-k', type=int, default=5,
                         help='nearest k neighbors to search for in GCC database')
+    parser.add_argument('-m', type=int, default=1,
+                        help='FAISS metric type to use')
     args = parser.parse_args()
     img2cap = Wide_ResNet_101_2(
         args.data_dir,
