@@ -44,7 +44,8 @@ class Wide_ResNet_101_2:
             x_centered = self.embeddings - self.embeddings.mean(0)
             self.transform = np.linalg.inv(np.linalg.cholesky(
                 np.dot(x_centered.T, x_centered) / x_centered.shape[0])).T
-            self.index.add(np.dot(self.embeddings, self.transform))
+            self.index.add(
+                np.dot(self.embeddings, self.transform).astype(np.float32))
         elif self.metric == 0:
             # Inner project
             self.index = faiss.IndexFlatIP(dim)
@@ -73,7 +74,7 @@ class Wide_ResNet_101_2:
                 if self.metric == -1:
                     faiss.normalize_L2(embed)
                 elif self.metric == 23:
-                    embed = np.dot(embed, self.transform)
+                    embed = np.dot(embed, self.transform).astype(np.float32)
                 D, I = self.index.search(embed, self.k)
                 for i in I[0]:
                     print(self.captions[i])
