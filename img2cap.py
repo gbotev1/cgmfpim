@@ -74,4 +74,4 @@ if __name__ == '__main__':
         args.captions,
         args.embeddings,
         args.k)
-    img2cap.search_img_embed()
+    img2cap.run()
