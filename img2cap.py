@@ -75,5 +75,6 @@ if __name__ == '__main__':
         args.images_dir,
         args.captions,
         args.embeddings,
-        args.k)
+        args.k,
+        args.metric)
     img2cap.run()
