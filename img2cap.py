@@ -26,7 +26,9 @@ class Wide_ResNet_101_2:
         with open(path.join(self.data_dir, captions)) as infile:
             self.captions = infile.readlines()
         self.embeddings = load(path.join(self.data_dir, embeddings))
-        self.index = faiss.IndexFlatIP(2048)
+        self.k = k
+
+        self.index = faiss.IndexFlat(2048, metric)
         self.index.add(self.embeddings)
 
         self.model = wide_resnet101_2(pretrained=True, progress=True)
@@ -67,11 +69,14 @@ if __name__ == '__main__':
                         help='filename for embeddings NumPy archive')
     parser.add_argument('-k', type=int, default=5,
                         help='nearest k neighbors to search for in GCC database')
+    parser.add_argument('-m', '--metric', type=int, default=1,
+                        help='FAISS metric type to use')
     args = parser.parse_args()
     img2cap = Wide_ResNet_101_2(
         args.data_dir,
         args.images_dir,
         args.captions,
         args.embeddings,
-        args.k)
+        args.k,
+        args.metric)
     img2cap.run()
