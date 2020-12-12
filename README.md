@@ -38,7 +38,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About the Project
 
-[TODO]
+This project is still under active development, and should be understood to be in **beta** mode.
 
 <!-- GETTING STARTED -->
 ## Getting Started
