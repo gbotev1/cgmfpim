@@ -23,6 +23,9 @@ EXPERIMENT #4: time python3 train.py -g gpt2 --max_epochs 3 --gpus 1 --batch_siz
 
 Looking at the training losses, the loss seems to plateau at 2 epochs. Moving forward using 2 epochs.
 
-- epochs
+EXPERIMENT #5: `time python3 train.py -g gpt2 --max_epochs 2 --gpus 1 --batch_size 8 --deterministic --checkpoint_callback --accumulate_grad_batches 2`
+    TIME: real    12m17.767s
+	  user    13m8.365s
+	  sys     0m30.746s
+
 - accumulating gradients [currently 1; 2, 4, 8, 16]
-- 
