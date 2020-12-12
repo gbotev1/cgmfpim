@@ -26,7 +26,7 @@ class Wide_ResNet_101_2:
         with open(path.join(self.data_dir, captions)) as infile:
             self.captions = infile.readlines()
         self.embeddings = load(path.join(self.data_dir, embeddings))
-        self.index = faiss.IndexFlat(2048, metric)
+        self.index = faiss.IndexFlatL2(2048, metric)
         self.index.add(self.embeddings)
 
         self.model = wide_resnet101_2(pretrained=True, progress=True)
