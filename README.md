@@ -116,6 +116,16 @@ Listed in alphabetical order by last name:
 	    pages = "38--45"
 	}
 	```
+* [Pytorch Lightning: The lightweight PyTorch wrapper for high-performance AI research.](https://github.com/PyTorchLightning/pytorch-lightning)
+  ```
+    @article{falcon2019pytorch,
+      title={PyTorch Lightning},
+      author={Falcon, WA},
+      journal={GitHub. Note: https://github.com/PyTorchLightning/pytorch-lightning},
+      volume={3},
+      year={2019}
+    }
+  ```
 
 **Papers**
 * [Dank Learning: Generating Memes Using Deep Neural Networks](https://arxiv.org/pdf/1806.04510.pdf)
@@ -129,3 +139,11 @@ Listed in alphabetical order by last name:
 	      primaryClass={cs.CL}
 	}
 	```
+* * [Language Models are Unsupervised Multitask Learners](http://www.persagen.com/files/misc/radford2019language.pdf)
+  ```
+  @article{radford2019language,
+    title={Language Models are Unsupervised Multitask Learners},
+    author={Radford, Alec and Wu, Jeff and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya},
+    year={2019}
+  }
+  ```
