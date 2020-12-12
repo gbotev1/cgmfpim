@@ -67,7 +67,7 @@ if __name__ == '__main__':
                         help='filename for embeddings NumPy archive')
     parser.add_argument('-k', type=int, default=5,
                         help='nearest k neighbors to search for in GCC database')
-    parser.add_argument('-m', type=int, default=1,
+    parser.add_argument('-m', '--metric', type=int, default=1,
                         help='FAISS metric type to use')
     args = parser.parse_args()
     img2cap = Wide_ResNet_101_2(
