@@ -6,8 +6,8 @@ from torchvision.models import wide_resnet101_2
 from torch.nn import Module
 from torchvision.transforms import Resize, CenterCrop, ToTensor, Normalize, Compose
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import numpy as np
 import faiss
-import numpy
 
 
 class Identity(Module):
