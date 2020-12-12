@@ -20,16 +20,38 @@ class Identity(Module):
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, images_dir: str, captions: str, embeddings: str, k: int, metric: int) -> None:
+    def __init__(self, data_dir: str, images_dir: str, captions: str, embeddings: str, k: int, metric: int, dim: int = 2048) -> None:
         self.data_dir = data_dir
         self.images_dir = images_dir
         with open(path.join(self.data_dir, captions)) as infile:
             self.captions = infile.readlines()
         self.embeddings = load(path.join(self.data_dir, embeddings))
         self.k = k
+        self.metric = metric
 
-        self.index = faiss.IndexFlat(2048, metric)
-        self.index.add(self.embeddings)
+        if self.metric == -1:
+            # Cosine similarity
+            self.index = faiss.IndexFlatIP(dim)
+            faiss.normalize_L2(self.embeddings)
+            self.index.add(self.embeddings)
+        elif self.metric == 1:
+            # Euclidean distance (no square root)
+            self.index = faiss.IndexFlatL2(dim)
+            self.index.add(self.embeddings)
+        elif self.metric == 23:
+            # Mahalanobis distance
+            self.index = faiss.IndexFlatL2(dim)
+            self.embeddings = self.embeddings - self.embeddings.mean(0)
+            self.trans = np.linalg.inv(np.linalg.cholesky(
+                np.dot(self.embeddings.T, self.embeddings) / self.embeddings.shape[0]))
+            self.index.add(np.dot(x, self.trans.T))
+        elif self.metric == 0:
+            # Inner project
+            self.index = faiss.IndexFlatIP(dim)
+            self.index.add(self.embeddings)
+        else:
+            self.index = faiss.IndexFlat(dim, self.metric)
+            self.index.add(self.embeddings)
 
         self.model = wide_resnet101_2(pretrained=True, progress=True)
         self.model.eval()  # Don't forget to put model in evaluation mode!
@@ -48,6 +70,10 @@ class Wide_ResNet_101_2:
                 image = self.transforms(Image.open(filename)).unsqueeze(
                     0)  # Fake batch-size of 1
                 embed = self.model(image).detach().numpy()
+                if self.metric == -1:
+                    faiss.normalize_L2(embed)
+                elif self.metric == 23:
+                    embed = np.dot(embed, self.trans.T)
                 D, I = self.index.search(embed, self.k)
                 for i in I[0]:
                     print(self.captions[i])
