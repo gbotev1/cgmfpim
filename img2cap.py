@@ -40,7 +40,7 @@ class Wide_ResNet_101_2:
                                              std=[0.229, 0.224, 0.225])])
 
     def run(self) -> None:
-        for filename in glob(path.join(self.data_dir, self.img_dir, '*.jpg')):
+        for filename in glob(path.join(self.data_dir, self.images_dir, '*.jpg')):
             try:
                 print(filename)
                 image = self.transforms(Image.open(filename)).unsqueeze(
