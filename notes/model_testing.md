@@ -33,4 +33,7 @@ EXPERIMENT #6: `time python3 train.py -g gpt2 --max_epochs 2 --gpus 1 --batch_si
 	  user    12m25.078s
 	  sys     0m30.706s
 
-- accumulating gradients [currently 1; 2, 4, 8, 16]
+EXPERIMENT #7: `time python3 train.py -g gpt2 --max_epochs 2 --gpus 1 --batch_size 8 --deterministic --checkpoint_callback --accumulate_grad_batches 8`
+    TIME: real    11m15.153s
+	  user    12m5.654s
+	  sys     0m30.657s
