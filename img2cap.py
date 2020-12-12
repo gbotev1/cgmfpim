@@ -66,21 +66,19 @@ class Wide_ResNet_101_2:
 
     def run(self) -> None:
         for filename in glob(path.join(self.data_dir, self.images_dir, '*.jpg')):
-            try:
-                print(filename)
-                image = self.transforms(Image.open(filename)).unsqueeze(
-                    0)  # Fake batch-size of 1
-                embed = self.model(image).detach().numpy()
-                if self.metric == -1:
-                    faiss.normalize_L2(embed)
-                elif self.metric == 23:
-                    embed = np.dot(embed, self.transform).astype(np.float32)
-                D, I = self.index.search(embed, self.k)
-                for i in I[0]:
-                    print(self.captions[i])
-                print()  # For spacing
-            except:
-                pass
+            print(filename)
+            image = self.transforms(Image.open(filename)).unsqueeze(
+                0)  # Fake batch-size of 1
+            embed = self.model(image).detach().numpy()
+            if self.metric == -1:
+                faiss.normalize_L2(embed)
+            elif self.metric == 23:
+                embed = np.dot(embed, self.transform).astype(np.float32)
+            D, I = self.index.search(embed, self.k)
+            for i in range(len(I[0])):
+                print(self.captions[I[0][i]])
+                print(D[0][i])
+            print()  # For spacing
 
 
 if __name__ == '__main__':
