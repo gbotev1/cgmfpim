@@ -139,7 +139,7 @@ Listed in alphabetical order by last name:
 	      primaryClass={cs.CL}
 	}
 	```
-* * [Language Models are Unsupervised Multitask Learners](http://www.persagen.com/files/misc/radford2019language.pdf)
+* [Language Models are Unsupervised Multitask Learners](http://www.persagen.com/files/misc/radford2019language.pdf)
   ```
   @article{radford2019language,
     title={Language Models are Unsupervised Multitask Learners},
