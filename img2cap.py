@@ -48,7 +48,7 @@ class Wide_ResNet_101_2:
                 embed = self.model(image).detach().numpy()
                 D, I = self.index.search(embed, self.k)
                 for i in I[0]:
-                    print(self.capt[i])
+                    print(self.captions[i])
                 print()  # For spacing
             except:
                 pass
