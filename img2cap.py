@@ -23,7 +23,7 @@ class Wide_ResNet_101_2:
     def __init__(self, data_dir: str, images_dir: str, captions: str, embeddings: str, k: int) -> None:
         self.data_dir = data_dir
         self.images_dir = images_dir
-        with open(path.join(self.data_dir, self.captions)) as infile:
+        with open(path.join(self.data_dir, captions)) as infile:
             self.captions = infile.readlines()
         self.embeddings = load(embeddings)
         self.index = faiss.IndexFlat(2048, faiss.METRIC_Canberra)
