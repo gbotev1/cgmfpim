@@ -41,10 +41,10 @@ class Wide_ResNet_101_2:
         elif self.metric == 23:
             # Mahalanobis distance
             self.index = faiss.IndexFlatL2(dim)
-            self.embeddings = self.embeddings - self.embeddings.mean(0)
-            self.trans = np.linalg.inv(np.linalg.cholesky(
-                np.dot(self.embeddings.T, self.embeddings) / self.embeddings.shape[0]))
-            self.index.add(np.dot(x, self.trans.T))
+            x_centered = self.embeddings - self.embeddings.mean(0)
+            self.transform = np.linalg.inv(np.linalg.cholesky(
+                np.dot(x_centered.T, x_centered) / x_centered.shape[0])).T
+            self.index.add(np.dot(self.embeddings, self.transform))
         elif self.metric == 0:
             # Inner project
             self.index = faiss.IndexFlatIP(dim)
@@ -73,7 +73,7 @@ class Wide_ResNet_101_2:
                 if self.metric == -1:
                     faiss.normalize_L2(embed)
                 elif self.metric == 23:
-                    embed = np.dot(embed, self.trans.T)
+                    embed = np.dot(embed, self.transform)
                 D, I = self.index.search(embed, self.k)
                 for i in I[0]:
                     print(self.captions[i])
