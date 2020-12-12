@@ -82,7 +82,7 @@ class Wide_ResNet_101_2:
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='TODO only for CPU',
+    parser = ArgumentParser(description='Helper script to embed input images and find closest captions in GCC database under specified metrics using the same pretrained Wide ResNet-101-2 from the img2vec.py script.',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_dir', type=str,
                         default='data', help='local data directory')
