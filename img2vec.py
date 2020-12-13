@@ -2,7 +2,6 @@
 from PIL import Image
 from torchvision.models import wide_resnet101_2
 from os import path, makedirs
-from os import remove as os_remove
 from shutil import rmtree
 from csv import reader as csv_reader
 from torch import cuda, Tensor, device
@@ -13,7 +12,7 @@ from numpy import stack
 from pickle import dump, HIGHEST_PROTOCOL
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from queue import Queue, Empty
 from warnings import simplefilter
 

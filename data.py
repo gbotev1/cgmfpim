@@ -1,7 +1,7 @@
 from transformers import GPT2TokenizerFast
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
-from os import path, environ, cpu_count
+from os import path, cpu_count
 from csv import reader as csv_reader
 from typing import Optional, List
 import torch
