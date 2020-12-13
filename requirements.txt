@@ -7,3 +7,4 @@ transformers
 torchvision 
 torch
 nltk
+fairscale
