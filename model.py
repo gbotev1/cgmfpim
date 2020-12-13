@@ -3,6 +3,7 @@ from pytorch_lightning import LightningModule
 import torch
 import torch.optim as optim
 from typing import Dict, Union, Optional
+from argparse import Namespace
 
 
 class GPT2(LightningModule):
