@@ -2,16 +2,20 @@ from transformers import PreTrainedTokenizerBase, GPT2LMHeadModel, get_cosine_sc
 from pytorch_lightning import LightningModule
 import torch
 import torch.optim as optim
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
 
 class GPT2(LightningModule):
 
     def __init__(self,
                  args,
-                 tokenizer: PreTrainedTokenizerBase,
+                 tokenizer: Optional[PreTrainedTokenizerBase] = None,
                  ):
         super(GPT2, self).__init__()
+        # Make sure that a valid tokenizer was provided
+        if tokenizer is None:
+            raise ValueError(
+                "A valid tokenizer must be provided to initialize this model. The tokenizer appears as an optional argument to be compatible with PyTorch Lightning's checkpoint loading function.")
         # Update both pad_token and newly added sep_token
         self.model = GPT2LMHeadModel.from_pretrained(
             args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, sep_token_id=tokenizer.sep_token_id)
