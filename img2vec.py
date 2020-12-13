@@ -11,7 +11,7 @@ from io import BytesIO
 from numpy import stack
 from pickle import dump, HIGHEST_PROTOCOL
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from typing import List, Optional
 from queue import Queue, Empty
 from warnings import simplefilter
@@ -19,13 +19,13 @@ from warnings import simplefilter
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, tsvname: str, embed_dir: str, timeout: float, log_every: int) -> None:
+    def __init__(self, args: Namespace) -> None:
         # Save parameters
-        self.data_dir = data_dir
-        self.tsvname = tsvname
-        self.embed_dir = embed_dir
-        self.timeout = timeout
-        self.log_every = log_every
+        self.data_dir = args.data_dir
+        self.tsvname = args.tsvname
+        self.embed_dir = args.embed_dir
+        self.timeout = args.timeout
+        self.log_every = args.log_every
         # Turn PIL warnings into exceptions to filter out bad images
         simplefilter('error', Image.DecompressionBombWarning)
         simplefilter('error', UserWarning)
@@ -116,11 +116,5 @@ if __name__ == '__main__':
                         help="timeout in seconds for requests' GET method")
     parser.add_argument('-l', '--log_every', type=int, default=1024,
                         help='how many iterations to save embeddings and print status to stdout stream')
-    args = parser.parse_args()
-    model = Wide_ResNet_101_2(
-        args.data_dir,
-        args.tsvname,
-        args.embed_dir,
-        args.timeout,
-        args.log_every)
+    model = Wide_ResNet_101_2(parser.parse_args())
     model.run()

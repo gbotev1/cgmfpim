@@ -4,7 +4,7 @@ from csv import writer as csv_writer
 from os import path
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from typing import List
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 
 detokenizer = TreebankWordDetokenizer()
 
@@ -18,10 +18,10 @@ def process_gcc_split(data_dir: str, tsvname: str) -> List[List[str]]:
     return lines
 
 
-def main(data_dir: str, train: str, val: str, output: str) -> None:
-    lines = process_gcc_split(data_dir, train)
-    lines.extend(process_gcc_split(data_dir, val))
-    with open(path.join(data_dir, output), 'w', newline='') as tsvfile:
+def main(args: Namespace) -> None:
+    lines = process_gcc_split(args.data_dir, args.train)
+    lines.extend(process_gcc_split(args.data_dir, args.val))
+    with open(path.join(args.data_dir, args.output), 'w', newline='') as tsvfile:
         tsv_writer = csv_writer(tsvfile, delimiter='\t')
         tsv_writer.writerows(lines)
 
@@ -37,5 +37,4 @@ if __name__ == '__main__':
                         help='TSV input filename in local data directory of validation split of GCC dataset')
     parser.add_argument('-o', '--output', type=str, default='gcc_full.tsv',
                         help='TSV output filename to save in local data directory of combined, detokenized GCC dataset')
-    args = parser.parse_args()
-    main(args.data_dir, args.train, args.val, args.output)
+    main(parser.parse_args())

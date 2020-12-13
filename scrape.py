@@ -4,7 +4,7 @@
 from bs4 import BeautifulSoup as bs
 from bs4 import SoupStrainer as ss
 from bs4 import element
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from os import path, makedirs
 from requests import get as requests_get
@@ -113,21 +113,21 @@ def process_meme_templates(page: int, data_dir: str, save_dir: str, n_pages_per_
     return None if len(dfs) == 0 else concat(dfs, ignore_index=True)
 
 
-def main(n_pages_meme_types: int, n_pages_per_meme: int, data_dir: str, save_dir: str, outfile: str, num_attempts: int) -> None:
+def main(args: Namespace) -> None:
     # Create save_dir folder if it doesn't already exist
-    if not path.exists(save_dir):
-        makedirs(save_dir)
+    if not path.exists(args.save_dir):
+        makedirs(args.save_dir)
     # Scrape driver
     dfs = []
-    for i in range(n_pages_meme_types):
+    for i in range(args.n_pages_meme_types):
         dfs.append(process_meme_templates(
-            i, data_dir, save_dir, n_pages_per_meme, num_attempts))
+            i, args.data_dir, args.save_dir, args.n_pages_per_meme, args.num_attempts))
     if len(dfs) == 0:
         print('No valid captions were found for the given parameters.', file=stderr)
     else:
         df = concat(dfs, ignore_index=True)
         print(f'# of memes scraped: {len(df)}')
-        df.to_csv(path.join(data_dir, outfile), sep='\t')
+        df.to_csv(path.join(args.data_dir, args.outfile), sep='\t')
 
 
 if __name__ == '__main__':
@@ -144,6 +144,4 @@ if __name__ == '__main__':
                         help='TSV filename for scraped captions and metadata')
     parser.add_argument('-a', '--num_attempts', type=int, default=10,
                         help='number of times to retry processing a meme template if an exception is thrown')
-    args = parser.parse_args()
-    main(args.n_pages_meme_types, args.n_pages_per_meme,
-         args.data_dir, args.save_dir, args.outfile, args.num_attempts)
+    main(parser.parse_args())

@@ -5,7 +5,7 @@ from os import path
 from torchvision.models import wide_resnet101_2
 from torch.nn import Module
 from torchvision.transforms import Resize, CenterCrop, ToTensor, Normalize, Compose
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 import numpy as np
 import faiss
 
@@ -20,12 +20,12 @@ class Identity(Module):
 
 class Wide_ResNet_101_2:
 
-    def __init__(self, data_dir: str, images_dir: str, captions: str, embeddings: str, k: int, metric: int, dim: int = 2048) -> None:
-        self.data_dir = data_dir
-        self.images_dir = images_dir
-        with open(path.join(self.data_dir, captions)) as infile:
+    def __init__(self, args: Namespace, dim: int = 2048) -> None:
+        self.data_dir = args.data_dir
+        self.images_dir = args.images_dir
+        with open(path.join(args.data_dir, args.captions)) as infile:
             self.captions = infile.readlines()
-        self.embeddings = np.load(path.join(self.data_dir, embeddings))
+        self.embeddings = np.load(path.join(args.data_dir, args.embeddings))
         self.k = k
         self.metric = metric
 
@@ -96,12 +96,5 @@ if __name__ == '__main__':
                         help='nearest k neighbors to search for in GCC database')
     parser.add_argument('-m', '--metric', type=int, default=1,
                         help='FAISS metric type to use')
-    args = parser.parse_args()
-    img2cap = Wide_ResNet_101_2(
-        args.data_dir,
-        args.images_dir,
-        args.captions,
-        args.embeddings,
-        args.k,
-        args.metric)
+    img2cap = Wide_ResNet_101_2(parser.parse_args())
     img2cap.run()

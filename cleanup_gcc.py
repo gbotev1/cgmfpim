@@ -4,13 +4,13 @@ from os import path
 from csv import reader as csv_reader
 from pickle import load
 from numpy import stack, save
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 
 
-def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfile: str) -> None:
+def main(args: Namespace) -> None:
     caption_indices = set()  # Safe to do b/c embeddings inserted in right order
     embeddings = []
-    filenames = glob(path.join(data_dir, embed_dir, '*.pickle'))
+    filenames = glob(path.join(args.data_dir, args.embed_dir, '*.pickle'))
     # Sort filenames in-place by numerical value of file (not lexicographically)
     filenames.sort(key=lambda filename: int(filename.split('/')[-1][:-7]))
     print('Sorted partial embedding files')
@@ -24,12 +24,12 @@ def main(data_dir: str, embed_dir: str, infile: str, pruned_captions: str, outfi
     # Stack embeddings together into single matrix before saving
     embeddings = stack(embeddings)
     print('Finished stacking embeddings')
-    save(path.join(data_dir, outfile), embeddings)
+    save(path.join(args.data_dir, args.outfile), embeddings)
     print('Finished saving embeddings')
     # Save pruned captions as simple text file (no need for TSV anymore)
-    with open(path.join(data_dir, infile), newline='') as tsvfile:
+    with open(path.join(args.data_dir, args.infile), newline='') as tsvfile:
         tsv_reader = csv_reader(tsvfile, delimiter='\t')
-        with open(path.join(data_dir, pruned_captions), 'w') as outfile:
+        with open(path.join(args.data_dir, args.pruned_captions), 'w') as outfile:
             for i, row in enumerate(tsv_reader):
                 if i in caption_indices:
                     outfile.write(f'{row[0]}\n')
@@ -49,9 +49,4 @@ if __name__ == "__main__":
                         default='gcc_captions.txt', help='output text filename in local data directory for pruned GCC dataset captions corresponding to rows of embeddings matrix')
     parser.add_argument('-o', '--outfile', type=str,
                         default='embeddings.npy', help='filename of combined NumPy embeddings matrix to save in local data directory')
-    args = parser.parse_args()
-    main(args.data_dir,
-         args.embed_dir,
-         args.infile,
-         args.pruned_captions,
-         args.outfile)
+    main(parser.parse_args())

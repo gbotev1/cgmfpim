@@ -2,10 +2,10 @@ from data import MemesDataModule
 from model import GPT2
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ProgressBar
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 
 
-def main(args) -> None:
+def main(args: Namespace) -> None:
     seed_everything(0)  # For reproducability
     datamodule = MemesDataModule(args)
     model = GPT2(args, datamodule.tokenizer)
@@ -37,5 +37,4 @@ if __name__ == '__main__':
                         help='outfile TSV name of pickle file when MemesDataModule\'s "prepare_data" is called')
     parser.add_argument('--num_training_steps', type=int, default=0,
                         help='DO NOT CHANGE: will be automatically set but added here for code readability')
-    args = parser.parse_args()
-    main(args)
+    main(parser.parse_args())
