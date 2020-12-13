@@ -19,14 +19,14 @@ def main(args: Namespace):
             # Attach special separator token to complete prompt
             prompts.append(f'{line}{tokenizer.sep_token}')
     # Tokenize
-    inputs = tokenizer(prompts, return_tensors='pt',
-                       padding=True, truncation=True)
+    prompts = [tokenizer.encode(
+        prompt, return_tensors='pt', padding=True, truncation=True) for prompt in prompts]
     # Predict
-    output = model.model.generate(inputs, eos_token_id=tokenizer.eos_token_id, do_sample=True,
-                                  max_length=args.max_length, top_p=args.top_p, top_k=args.top_k)
+    outputs = [model.model.generate(prompt, eos_token_id=tokenizer.eos_token_id, do_sample=True,
+                                    max_length=args.max_length, top_p=args.top_p, top_k=args.top_k) for prompt in prompts]
     # Save and print results
     with open(args.outfile, 'w') as outfile:
-        for pred in output:
+        for pred in outputs:
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
             print(meme)
