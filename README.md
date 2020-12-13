@@ -19,21 +19,27 @@
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 <ul>
-  <li><a href="#about-the-project">About the Project</a></li>
-  <li>
-    <a href="#getting-started">Getting Started</a>
-    <ol>
-      <li><a href="#1-install-git-lfs">Install Git-LFS</a></li>
-      <li><a href="#2-clone-repository">Clone repository</a></li>
-      <li><a href="#3-install-requirements">Install requirements</a></li>
-      <li><a href="#4-inflate-archives">Inflate archives</a></li>
-      <li><a href="#5-download-gcc-embeddings">Download GCC embeddings</a></li>
-    </ol>
-  </li>
-  <li><a href="#contributing">Contributing</a></li>
-  <li><a href="#license">License</a></li>
-  <li><a href="#contact">Contact</a></li>
-  <li><a href="#references">References</a></li>
+	<li><a href="#about-the-project">About the Project</a></li>
+	<li>
+		<a href="#getting-started">Getting Started</a>
+		<ol>
+			<li><a href="#1-install-git-lfs">Install Git-LFS</a></li>
+			<li><a href="#2-clone-repository">Clone repository</a></li>
+			<li><a href="#3-install-requirements">Install requirements</a></li>
+			<li><a href="#4-inflate-archives">Inflate archives</a></li>
+			<li><a href="#5-download-gcc-embeddings">Download GCC embeddings</a></li>
+		</ol>
+	</li>
+	<li><a href="#contributing">Contributing</a></li>
+	<li><a href="#license">License</a></li>
+	<li><a href="#contact">Contact</a></li>
+  	<li>
+		<a href="#references">References</a>
+		<ol>
+			<li><a href="#code">Code</a></li>
+			<li><a href="#papers">Papers</a></li>
+		</ol>
+	</li>
 </ul>
 
 <!-- ABOUT THE PROJECT -->
@@ -107,7 +113,7 @@ Listed in alphabetical order by last name:
 <!-- REFERENCES -->
 ## References
 
-**Libraries**
+### Code
 * [Huggingface's 🤗Transformers: State-of-the-art Natural Language Processing for Pytorch and TensorFlow 2.0.](https://github.com/huggingface/transformers)
 	```
 	@inproceedings{wolf-etal-2020-transformers,
@@ -192,7 +198,7 @@ Listed in alphabetical order by last name:
 	}
 	```
 
-**Papers**
+### Papers
 * [Dank Learning: Generating Memes Using Deep Neural Networks](https://arxiv.org/pdf/1806.04510.pdf)
 	```
 	@misc{peirson2018dank,
