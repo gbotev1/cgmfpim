@@ -61,10 +61,12 @@ git clone https://github.com/gbotev1/cgmfpim.git
 
 ### 3. Install requirements
 
-Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you only plan on using our pre-computed archives, not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which we require that an appropriate version of CUDA is installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled linux version from Anaconda with CUDA Toolkit 10.2 to enable GPU support.
+Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you plan on using only our pre-computed archives, then not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which an appropriate version of CUDA must be installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled Linux version from Anaconda with CUDA Toolkit 10.2 for our experiments.
 ```sh
 pip3 install -U -r requirements.txt
 ```
+**Note:**
+> The pytorch-lightning['extra'] PyPI package seems to not correctly install the extra dependencies, so we have modified our [`requirements.txt`](requirements.txt) file to manually install the [Horovod](https://github.com/horovod/horovod) and [FairScale](https://github.com/facebookresearch/fairscale) PyPI packages.
 
 ### 4. Inflate archives
 
@@ -120,16 +122,75 @@ Listed in alphabetical order by last name:
 	    pages = "38--45"
 	}
 	```
-* [Pytorch Lightning: The lightweight PyTorch wrapper for high-performance AI research.](https://github.com/PyTorchLightning/pytorch-lightning)
-  ```
-    @article{falcon2019pytorch,
-      title={PyTorch Lightning},
-      author={Falcon, WA},
-      journal={GitHub. Note: https://github.com/PyTorchLightning/pytorch-lightning},
-      volume={3},
-      year={2019}
-    }
-  ```
+* [PyTorch Lightning: The lightweight PyTorch wrapper for high-performance AI research. Scale your models, not the boilerplate.](https://github.com/PyTorchLightning/pytorch-lightning)
+	```
+	@article{falcon2019pytorch,
+	  title={PyTorch Lightning},
+	  author={Falcon, WA},
+	  journal={GitHub. Note: https://github.com/PyTorchLightning/pytorch-lightning},
+	  volume={3},
+	  year={2019}
+	}
+	```
+* [FAISS: A library for efficient similarity search and clustering of dense vectors.](https://github.com/facebookresearch/faiss)
+	```
+	@article{JDH17,
+	  title={Billion-scale similarity search with GPUs},
+	  author={Johnson, Jeff and Douze, Matthijs and J{\'e}gou, Herv{\'e}},
+	  journal={arXiv preprint arXiv:1702.08734},
+	  year={2017}
+	}
+	```
+* [FairScale: PyTorch extensions for high performance and large scale training.](https://github.com/facebookresearch/fairscale)
+	```
+	@misc{kim2020torchgpipe,
+	      title={torchgpipe: On-the-fly Pipeline Parallelism for Training Giant Models}, 
+	      author={Chiheon Kim and Heungsub Lee and Myungryong Jeong and Woonhyuk Baek and Boogeon Yoon and Ildoo Kim and Sungbin Lim and Sungwoong Kim},
+	      year={2020},
+	      eprint={2004.09910},
+	      archivePrefix={arXiv},
+	      primaryClass={cs.DC}
+	}
+	```
+	```
+	@misc{rajbhandari2020zero,
+	      title={ZeRO: Memory Optimizations Toward Training Trillion Parameter Models}, 
+	      author={Samyam Rajbhandari and Jeff Rasley and Olatunji Ruwase and Yuxiong He},
+	      year={2020},
+	      eprint={1910.02054},
+	      archivePrefix={arXiv},
+	      primaryClass={cs.LG}
+	}
+	```
+	```
+	@misc{shoeybi2020megatronlm,
+	      title={Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism}, 
+	      author={Mohammad Shoeybi and Mostofa Patwary and Raul Puri and Patrick LeGresley and Jared Casper and Bryan Catanzaro},
+	      year={2020},
+	      eprint={1909.08053},
+	      archivePrefix={arXiv},
+	      primaryClass={cs.CL}
+	}
+	```
+	```
+	@misc{johnson2020adascale,
+	      title={AdaScale SGD: A User-Friendly Algorithm for Distributed Training}, 
+	      author={Tyler B. Johnson and Pulkit Agrawal and Haijie Gu and Carlos Guestrin},
+	      year={2020},
+	      eprint={2007.05105},
+	      archivePrefix={arXiv},
+	      primaryClass={cs.LG}
+	}
+	```
+* [Horovod: Distributed training framework for TensorFlow, Keras, PyTorch, and Apache MXNet.](https://github.com/horovod/horovod)
+	```
+	@article{sergeev2018horovod,
+	  Author = {Alexander Sergeev and Mike Del Balso},
+	  Journal = {arXiv preprint arXiv:1802.05799},
+	  Title = {Horovod: fast and easy distributed deep learning in {TensorFlow}},
+	  Year = {2018}
+	}
+	```
 
 **Papers**
 * [Dank Learning: Generating Memes Using Deep Neural Networks](https://arxiv.org/pdf/1806.04510.pdf)
@@ -144,10 +205,10 @@ Listed in alphabetical order by last name:
 	}
 	```
 * [Language Models are Unsupervised Multitask Learners](http://www.persagen.com/files/misc/radford2019language.pdf)
-  ```
-  @article{radford2019language,
-    title={Language Models are Unsupervised Multitask Learners},
-    author={Radford, Alec and Wu, Jeff and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya},
-    year={2019}
-  }
-  ```
+	```
+	@article{radford2019language,
+	    title={Language Models are Unsupervised Multitask Learners},
+	    author={Radford, Alec and Wu, Jeff and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya},
+	    year={2019}
+	  }
+	```
