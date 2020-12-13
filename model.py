@@ -24,11 +24,13 @@ class GPT2(LightningModule):
         if self.hparams.gpus is None:
             num_devices = 1
         elif type(self.hparams.gpus) == int:
-            num_devices = max(1, self.hparams.gpus)  # -1 bug here!
+            # TODO: -1 bug here!
+            num_devices = max(1, self.hparams.gpus)
         elif type(self.hparams.gpus) == list:
             num_devices = len(self.hparams.gpus)
         elif type(self.hparams.gpus) == str:
-            num_devices = len(self.hparams.gpus.split(','))  # -1 bug here!
+            # TODO: -1 bug here!
+            num_devices = len(self.hparams.gpus.split(','))
         else:
             raise ValueError(
                 'Unexpected type encountered for "gpus" keyword argument. Type should be one of Optional[Union[int, str, List[int]]].')
