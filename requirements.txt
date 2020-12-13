@@ -2,9 +2,10 @@ bs4
 requests
 numpy
 pandas
-pytorch-lightning[extra]
+pytorch-lightning
 transformers
-torchvision 
+torchvision
 torch
 nltk
 fairscale
+horovod
