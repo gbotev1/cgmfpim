@@ -57,7 +57,7 @@ class Wide_ResNet_101_2:
             self.model(image)
             del image
             return i
-        except:
+        except Exception:
             return None
 
     def run(self) -> None:
