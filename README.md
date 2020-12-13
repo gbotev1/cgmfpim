@@ -63,14 +63,14 @@ git clone https://github.com/gbotev1/cgmfpim.git
 
 Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you only plan on using our pre-computed archives, not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which we require that an appropriate version of CUDA is installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled linux version from Anaconda with CUDA Toolkit 10.2 to enable GPU support.
 ```sh
-pip3 install -r requirements.txt
+pip3 install -U -r requirements.txt
 ```
 
 ### 4. Inflate archives
 
-The [following `sh` script](inflate_archives.sh) is provided for convenience to easily extract `meme_data.tsv` and `meme_data_top.tsv` from [this file](data/11-25-20_21-1500.tsv.tar.gz) of scraped captions from [Imgflip](https://imgflip.com) on November 25, 2020 as well as a `meme_templates` directory of meme image templates into the [`data`](data) directory. The `meme_data_top.tsv` file is a filtered version of the full `meme_data.tsv`, where at most the top 100 meme captions by number of upvotes are saved. It also extracts our custom [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download). Once extracted, the GCC dataset file [`gcc_full.tsv`](data/gcc_full.tsv.tar.gz) we provide is nothing but a concatenation of the train and validation files available for download from the official linked dataset page after running each of the captions through [NLTK's Penn Treebank detokenizer](https://www.nltk.org/_modules/nltk/tokenize/treebank.html#TreebankWordDetokenizer). For those curious, this logic is defined in [`prepare_gcc.py`](prepare_gcc.py).
+The [following `bash` script](inflate_archives.sh) is provided for convenience to easily extract `meme_data.tsv` and `meme_data_top.tsv` from [this file](data/11-25-20_21-1500.tsv.tar.gz) of scraped captions from [Imgflip](https://imgflip.com) on November 25, 2020 as well as a `meme_templates` directory of meme image templates into the [`data`](data) directory. The `meme_data_top.tsv` file is a filtered version of the full `meme_data.tsv`, where at most the top 100 meme captions by number of upvotes are saved. It also extracts our custom [Google's Conceptual Captions (GCC) dataset](https://ai.google.com/research/ConceptualCaptions/download). Once extracted, the GCC dataset file [`gcc_full.tsv`](data/gcc_full.tsv.tar.gz) we provide is nothing but a concatenation of the train and validation files available for download from the official linked dataset page after running each of the captions through [NLTK's Penn Treebank detokenizer](https://www.nltk.org/_modules/nltk/tokenize/treebank.html#TreebankWordDetokenizer). For those curious, this logic is defined in [`prepare_gcc.py`](prepare_gcc.py).
 ```sh
-sh inflate_archives.sh
+inflate_archives.sh
 ```
 
 ### 5. Download GCC embeddings
