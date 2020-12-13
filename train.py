@@ -10,8 +10,6 @@ def main(args: Namespace) -> None:
     datamodule = MemesDataModule(args)
     model = GPT2(args, datamodule.tokenizer)
     trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar()])
-    trainer.tune(model, datamodule=datamodule)
-    model.set_num_train_steps(datamodule.splits[0])
     trainer.fit(model, datamodule)
 
 
