@@ -10,10 +10,10 @@ import pickle
 
 class MemesDataset(Dataset):
 
-    def __init__(self, path: str, num_memes: int) -> None:
+    def __init__(self, path: str) -> None:
         with open(path, 'rb') as handle:
             self.data = pickle.load(handle)
-        self.num_memes = num_memes
+        self.num_memes = len(self.data)  # Save for efficiency
 
     def __len__(self) -> int:
         return self.num_memes
@@ -78,7 +78,7 @@ class MemesDataModule(LightningDataModule):
     # produces train, validation, and test dataloaders
     def setup(self, stage: Optional[str] = None) -> None:
         data = MemesDataset(
-            path.join(self.hparams.data_dir, self.hparams.outfile), sum(self.splits))
+            path.join(self.hparams.data_dir, self.hparams.outfile))
         splits = self.get_splits(data.num_memes)
         self.data_train, self.data_val, self.data_test = random_split(
             data, splits)
