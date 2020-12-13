@@ -9,7 +9,8 @@ def main(args: Namespace):
     tokenizer.add_special_tokens(
         {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
     # Load model weights from checkpoint
-    model = GPT2.load_from_checkpoint(args.checkpoint, tokenizer=tokenizer)
+    model = GPT2.load_from_checkpoint(
+        args.checkpoint, tokenizer=args.tokenizer)
     model.eval()  # Don't forget to put model in evaluation mode!
     # Prepare starter text
     prompts = []
