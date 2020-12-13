@@ -48,7 +48,10 @@ The following steps should help you set up your environment:
 
 ### 1. Install Git-LFS
 
-This repository uses [Git Large File Storage](https://git-lfs.github.com), which should be downloaded, installed, and set up for your user account before cloning our repository.
+This repository uses [Git Large File Storage](https://git-lfs.github.com), which should be downloaded and installed before cloning our repository. In particular, make sure to run the following command before cloning:
+```sh
+git lfs install
+```
 
 ### 2. Clone repository
 
