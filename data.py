@@ -1,7 +1,7 @@
 from transformers import GPT2TokenizerFast
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Dataset, DataLoader, random_split
-from os import path
+from os import path, cpu_count
 from csv import reader as csv_reader
 from typing import Optional, List
 from argparse import Namespace
@@ -28,8 +28,12 @@ class MemesDataModule(LightningDataModule):
     def __init__(self, args: Namespace) -> None:
         super().__init__()
         self.gpu_boole = torch.cuda.is_available()
-        self.num_cpus = 0 if args.accelerator == 'ddp_spawn' else max(
-            1, torch.cuda.device_count())
+        if args.accelerator == 'ddp_spawn':
+            self.num_cpus = 0
+        elif args.accelerator is None:
+            self.num_cpus = cpu_count()
+        else:
+            self.num_cpus = 1
         # There should be no parallelism: stop warnings
         # environ['TOKENIZERS_PARALLELISM'] = 'false' (maybe it should actually be 'true'?)
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
