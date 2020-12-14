@@ -1,4 +1,4 @@
-from transformers import PreTrainedTokenizerBase, GPT2LMHeadModel, get_cosine_schedule_with_warmup
+from transformers import PreTrainedTokenizerBase, GPT2LMHeadModel
 from pytorch_lightning import LightningModule
 import torch
 import torch.optim as optim
