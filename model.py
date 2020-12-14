@@ -33,24 +33,27 @@ class GPT2(LightningModule):
 
     def training_step(self, batch: Dict[str, Union[torch.Tensor, int]], batch_index: int) -> None:
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
+        # lgtm[py/call-to-non-callable]
         outputs = self(
-            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})  # lgtm [py/call-to-non-callable]
+            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
         self.log('train_loss', loss, prog_bar=True, sync_dist=True)
         return outputs[0]
 
     def validation_step(self, batch: Dict[str, Union[torch.Tensor, int]], batch_index: int) -> None:
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
+        # lgtm[py/call-to-non-callable]
         outputs = self(
-            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})  # lgtm [py/call-to-non-callable]
+            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
         self.log('val_loss', loss, prog_bar=True, sync_dist=True)
         return loss
 
     def test_step(self, batch: Dict[str, Union[torch.Tensor, int]], batch_index: int) -> None:
         # Try to predict input IDs by setting them as labels (verified approach in documentation)
+        # lgtm[py/call-to-non-callable]
         outputs = self(
-            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})  # lgtm [py/call-to-non-callable]
+            {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask'], 'labels': batch['input_ids']})
         loss = outputs[0]
         self.log('test_loss', loss, prog_bar=True, sync_dist=True)
         return loss
