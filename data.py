@@ -28,7 +28,8 @@ class MemesDataModule(LightningDataModule):
     def __init__(self, args: Namespace) -> None:
         super().__init__()
         self.gpu_boole = torch.cuda.is_available()
-        self.num_cpus = 0 if args.accelerator == 'horovod' or args.accelerator == 'ddp_spawn' else cpu_count()
+        self.num_cpus = 0 if args.accelerator == 'ddp_spawn' else min(min(cpu_count(), 16), max(
+            cpu_count(), 16))  # Use no more than 16 workers if not using ddp_spawn accelerator
         # There should be no parallelism: stop warnings
         # environ['TOKENIZERS_PARALLELISM'] = 'false' (maybe it should actually be 'true'?)
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
