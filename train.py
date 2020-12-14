@@ -1,7 +1,7 @@
 from data import MemesDataModule
 from model import GPT2
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import ProgressBar
+from pytorch_lightning.callbacks import ProgressBar, ModelCheckpoint
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 
 
@@ -10,7 +10,8 @@ def main(args: Namespace) -> None:
         seed_everything(0)  # For reproducability
     datamodule = MemesDataModule(args)
     model = GPT2(args=args, tokenizer=datamodule.tokenizer)
-    trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar()])
+    trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar(), ModelCheckpoint(
+        save_top_k=args.max_epochs)])  # Save checkpoint after every epoch
     trainer.tune(model, datamodule=datamodule)
     trainer.fit(model, datamodule)
 
