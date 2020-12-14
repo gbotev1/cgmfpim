@@ -14,7 +14,7 @@ TIME: real    9m52.191s
 **Note:**
 >The following message was returned during this run: `Primary job terminated normally, but 1 process returned a non-zero exit code. Per user-direction, the job has been aborted.`
 
-EXPERIMENT #3: `time horovodrun -np 8 --autotune --autotune-log-file tmp.csv python3 train.py -g gpt2 --gpus 1 --batch_size 2 --progress_bar_refresh_rate 20 --checkpoint_callback --accelerator horovod --benchmark --seed_everything --max_epochs 3`
+EXPERIMENT #3: `time horovodrun -np 8 --autotune --autotune-log-file notes/a100_experiment_3.csv python3 train.py -g gpt2 --gpus 1 --batch_size 2 --progress_bar_refresh_rate 20 --checkpoint_callback --accelerator horovod --benchmark --seed_everything --max_epochs 3`
 ```
 TIME: real    21m40.327s
       user    33m12.908s
