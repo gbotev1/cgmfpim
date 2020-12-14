@@ -64,7 +64,7 @@ class MemesDataModule(LightningDataModule):
         if sum(self.hparams.split_ratios) != 1.0:
             raise ValueError(
                 f'Split ratios "{self.hparams.split_ratios}" given has sum {sum(self.hparams.split_ratios)} instead of 1.0.')
-        if len(self.split_ratios) != 3:
+        if len(self.hparams.split_ratios) != 3:
             raise ValueError(
                 f'Split ratios "{self.hparams.split_ratios}" given has {len(self.hparams.split_ratios)} splits specified instead of 3 (corresponding to train-validation-test).')
         # Make sure each split has an integral size
