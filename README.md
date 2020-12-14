@@ -67,7 +67,7 @@ git clone https://github.com/gbotev1/cgmfpim.git
 
 ### 3. Install requirements
 
-Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you plan on using only our pre-computed archives, then not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which an appropriate version of CUDA must be installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled Linux version from Anaconda with CUDA Toolkit 10.2 for our experiments.
+Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you plan on using only our pre-computed archives, then not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which an appropriate version of CUDA must be installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled Linux version from Anaconda with CUDA Toolkit 10.2 for our experiments. In order to install Horovod properly for your machine, you should follow the official instructions [here](https://github.com/horovod/horovod/blob/master/docs/install.rst).
 ```sh
 pip3 install -U -r requirements.txt
 ```
