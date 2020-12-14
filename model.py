@@ -60,7 +60,4 @@ class GPT2(LightningModule):
 
     def configure_optimizers(self):
         no_decay = ['bias', 'LayerNorm.weight']
-        optimizer_grouped_parameters = [{'params': [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-                                         'weight_decay': self.hparams.weight_decay}]
-        return optim.AdamW(
-            optimizer_grouped_parameters, lr=self.hparams.learning_rate)
+        return optim.AdamW([p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)], lr=self.hparams.learning_rate)
