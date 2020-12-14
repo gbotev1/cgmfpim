@@ -67,12 +67,12 @@ git clone https://github.com/gbotev1/cgmfpim.git
 
 ### 3. Install requirements
 
-Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you plan on using only our pre-computed archives, then not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which an appropriate version of CUDA must be installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled Linux version from Anaconda with CUDA Toolkit 10.2 for our experiments. In order to install Horovod properly for your machine, you should follow the official instructions [here](https://github.com/horovod/horovod/blob/master/docs/install.rst).
+Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you plan on using only our pre-computed archives, then not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which an appropriate version of CUDA must be installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled Linux version from Anaconda with CUDA Toolkit 10.2 for our experiments.
 ```sh
 pip3 install -U -r requirements.txt
 ```
 **Notes:**
-> The `pytorch-lightning['extra']` PyPI package seems to not correctly install the extra dependencies, so we have modified our [`requirements.txt`](requirements.txt) file to manually install the [Horovod](https://github.com/horovod/horovod) and [FairScale](https://github.com/facebookresearch/fairscale) PyPI packages.
+> The `pytorch-lightning['extra']` PyPI package seems to not correctly install the extra dependencies, so we have modified our [`requirements.txt`](requirements.txt) file to manually install the [FairScale](https://github.com/facebookresearch/fairscale) PyPI package. In order to install [Horovod](https://github.com/horovod/horovod) properly for your machine, you should follow the official instructions [here](https://github.com/horovod/horovod/blob/master/docs/install.rst).
 
 > You might have to run `pip install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html` if you would like to run on an NVIDIA A100 GPU, which also requires CUDA 11.
 
