@@ -9,7 +9,7 @@
 
 <!-- SHIELDS -->
 <p align="center">
-    <img alt="Python 3.8" src="https://img.shields.io/badge/python-3.8-blue.svg?color=blue&style=for-the-badge"/>
+    <img alt="Python 3.9" src="https://img.shields.io/badge/python-3.9-blue.svg?color=blue&style=for-the-badge"/>
     <img alt="repo size" src="https://img.shields.io/github/repo-size/gbotev1/cgmfpim?color=blue&style=for-the-badge"/>
     <img alt="total lines" src="https://img.shields.io/tokei/lines/github/gbotev1/cgmfpim?color=blue&style=for-the-badge"/>
     <img alt="AGPL-3.0" src="https://img.shields.io/github/license/gbotev1/cgmfpim?color=blue&style=for-the-badge"/>
@@ -67,7 +67,7 @@ git clone https://github.com/gbotev1/cgmfpim.git
 
 ### 3. Install requirements
 
-Our code is tested using Python 3.8. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you plan on using only our pre-computed archives, then not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which an appropriate version of CUDA must be installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled Linux version from Anaconda with CUDA Toolkit 10.2 for our experiments.
+Our code is tested using Python 3.9. The provided [`requirements.txt`](requirements.txt) file delineates all requirements necessary to run any script in this repository. If you plan on using only our pre-computed archives, then not all of these packages are necessary. Some scripts may necessitate the use of a GPU for which an appropriate version of CUDA must be installed. You should also make sure to install the [FAISS Library](https://github.com/facebookresearch/faiss) on your machine. We used the pre-compiled Linux version from Anaconda with CUDA Toolkit 10.2 for our experiments.
 ```sh
 pip3 install -U -r requirements.txt
 ```
