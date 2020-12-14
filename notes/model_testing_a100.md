@@ -1,4 +1,4 @@
-EXPERIMENT #1: `time python3 train.py -g gpt2 --gpus 8 --batch_size 2 --progress_bar_refresh_rate 20 --checkpoint_callback --accelerator ddp --plugins=ddp_sharded --benchmark --seed_everything --max_epochs 3`
+EXPERIMENT #1: `time python3 train.py -g gpt2 --gpus 8 --batch_size 2 --progress_bar_refresh_rate 20 --checkpoint_callback --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 3`
 ```
 TIME: real    9m59.163s
       user    9m54.623s
