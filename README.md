@@ -71,8 +71,11 @@ Our code is tested using Python 3.8. The provided [`requirements.txt`](requireme
 ```sh
 pip3 install -U -r requirements.txt
 ```
-**Note:**
+**Notes:**
 > The `pytorch-lightning['extra']` PyPI package seems to not correctly install the extra dependencies, so we have modified our [`requirements.txt`](requirements.txt) file to manually install the [Horovod](https://github.com/horovod/horovod) and [FairScale](https://github.com/facebookresearch/fairscale) PyPI packages.
+
+> You might have to run `pip install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html` if you would like to run on an NVIDIA A100 GPU, which also requires CUDA 11.
+
 
 ### 4. Inflate archives
 
