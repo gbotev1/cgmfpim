@@ -11,7 +11,7 @@ def main(args: Namespace) -> None:
     datamodule = MemesDataModule(args)
     model = GPT2(args=args, tokenizer=datamodule.tokenizer)
     trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar(), ModelCheckpoint(
-        save_top_k=args.max_epochs)])  # Save checkpoint after every epoch
+        monitor='val_loss', save_top_k=args.max_epochs)])  # Save checkpoint after every epoch
     trainer.tune(model, datamodule=datamodule)
     trainer.fit(model, datamodule)
 
