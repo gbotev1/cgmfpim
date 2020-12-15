@@ -45,3 +45,10 @@ TIME: real    20m59.170s
       user    20m24.027s
       sys     0m52.393s
 ```
+
+EXPERIMENT #7: `time python3 train.py -g gpt2-xl --gpus 8 --batch_size 3 --accumulate_grad_batches 341 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1`
+```
+TIME: real    8m35.371s
+      user    7m43.693s
+      sys     0m31.953s
+```
