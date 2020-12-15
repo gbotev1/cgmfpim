@@ -7,7 +7,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 
 def main(args: Namespace) -> None:
     if args.seed_everything:
-        seed_everything(0)  # For reproducability
+        seed_everything(0)  # For reproducibility
     datamodule = MemesDataModule(args)
     model = GPT2(args=args, tokenizer=datamodule.tokenizer)
     trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar(), ModelCheckpoint(
