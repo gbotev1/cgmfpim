@@ -52,3 +52,12 @@ TIME: real    8m35.371s
       user    7m43.693s
       sys     0m31.953s
 ```
+
+The following experiments are after switching from the separator token "<|SEP|>" to the regular string ": ".
+
+EXPERIMENT #8: `time python3 train.py -g gpt2 --gpus 8 --accelerator ddp --batch_size 2 --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1`
+```
+TIME: real    3m25.127s
+      user    3m14.572s
+      sys     0m11.668s
+```
