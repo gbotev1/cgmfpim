@@ -58,9 +58,9 @@ class MemesDataModule(LightningDataModule):
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
-                # Associate meme type with its caption by separating with special control sequence (do not add new token!)
+                # Associate meme type with its caption (lowercased) by separating with special control sequence (do not add new token!)
                 captions.append(
-                    f'{meme[1]}{SEP_TOKEN}{meme[2]}{self.tokenizer.eos_token}')
+                    f'{meme[1]}{SEP_TOKEN}{meme[2].lower()}{self.tokenizer.eos_token}')
         with open(path.join(self.hparams.data_dir, self.hparams.outfile), 'wb') as handle:
             dump(captions, handle, HIGHEST_PROTOCOL)
 
