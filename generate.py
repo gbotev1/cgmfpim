@@ -31,7 +31,7 @@ def main(args: Namespace):
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
             start = meme.find(SEP_TOKEN)
-            print(meme[start + len(SEP_TOKEN) - 1:])
+            print(f'{meme[:start]}\n{meme[start + len(SEP_TOKEN):]}')
             outfile.write(f'{meme}\n')
 
 

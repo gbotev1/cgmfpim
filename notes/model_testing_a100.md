@@ -31,3 +31,10 @@ TIME: real    10m38.522s
 ```
 **Note:**
 >The following message was returned during this run: `Primary job terminated normally, but 1 process returned a non-zero exit code. Per user-direction, the job has been aborted.`
+
+EXPERIMENT #5: `time python3 train.py -g gpt2-xl --gpus 8 --batch_size 3 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1`
+```
+TIME: real    10m5.590s
+      user    9m15.976s
+      sys     0m31.536s
+```
