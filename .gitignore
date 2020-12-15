@@ -6,6 +6,7 @@ data/*
 !data/*.tar
 __pycache__/
 test_outfile.txt
+lightning_logs/*/checkpoints/*.ckpt
 meme-machine.pem
 
 # Peter
