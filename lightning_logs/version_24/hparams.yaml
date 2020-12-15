@@ -1,12 +1,12 @@
 accelerator: ddp
-accumulate_grad_batches: 2
+accumulate_grad_batches: 4
 amp_backend: native
 amp_level: O2
 auto_lr_find: false
 auto_scale_batch_size: false
 auto_select_gpus: false
 automatic_optimization: null
-batch_size: 16
+batch_size: 8
 benchmark: true
 check_val_every_n_epoch: 1
 checkpoint_callback: true
@@ -21,7 +21,7 @@ gpt2_model_type: gpt2
 gpus: 8
 gradient_checkpointing: false
 gradient_clip_val: 0
-infile: meme_data_top.tsv
+infile: meme_data.tsv
 learning_rate: 0.0004
 limit_test_batches: 1.0
 limit_train_batches: 1.0
