@@ -20,7 +20,7 @@ class GPT2(LightningModule):
         if tokenizer is None:
             raise ValueError(
                 "A valid \"tokenizer\" must be provided to initialize this model. The \"tokenizer\" appears as an optional argument to be compatible with PyTorch Lightning's checkpoint loading function.")
-        # Update pad_token_id
+        # Update pad and separator token IDs
         self.model = GPT2LMHeadModel.from_pretrained(
             args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id)
         # Save hyperparameters

@@ -2,6 +2,8 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from transformers import GPT2TokenizerFast
 from model import GPT2
 
+SEP_TOKEN = '<|SEP|>'
+
 
 def main(args: Namespace):
     # Initialize tokenizer the same way we did when training (in MemesDataModule)
@@ -15,9 +17,8 @@ def main(args: Namespace):
     prompts = []
     with open(args.infile) as infile:
         for line in infile:
-            # Attach special separator token to complete prompt
-            # Strip newline from prompts when generating
-            prompts.append(f'{line[:-1]}{tokenizer.sep_token}')
+            # Attach special control sequence to complete prompt, stripping newline from prompts when generating
+            prompts.append(f'{line[:-1]}{SEP_TOKEN}')
     # Tokenize
     inputs = tokenizer(prompts, return_tensors='pt',
                        padding=True, truncation=True)
@@ -29,8 +30,8 @@ def main(args: Namespace):
         for i, pred in enumerate(outputs):
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
-            start = meme.find(prompt[i])
-            print(meme[start + len(prompt[i]) - 1:])
+            start = meme.find(SEP_TOKEN)
+            print(meme[start + len(SEP_TOKEN) - 1:])
             outfile.write(f'{meme}\n')
 
 
