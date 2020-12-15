@@ -17,7 +17,8 @@ def main(args: Namespace):
     with open(args.infile) as infile:
         for line in infile:
             # Attach special separator token to complete prompt
-            prompts.append(f'{line}{tokenizer.sep_token}')
+            # Strip newline from prompts when generating
+            prompts.append(f'{line[:-1]}{tokenizer.sep_token}')
     # Tokenize
     inputs = tokenizer(prompts, return_tensors='pt',
                        padding=True, truncation=True)
@@ -26,10 +27,11 @@ def main(args: Namespace):
                                    max_length=args.max_length, top_p=args.top_p, top_k=args.top_k)
     # Save and print results
     with open(args.outfile, 'w') as outfile:
-        for pred in outputs:
+        for i, pred in enumerate(outputs):
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
-            print(meme)
+            start = meme.find(prompt[i])
+            print(meme[start + len(prompt[i]) - 1:])
             outfile.write(f'{meme}\n')
 
 
