@@ -5,6 +5,7 @@ data/*
 !data/*.tar.bz2
 !data/*.tar
 __pycache__/
+test_outfile.txt
 meme-machine.pem
 
 # Peter
