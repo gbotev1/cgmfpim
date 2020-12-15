@@ -20,11 +20,9 @@ class GPT2(LightningModule):
         if tokenizer is None:
             raise ValueError(
                 "A valid \"tokenizer\" must be provided to initialize this model. The \"tokenizer\" appears as an optional argument to be compatible with PyTorch Lightning's checkpoint loading function.")
-        # Update both pad_token and newly added sep_token
+        # Update pad_token_id
         self.model = GPT2LMHeadModel.from_pretrained(
-            args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, sep_token_id=tokenizer.sep_token_id)
-        # Resize model's token embedding
-        self.model.resize_token_embeddings(len(tokenizer))
+            args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id)
         # Save hyperparameters
         self.save_hyperparameters(args)
 

@@ -6,8 +6,7 @@ from model import GPT2
 def main(args: Namespace):
     # Initialize tokenizer the same way we did when training (in MemesDataModule)
     tokenizer = GPT2TokenizerFast.from_pretrained(args.gpt2_model_type)
-    tokenizer.add_special_tokens(
-        {'pad_token': tokenizer.eos_token, 'sep_token': '<|SEP|>'})
+    tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     # Load model weights from checkpoint
     model = GPT2.load_from_checkpoint(
         args.checkpoint, args=args, tokenizer=tokenizer)
@@ -17,7 +16,7 @@ def main(args: Namespace):
     with open(args.infile) as infile:
         for line in infile:
             # Attach special separator token to complete prompt
-            prompts.append(f'{line}{tokenizer.sep_token}')
+            prompts.append(f'{line}: ')
     # Tokenize
     inputs = tokenizer(prompts, return_tensors='pt',
                        padding=True, truncation=True)
