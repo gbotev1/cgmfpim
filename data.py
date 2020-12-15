@@ -38,9 +38,9 @@ class MemesDataModule(LightningDataModule):
         # environ['TOKENIZERS_PARALLELISM'] = 'false' (maybe it should actually be 'true'?)
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
             args.gpt2_model_type)
-        # Make sure pad token is also <|endoftext|> and set special separator token
+        # Make sure pad token is also <|endoftext|>
         self.tokenizer.add_special_tokens(
-            {'pad_token': self.tokenizer.eos_token, 'sep_token': '<|SEP|>'})
+            {'pad_token': self.tokenizer.eos_token})
         # Define custom collate function for data loader to tokenize batch properly
         self.collate_fn = lambda batch: self.tokenizer(
             batch, return_tensors='pt', padding=True, truncation=True)
@@ -56,9 +56,9 @@ class MemesDataModule(LightningDataModule):
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
-                # Associate meme's tags to its caption by separating with sep_token
+                # Associate meme type with its caption by separating with colon
                 captions.append(
-                    f'{meme[3]}{self.tokenizer.sep_token}{meme[2]}{self.tokenizer.eos_token}')
+                    f'{meme[1]}: {meme[2]}{self.tokenizer.eos_token}')
         with open(path.join(self.hparams.data_dir, self.hparams.outfile), 'wb') as handle:
             dump(captions, handle, HIGHEST_PROTOCOL)
 
