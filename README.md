@@ -36,10 +36,10 @@
 	<li><a href="#contact">Contact</a></li>
   	<li>
 		<a href="#references">References</a>
-		<ol>
+		<ul>
 			<li><a href="#code">Code</a></li>
 			<li><a href="#papers">Papers</a></li>
-		</ol>
+		</ul>
 	</li>
 </ul>
 
