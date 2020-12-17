@@ -23,7 +23,7 @@ def main(args: Namespace):
                              max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_returned_sequences=args.num_returned_sequences)
     # Save and print results
     with open(args.outfile, 'w') as outfile:
-        for i, pred in enumerate(outputs):
+        for pred in outputs:
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
             print(meme)
