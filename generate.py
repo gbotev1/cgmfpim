@@ -1,6 +1,25 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
-from transformers import GPT2TokenizerFast, GPT2LMHeadModel
+from transformers import PreTrainedTokenizerBase, GPT2TokenizerFast, GPT2LMHeadModel
 from model import GPT2
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Optional
+from io import TextIOWrapper
+
+
+def filter_meme(pred: str, tokenizer: PreTrainedTokenizerBase, tag: Optional[str], outfile: TextIOWrapper) -> Optional[str]:
+    # Detokenize encoding
+    meme = tokenizer.decode(pred, skip_special_tokens=True)
+    # Filter memes as requested
+    if tag is not None:
+        candidate = meme.find('Tags:')
+        if candidate != -1 and tag in meme[candidate + 4:].split(','):
+            outfile.write(f'{meme}\n')
+            return meme
+        else:
+            return None
+    else:
+        outfile.write(f'{meme}\n')
+        return meme
 
 
 def main(args: Namespace):
@@ -21,19 +40,15 @@ def main(args: Namespace):
     model = model if args.use_pretrained else model.model
     outputs = model.generate(tokenizer.encode('Meme:\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
                              max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
-    # Save and print results
+    # Save and print results using multiprocessing for efficiency
     with open(args.outfile, 'w') as outfile:
-        for pred in outputs:
-            # Detokenize encoding
-            meme = tokenizer.decode(pred, skip_special_tokens=True)
-            if args.tag is not None:
-                candidate = meme.find('Tags:')
-                if candidate != -1 and args.tag in meme[candidate + 4:].split(','):
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(lambda x: filter_meme(
+                x, tokenizer, args.tag, outfile), pred) for pred in outputs]
+            for future in as_completed(futures):
+                meme = future.result()
+                if meme is not None:
                     print(meme)
-                    outfile.write(f'{meme}\n')
-            else:
-                print(meme)
-                outfile.write(f'{meme}\n')
 
 
 if __name__ == '__main__':
