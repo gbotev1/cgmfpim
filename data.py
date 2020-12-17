@@ -62,7 +62,7 @@ class MemesDataModule(LightningDataModule):
                 caption = '\n'.join([line.strip()
                                      for line in caption.split('\n')])
                 captions.append(
-                    f'Meme:\n\n{caption}\n\nTags: {meme[3]}{self.tokenizer.eos_token}')
+                    f'Tags:\n\n{meme[3]}\n\nMeme:\n\n{caption}{self.tokenizer.eos_token}')
         with open(path.join(self.hparams.data_dir, self.hparams.outfile), 'wb') as handle:
             dump(captions, handle, HIGHEST_PROTOCOL)
 
