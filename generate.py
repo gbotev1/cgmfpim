@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel
+from pytorch_lightning import seed_everything
 from model import GPT2
 
 
@@ -40,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('tags', type=str, default=None,
                         help='Generate memes by filtering for these tags separated by commas with no spaces. You can also supply "@@@" to generate a random meme.')
     parser.add_argument('-s', '--seed_everything', action='store_true',
-                        help="whether to call PyTorch Lightning's \"seed_everything\" method with argument 0 for reproducability")
+                        help="whether to call PyTorch Lightning's \"seed_everything\" method with argument 0 for reproducibility")
     parser.add_argument('-o', '--outfile', type=str, default='test_outfile.txt',
                         help='filename in root directory to store generated model samples')
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
