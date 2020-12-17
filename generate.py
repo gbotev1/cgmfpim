@@ -1,8 +1,7 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from transformers import GPT2TokenizerFast
 from model import GPT2
-
-SEP_TOKEN = '<|SEP|>'
+from torch import cuda
 
 
 def main(args: Namespace):
@@ -11,14 +10,15 @@ def main(args: Namespace):
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     # Load model weights from checkpoint
     model = GPT2.load_from_checkpoint(
-        args.checkpoint, args=args, tokenizer=tokenizer)
+        args.checkpoint, args=args, tokenizer=tokenizer).to('cuda' if cuda.is_available() else 'cpu')  # Use CUDA if possible
     model.eval()  # Don't forget to put model in evaluation mode!
     # Prepare starter text
     prompts = []
     with open(args.infile) as infile:
         for line in infile:
-            # Attach special control sequence to complete prompt, stripping newline from prompts when generating
-            prompts.append(f'{line[:-1]}{SEP_TOKEN}')
+            # Attach special control sequence to complete prompt
+            # Add only a single newline since "line" already has 1
+            prompts.append(f'{line}\n')
     # Tokenize
     inputs = tokenizer(prompts, return_tensors='pt',
                        padding=True, truncation=True)
@@ -30,8 +30,7 @@ def main(args: Namespace):
         for i, pred in enumerate(outputs):
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
-            start = meme.find(SEP_TOKEN)
-            print(f'{meme[:start]}\n{meme[start + len(SEP_TOKEN):]}')
+            print(meme)
             outfile.write(f'{meme}\n')
 
 

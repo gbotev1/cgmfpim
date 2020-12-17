@@ -8,8 +8,6 @@ from argparse import Namespace
 from pickle import load, dump, HIGHEST_PROTOCOL
 import torch
 
-SEP_TOKEN = '<|SEP|>'
-
 
 class MemesDataset(Dataset):
 
@@ -60,7 +58,7 @@ class MemesDataModule(LightningDataModule):
             for meme in tsv_reader:
                 # Associate meme type with its caption (lowercased) by separating with special control sequence (do not add new token!)
                 captions.append(
-                    f'{meme[1]}{SEP_TOKEN}{meme[2].lower()}{self.tokenizer.eos_token}')
+                    f'Meme:\n\n{meme[2].lower()}\n\nTags: {meme[3]}{self.tokenizer.eos_token}')
         with open(path.join(self.hparams.data_dir, self.hparams.outfile), 'wb') as handle:
             dump(captions, handle, HIGHEST_PROTOCOL)
 
