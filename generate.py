@@ -20,7 +20,7 @@ def main(args: Namespace):
     # Predict, switching based on generation type
     model = model if args.use_pretrained else model.model
     outputs = model.generate(tokenizer.encode('Meme:\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
-                             max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_returned_sequences)
+                             max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
     # Save and print results
     with open(args.outfile, 'w') as outfile:
         for pred in outputs:
