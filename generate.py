@@ -19,7 +19,7 @@ def main(args: Namespace):
     model.eval()  # Don't forget to put model in evaluation mode!
     # Predict, switching based on generation type
     model = model if args.use_pretrained else model.model
-    outputs = model.generate(tokenizer.encode(f'Tags:\n\n{args.tag}\n\nMeme:\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
+    outputs = model.generate(tokenizer.encode(f'Tags: {args.tags}\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
                              max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
     # Save and print results using multiprocessing for efficiency
     with open(args.outfile, 'w') as outfile:
@@ -35,7 +35,7 @@ if __name__ == '__main__':
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('checkpoint', type=str,
                         help='checkpoint filepath from which to load GPT-2 model weights')
-    parser.add_argument('tag', type=str, default=None,
+    parser.add_argument('tags', type=str, default=None,
                         help='Generate memes filtering for this tag')
     parser.add_argument('-o', '--outfile', type=str, default='test_outfile.txt',
                         help='filename in root directory to store generated model samples')
