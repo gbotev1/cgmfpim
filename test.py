@@ -30,7 +30,7 @@ def main(args: Namespace):
     #                          max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
     
     print("running testing")
-    trainer.test(model)
+    Trainer.test(model)
 
     # # Save and print results using multiprocessing for efficiency
     # with open(args.outfile, 'w') as outfile:
