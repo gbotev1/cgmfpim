@@ -1,6 +1,7 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel
 from pytorch_lightning import Trainer, seed_everything
+from data import MemesDataModule
 from model import GPT2
 
 
@@ -28,6 +29,7 @@ def main(args: Namespace):
     # outputs = model.generate(tokenizer.encode('Tags: ' if args.tags == '@@@' else f'Tags: {args.tags}\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
     #                          max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
     
+    print("running testing")
     trainer.test(model)
 
     # # Save and print results using multiprocessing for efficiency
@@ -55,10 +57,6 @@ if __name__ == '__main__':
                         help='Huggingface transformers argument description: If set to float < 1, only the most probable tokens with probabilities that add up to top_p or higher are kept for generation. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('-k', '--top_k', type=int, default=50,
                         help='Huggingface transformers argument description: The number of highest probability vocabulary tokens to keep for top-k-filtering. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
-    parser.add_argument('-l', '--max_length', type=int, default=1024,
-                        help='Huggingface transformers argument description: The maximum length of the sequence to be generated. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
-    parser.add_argument('-n', '--num_return_sequences', type=int, default=100,
-                        help='Huggingface transformers argument description: The number of independently computed returned sequences for each element in the batch. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('--use_pretrained', action='store_true',
                         help='whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
     main(parser.parse_args())
