@@ -56,9 +56,13 @@ class MemesDataModule(LightningDataModule):
             tsv_reader = csv_reader(tsvfile, delimiter='\t')
             _ = next(tsv_reader)  # Consume header
             for meme in tsv_reader:
-                # Associate meme type with its caption (lowercased) by separating with special control sequence (do not add new token!)
+                # Associate meme type with its caption by separating with special control sequence (do not add new token!)
+                caption = meme[2].lower()  # Handle ALL-CAPS captions
+                # Strip extraneous whitespace, accounting for multiline text too!
+                caption = '\n'.join([line.strip()
+                                     for line in caption.split('\n')])
                 captions.append(
-                    f'Meme:\n\n{meme[2].lower()}\n\nTags: {meme[3]}{self.tokenizer.eos_token}')
+                    f'Meme:\n\n{caption}\n\nTags: {meme[3]}{self.tokenizer.eos_token}')
         with open(path.join(self.hparams.data_dir, self.hparams.outfile), 'wb') as handle:
             dump(captions, handle, HIGHEST_PROTOCOL)
 
