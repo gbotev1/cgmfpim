@@ -9,3 +9,4 @@ torch
 nltk
 fairscale
 tensorboard
+editdistance
