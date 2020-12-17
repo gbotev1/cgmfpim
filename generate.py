@@ -29,8 +29,12 @@ def main(args: Namespace):
     inputs = tokenizer(prompts, return_tensors='pt',
                        padding=True, truncation=True)
     # Predict
-    outputs = model.model.generate(inputs['input_ids'], eos_token_id=tokenizer.eos_token_id, do_sample=True,
-                                   max_length=args.max_length, top_p=args.top_p, top_k=args.top_k)
+    if args.use_pretrained:
+        outputs = model.generate(inputs['input_ids'], eos_token_id=tokenizer.eos_token_id, do_sample=True,
+                                 max_length=args.max_length, top_p=args.top_p, top_k=args.top_k)
+    else:
+        outputs = model.model.generate(inputs['input_ids'], eos_token_id=tokenizer.eos_token_id, do_sample=True,
+                                       max_length=args.max_length, top_p=args.top_p, top_k=args.top_k)
     # Save and print results
     with open(args.outfile, 'w') as outfile:
         for i, pred in enumerate(outputs):

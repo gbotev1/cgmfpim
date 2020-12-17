@@ -115,3 +115,10 @@ TIME: real    10m43.583s
       user    14m27.900s
       sys     1m15.371s
 ```
+
+EXPERIMENT #16: `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 64 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+```
+TIME: real    9m45.052s
+      user    13m57.288s
+      sys     0m56.061s
+```
