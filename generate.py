@@ -17,9 +17,6 @@ def main(args: Namespace):
         # Load model weights from checkpoint
         model = GPT2.load_from_checkpoint(
             args.checkpoint, args=args, tokenizer=tokenizer)
-    # Use CUDA if possible
-    # Modification is done in-place
-    model.to('cuda' if cuda.is_available() else 'cpu')
     model.eval()  # Don't forget to put model in evaluation mode!
     # Prepare starter text
     prompts = []
