@@ -1,6 +1,7 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel
 from pytorch_lightning import Trainer, seed_everything
+from pytorch_lightning.callbacks import ProgressBar, ModelCheckpoint
 from data import MemesDataModule
 from model import GPT2
 
