@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
-from transformers import GPT2TokenizerFast
+from transformers import GPT2TokenizerFast, GPT2LMHeadModel
 from model import GPT2
 from torch import cuda
 
@@ -8,9 +8,17 @@ def main(args: Namespace):
     # Initialize tokenizer the same way we did when training (in MemesDataModule)
     tokenizer = GPT2TokenizerFast.from_pretrained(args.gpt2_model_type)
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
-    # Load model weights from checkpoint
-    model = GPT2.load_from_checkpoint(
-        args.checkpoint, args=args, tokenizer=tokenizer).to('cuda' if cuda.is_available() else 'cpu')  # Use CUDA if possible
+    # Initialize appropriate model
+    if args.use_pretrained:
+        # Use vanilla pre-trained version
+        model = GPT2LMHeadModel.from_pretrained(args.gpt2_model_type)
+    else:
+        # Load model weights from checkpoint
+        model = GPT2.load_from_checkpoint(
+            args.checkpoint, args=args, tokenizer=tokenizer)
+    # Use CUDA if possible
+    # Modification is done in-place
+    model.to('cuda' if cuda.is_available() else 'cpu')
     model.eval()  # Don't forget to put model in evaluation mode!
     # Prepare starter text
     prompts = []
@@ -51,4 +59,6 @@ if __name__ == '__main__':
                         help='Huggingface transformers argument description: The number of highest probability vocabulary tokens to keep for top-k-filtering. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('-l', '--max_length', type=int, default=50,
                         help='Huggingface transformers argument description: The maximum length of the sequence to be generated. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
+    parser.add_argument('--use_pretrained', action='store_true',
+                        help='Whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
     main(parser.parse_args())
