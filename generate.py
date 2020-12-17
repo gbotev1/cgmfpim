@@ -20,7 +20,7 @@ def main(args: Namespace):
     # Predict, switching based on generation type
     model = model if args.use_pretrained else model.model
     outputs = model.generate(tokenizer.encode('Meme:\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
-                             max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_returned_sequences=args.num_returned_sequences)
+                             max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_returned_sequences)
     # Save and print results
     with open(args.outfile, 'w') as outfile:
         for pred in outputs:
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                         help='Huggingface transformers argument description: The number of highest probability vocabulary tokens to keep for top-k-filtering. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('-l', '--max_length', type=int, default=50,
                         help='Huggingface transformers argument description: The maximum length of the sequence to be generated. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
-    parser.add_argument('-n', '--num_returned_sequences', type=int, default=100,
+    parser.add_argument('-n', '--num_return_sequences', type=int, default=100,
                         help='Huggingface transformers argument description: The number of independently computed returned sequences for each element in the batch. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('--use_pretrained', action='store_true',
                         help='Whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
