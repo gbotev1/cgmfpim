@@ -32,6 +32,7 @@ def main(args: Namespace):
     
     trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar(), ModelCheckpoint(
         monitor='test_loss', save_top_k=args.max_epochs, save_weights_only=True)])  # Save checkpoint after every epoch
+    trainer.tune(model, datamodule=datamodule)
     print("running testing")
     trainer.test(model)
 
