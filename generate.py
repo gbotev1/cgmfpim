@@ -1,7 +1,6 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel
 from model import GPT2
-from torch import cuda
 
 
 def main(args: Namespace):
