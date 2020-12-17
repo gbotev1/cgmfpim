@@ -28,10 +28,9 @@ def main(args: Namespace):
             meme = tokenizer.decode(pred, skip_special_tokens=True)
             if args.tag is not None:
                 candidate = meme.find('Tags:')
-                if candidate != -1:
-                    if args.tag in meme[candidate + 4:].split(','):
-                        print(meme)
-                        outfile.write(f'{meme}\n')
+                if candidate != -1 and args.tag in meme[candidate + 4:].split(','):
+                    print(meme)
+                    outfile.write(f'{meme}\n')
             else:
                 print(meme)
                 outfile.write(f'{meme}\n')
