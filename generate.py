@@ -4,6 +4,8 @@ from model import GPT2
 
 
 def main(args: Namespace):
+    if args.seed_everything:
+        seed_everything(0)  # For reproducibility
     # Initialize tokenizer the same way we did when training (in MemesDataModule)
     tokenizer = GPT2TokenizerFast.from_pretrained(args.gpt2_model_type)
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
@@ -37,6 +39,8 @@ if __name__ == '__main__':
                         help='checkpoint filepath from which to load GPT-2 model weights')
     parser.add_argument('tags', type=str, default=None,
                         help='Generate memes by filtering for these tags separated by commas with no spaces. You can also supply "@@@" to generate a random meme.')
+    parser.add_argument('-s', '--seed_everything', action='store_true',
+                        help="whether to call PyTorch Lightning's \"seed_everything\" method with argument 0 for reproducability")
     parser.add_argument('-o', '--outfile', type=str, default='test_outfile.txt',
                         help='filename in root directory to store generated model samples')
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
@@ -50,5 +54,5 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num_return_sequences', type=int, default=100,
                         help='Huggingface transformers argument description: The number of independently computed returned sequences for each element in the batch. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('--use_pretrained', action='store_true',
-                        help='Whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
+                        help='whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
     main(parser.parse_args())
