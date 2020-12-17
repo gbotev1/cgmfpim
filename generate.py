@@ -26,8 +26,15 @@ def main(args: Namespace):
         for pred in outputs:
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
-            print(meme)
-            outfile.write(f'{meme}\n')
+            if args.tag is not None:
+                candidate = meme.find('Tags:')
+                if candidate != -1:
+                    if args.tag in meme[candidate + 4:].split(','):
+                        print(meme)
+                        outfile.write(f'{meme}\n')
+            else:
+                print(meme)
+                outfile.write(f'{meme}\n')
 
 
 if __name__ == '__main__':
@@ -43,10 +50,12 @@ if __name__ == '__main__':
                         help='Huggingface transformers argument description: If set to float < 1, only the most probable tokens with probabilities that add up to top_p or higher are kept for generation. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('-k', '--top_k', type=int, default=50,
                         help='Huggingface transformers argument description: The number of highest probability vocabulary tokens to keep for top-k-filtering. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
-    parser.add_argument('-l', '--max_length', type=int, default=50,
+    parser.add_argument('-l', '--max_length', type=int, default=1024,
                         help='Huggingface transformers argument description: The maximum length of the sequence to be generated. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('-n', '--num_return_sequences', type=int, default=100,
                         help='Huggingface transformers argument description: The number of independently computed returned sequences for each element in the batch. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('--use_pretrained', action='store_true',
                         help='Whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
+    parser.add_argument('--tag', type=str, default=None,
+                        help='Whether to filter generated memes that match provided tag')
     main(parser.parse_args())
