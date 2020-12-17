@@ -45,8 +45,6 @@ if __name__ == '__main__':
     parser = Trainer.add_argparse_args(parser)
     parser.add_argument('checkpoint', type=str,
                         help='checkpoint filepath from which to load GPT-2 model weights')
-    parser.add_argument('tags', type=str, default=None,
-                        help='Generate memes by filtering for these tags separated by commas with no spaces. You can also supply "@@@" to generate a random meme.')
     parser.add_argument('-s', '--seed_everything', action='store_true',
                         help="whether to call PyTorch Lightning's \"seed_everything\" method with argument 0 for reproducibility")
     parser.add_argument('-o', '--outfile', type=str, default='test_outfile.txt',
