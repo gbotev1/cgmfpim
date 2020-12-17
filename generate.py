@@ -11,8 +11,8 @@ def filter_meme(pred: str, tokenizer: PreTrainedTokenizerBase, tag: Optional[str
     meme = tokenizer.decode(pred, skip_special_tokens=True)
     # Filter memes as requested
     if tag is not None:
-        candidate = meme.find('Tags:')
-        if candidate != -1 and tag in meme[candidate + 4:].split(','):
+        candidate = meme.find('Tags: ')
+        if candidate != -1 and tag in meme[candidate + 6:].split(','):
             outfile.write(f'{meme}\n')
             return meme
         else:
