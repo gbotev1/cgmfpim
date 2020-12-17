@@ -150,9 +150,23 @@ TIME: real    32m58.058s
 
 Using new ordering...
 
-EXPERIMENT #20 (log 29): `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+EXPERIMENT #20 (log 29): `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data_top.tsv`
 ```
-TIME: real    10m12.429s
-      user    14m24.273s
-      sys     0m59.401s
+TIME: real    1m22.765s
+      user    1m15.525s
+      sys     0m12.457s
+```
+
+EXPERIMENT #21 (log 30): `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data_top.tsv`
+```
+TIME: real    1m26.848s
+      user    1m21.443s
+      sys     0m13.029s
+```
+
+EXPERIMENT #22 (log 31): `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+```
+TIME: real    10m13.519s
+      user    13m53.355s
+      sys     0m59.063s
 ```
