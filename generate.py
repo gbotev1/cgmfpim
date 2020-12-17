@@ -18,23 +18,10 @@ def main(args: Namespace):
         model = GPT2.load_from_checkpoint(
             args.checkpoint, args=args, tokenizer=tokenizer)
     model.eval()  # Don't forget to put model in evaluation mode!
-    # Prepare starter text
-    prompts = []
-    with open(args.infile) as infile:
-        for line in infile:
-            # Attach special control sequence to complete prompt
-            # Add only a single newline since "line" already has 1
-            prompts.append(f'{line}\n')
-    # Tokenize
-    inputs = tokenizer(prompts, return_tensors='pt',
-                       padding=True, truncation=True)
-    # Predict
-    if args.use_pretrained:
-        outputs = model.generate(inputs['input_ids'], eos_token_id=tokenizer.eos_token_id, do_sample=True,
-                                 max_length=args.max_length, top_p=args.top_p, top_k=args.top_k)
-    else:
-        outputs = model.model.generate(inputs['input_ids'], eos_token_id=tokenizer.eos_token_id, do_sample=True,
-                                       max_length=args.max_length, top_p=args.top_p, top_k=args.top_k)
+    # Predict, switching based on generation type
+    model = model if args.use_pretrained else model.model
+    outputs = model.generate(tokenizer.encode('Meme:\n\n'), eos_token_id=tokenizer.eos_token_id, do_sample=True,
+                             max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_returned_sequences=args.num_returned_sequences)
     # Save and print results
     with open(args.outfile, 'w') as outfile:
         for i, pred in enumerate(outputs):
@@ -49,8 +36,6 @@ if __name__ == '__main__':
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('checkpoint', type=str,
                         help='checkpoint filepath from which to load GPT-2 model weights')
-    parser.add_argument('-i', '--infile', type=str, default='test_infile.txt',
-                        help='filename in root directory of test primer text for model')
     parser.add_argument('-o', '--outfile', type=str, default='test_outfile.txt',
                         help='filename in root directory to store generated model samples')
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
@@ -61,6 +46,8 @@ if __name__ == '__main__':
                         help='Huggingface transformers argument description: The number of highest probability vocabulary tokens to keep for top-k-filtering. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('-l', '--max_length', type=int, default=50,
                         help='Huggingface transformers argument description: The maximum length of the sequence to be generated. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
+    parser.add_argument('-n', '--num_returned_sequences', type=int, default=100,
+                        help='Huggingface transformers argument description: The number of independently computed returned sequences for each element in the batch. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('--use_pretrained', action='store_true',
                         help='Whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
     main(parser.parse_args())

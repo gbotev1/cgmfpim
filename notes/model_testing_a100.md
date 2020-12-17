@@ -116,9 +116,25 @@ TIME: real    10m43.583s
       sys     1m15.371s
 ```
 
+The following experiments were run using the new dataset format.
+
 EXPERIMENT #16: `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 64 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
 ```
 TIME: real    9m45.052s
       user    13m57.288s
       sys     0m56.061s
+```
+
+EXPERIMENT #17: `time python3 train.py -g gpt2 --gpus 8 --learning_rate 1.5e-6 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+```
+TIME: real    10m3.108s
+      user    13m40.333s
+      sys     0m56.538s
+```
+
+EXPERIMENT #18: `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+```
+TIME: real    10m15.354s
+      user    14m11.430s
+      sys     0m55.549s
 ```
