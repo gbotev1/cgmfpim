@@ -170,3 +170,10 @@ TIME: real    10m13.519s
       user    13m53.355s
       sys     0m59.063s
 ```
+
+EXPERIMENT #23 (log 32): `time python3 train.py -g gpt2-medium --gpus 8 --batch_size 4 --accumulate_grad_batches 2 --accelerator ddp --plugins ddp_sharded --seed_everything --max_epochs 2 --progress_bar_refresh_rate 20 -i meme_data.tsv --split_ratios 0.96 0.02 0.02 --gradient_checkpointing`
+```
+TIME: real    82m6.360s
+      user    90m2.579s
+      sys     1m54.703s
+```
