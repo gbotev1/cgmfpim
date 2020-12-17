@@ -26,8 +26,8 @@ def main(args: Namespace):
         for pred in outputs:
             # Detokenize encoding
             meme = tokenizer.decode(pred, skip_special_tokens=True)
+            print(meme)
             outfile.write(f'{meme}\n')
-            return meme
 
 
 if __name__ == '__main__':
@@ -35,6 +35,8 @@ if __name__ == '__main__':
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('checkpoint', type=str,
                         help='checkpoint filepath from which to load GPT-2 model weights')
+    parser.add_argument('tag', type=str, default=None,
+                        help='Generate memes filtering for this tag')
     parser.add_argument('-o', '--outfile', type=str, default='test_outfile.txt',
                         help='filename in root directory to store generated model samples')
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
@@ -49,6 +51,4 @@ if __name__ == '__main__':
                         help='Huggingface transformers argument description: The number of independently computed returned sequences for each element in the batch. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('--use_pretrained', action='store_true',
                         help='Whether to use the default pre-trained GPT-2 model instead of a fine-tuned one for comparison purposes')
-    parser.add_argument('--tag', type=str, default=None,
-                        help='Whether to filter generated memes that match provided tag')
     main(parser.parse_args())
