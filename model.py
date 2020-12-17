@@ -22,7 +22,7 @@ class GPT2(LightningModule):
                 "A valid \"tokenizer\" must be provided to initialize this model. The \"tokenizer\" appears as an optional argument to be compatible with PyTorch Lightning's checkpoint loading function.")
         # Update pad and separator token IDs
         self.model = GPT2LMHeadModel.from_pretrained(
-            args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id)
+            args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, resid_pdrop=0.0, embd_pdrop=0.0, attn_pdrop=0.0)  # Make sure to not use dropout when fine-tuning
         # Save hyperparameters
         self.save_hyperparameters(args)
 

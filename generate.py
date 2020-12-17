@@ -11,7 +11,8 @@ def main(args: Namespace):
     # Initialize appropriate model
     if args.use_pretrained:
         # Use vanilla pre-trained version
-        model = GPT2LMHeadModel.from_pretrained(args.gpt2_model_type)
+        model = GPT2LMHeadModel.from_pretrained(
+            args.gpt2_model_type, pad_token_id=tokenizer.eos_token_id, resid_pdrop=0.0, embd_pdrop=0.0, attn_pdrop=0.0)
     else:
         # Load model weights from checkpoint
         model = GPT2.load_from_checkpoint(
