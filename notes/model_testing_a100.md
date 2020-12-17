@@ -118,23 +118,32 @@ TIME: real    10m43.583s
 
 The following experiments were run using the new dataset format.
 
-EXPERIMENT #16: `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 64 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+EXPERIMENT #16 (log 25): `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 64 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
 ```
 TIME: real    9m45.052s
       user    13m57.288s
       sys     0m56.061s
 ```
 
-EXPERIMENT #17: `time python3 train.py -g gpt2 --gpus 8 --learning_rate 1.5e-6 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+EXPERIMENT #17 (log 26): `time python3 train.py -g gpt2 --gpus 8 --learning_rate 1.5e-6 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
 ```
 TIME: real    10m3.108s
       user    13m40.333s
       sys     0m56.538s
 ```
 
-EXPERIMENT #18: `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
+EXPERIMENT #18 (log 27): `time python3 train.py -g gpt2 --gpus 8 --batch_size 8 --accumulate_grad_batches 4 --accelerator ddp --plugins ddp_sharded --benchmark --seed_everything --max_epochs 1 -i meme_data.tsv`
 ```
 TIME: real    10m15.354s
       user    14m11.430s
       sys     0m55.549s
+```
+
+Just realized that all batches may have different sizes, so there is no need to use "--benchmark".
+
+EXPERIMENT #19 (log 28): `time python3 train.py -g gpt2-medium --gpus 8 --batch_size 4 --accumulate_grad_batches 8 --accelerator ddp --plugins ddp_sharded --seed_everything --max_epochs 1 -i meme_data.tsv`
+```
+TIME: real    32m58.058s
+      user    36m38.823s
+      sys     1m2.727s
 ```
