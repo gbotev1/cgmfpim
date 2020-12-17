@@ -29,8 +29,10 @@ def main(args: Namespace):
     # outputs = model.generate(tokenizer.encode('Tags: ' if args.tags == '@@@' else f'Tags: {args.tags}\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
     #                          max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
     
+    trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar(), ModelCheckpoint(
+        monitor='test_loss', save_top_k=args.max_epochs, save_weights_only=True)])  # Save checkpoint after every epoch
     print("running testing")
-    Trainer.test(model)
+    trainer.test(model)
 
     # # Save and print results using multiprocessing for efficiency
     # with open(args.outfile, 'w') as outfile:
