@@ -22,7 +22,7 @@ def main(args: Namespace):
     model.eval()  # Don't forget to put model in evaluation mode!
     # Predict, switching based on generation type
     model = model if args.use_pretrained else model.model
-    outputs = model.generate(tokenizer.encode('Tags: ' if args.tags == '@@@' else f'Tags: {args.tags}\n\n', return_tensors='pt', padding=True, truncation=True), eos_token_id=tokenizer.eos_token_id, do_sample=True,
+    outputs = model.generate(tokenizer.encode('Tags: ' if args.tags == '@@@' else f'Tags: {args.tags}\n\n', return_tensors='pt'), eos_token_id=tokenizer.eos_token_id, do_sample=True,
                              max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
     # Save and print results using multiprocessing for efficiency
     with open(args.outfile, 'w') as outfile:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
                         help='pre-trained model ID string for GPT-2')
     parser.add_argument('-p', '--top_p', type=float, default=0.95,
                         help='Huggingface transformers argument description: If set to float < 1, only the most probable tokens with probabilities that add up to top_p or higher are kept for generation. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
-    parser.add_argument('-k', '--top_k', type=int, default=50,
+    parser.add_argument('-k', '--top_k', type=int, default=0,
                         help='Huggingface transformers argument description: The number of highest probability vocabulary tokens to keep for top-k-filtering. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
     parser.add_argument('-l', '--max_length', type=int, default=1024,
                         help='Huggingface transformers argument description: The maximum length of the sequence to be generated. See https://huggingface.co/transformers/main_classes/model.html?highlight=generate#transformers.generation_utils.GenerationMixin.generate for more information.')
