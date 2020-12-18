@@ -31,9 +31,10 @@ def main(args: Namespace):
     #                          max_length=args.max_length, top_p=args.top_p, top_k=args.top_k, num_return_sequences=args.num_return_sequences)
     
     trainer = Trainer.from_argparse_args(args, callbacks=[ProgressBar(), ModelCheckpoint(
-        monitor='test_loss', save_top_k=args.max_epochs, save_weights_only=True)])  # Save checkpoint after every epoch
-    trainer.tune(model, datamodule=datamodule)
+        monitor='test_loss', save_weights_only=True)])  # Save checkpoint after every epoch
     print("running testing")
+    # current error here:
+    # torch.nn.modules.module.ModuleAttributeError: 'GPT2LMHeadModel' object has no attribute 'automatic_optimization'
     trainer.test(model)
 
     # # Save and print results using multiprocessing for efficiency
