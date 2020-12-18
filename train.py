@@ -27,7 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--gradient_checkpointing', action='store_true',
                         help='use gradient checkpointing to save memory at expense of slower backward pass')
     parser.add_argument('-s', '--seed_everything', action='store_true',
-                        help="whether to call PyTorch Lightning's \"seed_everything\" method with argument 0 for reproducability")
+                        help="whether to call PyTorch Lightning's \"seed_everything\" method with argument 0 for reproducibility")
     parser.add_argument('-g', '--gpt2_model_type', type=str, default='gpt2', choices=['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
                         help='pre-trained model ID string for GPT-2')
     parser.add_argument('-d', '--data_dir', type=str, default='data',
