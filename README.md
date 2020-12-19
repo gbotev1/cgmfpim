@@ -116,6 +116,10 @@ Listed in alphabetical order by last name:
 <!-- REFERENCES -->
 ## References
 
+### Datasets
+* [Imgflip](https://imgflip.com)
+* [Google's Conceptual Captions](https://ai.google.com/research/ConceptualCaptions)
+
 ### Code
 * [Huggingface's 🤗Transformers: State-of-the-art Natural Language Processing for Pytorch and TensorFlow 2.0.](https://github.com/huggingface/transformers)
 	```
