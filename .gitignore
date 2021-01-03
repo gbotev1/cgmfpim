@@ -7,7 +7,7 @@ data/*
 __pycache__/
 test_outfile.txt
 lightning_logs/*/checkpoints/*.ckpt
-meme-machine.pem
+models/
 
 # Peter
 .vscode/
