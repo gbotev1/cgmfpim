@@ -29,12 +29,12 @@ def read_meme_data(file_path: str):
 def read_model_output(file_path: str):
     captions = []
     with open(os.path.join(os.getcwd(), file_path)) as fh:
-        _ = fh.readline() # consume header
-        _ = fh.readline()
+        fh.readline() # consume header
+        fh.readline()
         while True:
             line = fh.readline()
             if 'DATA' in line: # skip model header
-                line = fh.readline()
+                fh.readline()
                 continue
             if len(line) == 0:
                 break
