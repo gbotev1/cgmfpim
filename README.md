@@ -46,7 +46,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About the Project
 
-This project is still under active development, and should be understood to be in **beta** mode. Preliminary official website to demonstrate this project in action can be found at: [aimemes.fun](https://www.aimemes.fun).
+This project is still under active development, and should be understood to be in **beta** mode. Preliminary official website to demonstrate this project in action can be found at: [aimemes.fun](http://www.aimemes.fun).
 
 <!-- GETTING STARTED -->
 ## Getting Started
